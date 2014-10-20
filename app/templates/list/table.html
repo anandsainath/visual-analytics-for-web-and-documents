@@ -1,0 +1,102 @@
+{% macro render_column_header_option(header) %}
+  <div class="input-group-btn">
+  	<button tabindex="-1" class="btn btn-default js-title" type="button">{{ header }}</button>
+  	<button class="btn btn-default dropdown-toggle" tabindex="-1" data-toggle="dropdown" type="button">
+  		<span class="caret"></span>
+  		<span class="sr-only">Toggle Dropdown</span>
+  	</button>
+  	<ul class="dropdown-menu" role="menu">
+  		{{render_item("delete", "Delete Column")}}
+  		{{render_item("rename", "Rename Column")}}
+  		{{render_item("split", "Split Column")}}
+  		<li class="divider"></li>
+  		{{render_item("sort_asc", "Sort Ascending")}}
+  		{{render_item("sort_desc", "Sort Descending")}}
+  	</ul>
+  </div>
+{% endmacro %}
+
+{% macro render_pagination(pagination) %}
+  <ul class="pagination">
+    {%- for page in pagination.iter_pages() %}
+      {% if page %}
+        {% if page != pagination.page %}
+          <li>
+            <a href="{{ url_for_page(page) }}" data-pagination-url="{{ url_for_pagination(page) }}" class="js-pagination">{{ page }}</a>
+          </li>
+        {% else %}
+          <li class="active">
+            <a href="#" class="js-pagination js-active">{{ page }}</a>
+          </li>
+        {% endif %}
+      {% else %}
+        <li> <span class="ellipsis">…</span> </li>
+      {% endif %}
+    {%- endfor %}
+    {% if pagination.has_next %}
+      <li>
+        <a href="{{ url_for_page(pagination.page + 1) }}"  data-pagination-url="{{ url_for_pagination(pagination.page + 1) }}" class="js-pagination">Next &raquo;</a>
+      </li>
+    {% endif %}
+  </ul>
+{% endmacro %}
+
+{% macro render_item(action, header) %}
+  <li><a href="#" class="js-menu-item" data-action="{{action}}">{{header}}</a></li>
+{% endmacro %}
+
+{% if updated_column_count is defined %}
+  <div class="alert alert-warning fade in" role="alert" id="update-alert">
+    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+    <strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
+  </div>
+{% endif %}
+
+<div id="pagination-root">
+  {{ render_pagination(pagination) }}
+</div>
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table">
+      <colgroup>
+      {% for header in headers %}
+      <col span="1"/>
+      {% endfor %}
+    </colgroup>
+    <thead>
+      <tr>
+        {% for header in headers %}
+        <th> {{ render_column_header_option(header) }} </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      {% for row in data.items %}
+      <tr>
+        {% for header in headers %}
+        {% if row.content[header] is string %}
+          {% if row.content[header] | length > 40 %}
+            <td class="js-td-tooltip" title="{{ row.content[header] }}" data-toggle="tooltip">{{ row.content[header]|truncate(length=40) }}</td>
+          {% else %}
+            <td>{{ row.content[header] }}</td>
+          {% endif %}
+        {% else %}
+          <td>{{ row.content[header] }}</td>
+        {% endif %}
+        {% endfor %}    
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+
+<script type="text/javascript">
+  $(function(){
+    $('.js-td-tooltip').tooltip({
+      'container': 'body',
+      'viewport': { selector: 'body', padding: 10 },
+      'delay': 500
+    });
+  });
+</script>

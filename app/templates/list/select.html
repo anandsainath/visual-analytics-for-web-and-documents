@@ -1,0 +1,5 @@
+<select class="form-control" name="column[]">
+	{% for value in headers %}
+		<option value="{{value}}">{{ value }}</option>
+	{% endfor %}
+</select>

@@ -1,0 +1,26 @@
+{% macro render_pagination(pagination) %}
+      <ul class="pagination">
+        {%- for page in pagination.iter_pages() %}
+          {% if page %}
+            {% if page != pagination.page %}
+              <li>
+                <a href="{{ url_for_page(page) }}" data-pagination-url="{{ url_for_pagination(page) }}" class="js-pagination">{{ page }}</a>
+              </li>
+            {% else %}
+              <li class="active">
+                <a href="#" class="js-pagination js-active">{{ page }}</a>
+              </li>
+            {% endif %}
+          {% else %}
+            <li> <span class="ellipsis">…</span> </li>
+          {% endif %}
+        {%- endfor %}
+        {% if pagination.has_next %}
+          <li>
+            <a href="{{ url_for_page(pagination.page + 1) }}"  data-pagination-url="{{ url_for_pagination(pagination.page + 1) }}" class="js-pagination">Next &raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+{% endmacro %}
+
+{% block page_content %}{% endblock %}
