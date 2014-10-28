@@ -9,6 +9,7 @@ from app.list.models import JListInputFile
 from app.list.pagination import Pagination
 from app import app
 from random import randint
+from collections import defaultdict
 import random
 import json
 import string
@@ -27,24 +28,150 @@ def insert_csv_file():
 		JListInputFile(content=dict_row).save()
 	return redirect(url_for('.index'))
 
+@mod_list.route('/new-base')
+def new_base():
+	headers = sorted(JListInputFile.objects.first()["content"].keys())
+	return render_template('list/new_list_base.html', headers=headers)
+
+@mod_list.route('/get-list-contents')
+def get_list_contents():
+	headers = sorted(JListInputFile.objects.first()["content"].keys())
+	all_data = []
+	for header in headers:
+		content_list = JListInputFile._get_collection().aggregate([
+				{'$match':{ 'content.'+header : {'$ne' : ''} }}, 
+				{'$group':{'_id':'$content.'+header,'count': { '$sum': 1 }}},
+				{'$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
+				{'$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count', 'rate':{'$divide':["$$e.count", "$maxCount"]}}}}}},
+				{'$unwind':'$docs'},
+				{'$project':{'name':'$docs._id', 'count':'$docs.count','frequency':'$docs.rate','strength':{'$multiply':[0,'$docs.count']},'hasStrength':{'$multiply':[0,'$docs.count']},'strengthCount':{'$multiply':[0,'$docs.count']}}}
+			])['result']
+
+		all_data.append({
+			"key": header,
+			"values": content_list
+		})
+
+	return json.dumps(all_data)
+
+@mod_list.route('/get-updated-list-contents', methods=["POST"])
+def get_updated_list_contents():
+	data = request.json
+	return {
+		'Any' : get_updated_list_contents_any_mode(data['params'], data['column_list']),
+		'All' : get_updated_list_contents_all_mode(data['params'], data['column_list']),
+		'And' : get_updated_list_contents_and_mode(data['params'], data['column_list']),
+		'All-Any' : get_updated_list_contents_all_any_mode(data['params'], data['column_list'])
+	}.get(data['mode'])
+
+def get_updated_list_contents_any_mode(params, column_list):
+	#Return strengths for entities related to any of the current selections
+	or_params = []
+	for column_params in params:
+		or_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+	return get_aggregate_query_result({'$or':or_params}, column_list)
+
+def get_updated_list_contents_all_mode(params, column_list):
+	# entities connected to all of the current selections, though not necessarily in the same document
+	entities = defaultdict(int)
+	no_of_params = 0
+
+	for column_params in params:
+		for column_value in column_params['values']:
+				no_of_params += 1
+				for header in column_list:
+					connected_entities_list = JListInputFile._get_collection().aggregate([
+						{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
+						{ '$project':{ '_id': 0, 'content.'+header: 1 }},
+						{ '$group':{ '_id':'$content.'+header }}
+					])['result']
+
+					for entity in connected_entities_list:
+						entities[entity['_id']] += 1
+
+	header_index_map = defaultdict(int)
+	all_data = []
+	
+	for column_params in params:
+		for column_value in column_params['values']:
+			for header in column_list:
+
+				if header in header_index_map:
+					list_index = header_index_map[header]
+				else:
+					value_dict = defaultdict(int)
+					all_data.append({'key':header, 'values':value_dict})
+					list_index = len(all_data)-1
+					header_index_map[header] = list_index
+
+				connected_entities_list = JListInputFile._get_collection().aggregate([
+						{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
+						{ '$project':{ '_id': 0, 'content.'+header: 1 }},
+						{ '$group':{ '_id':'$content.'+header }}
+					])['result']
+				for entity in connected_entities_list:
+					if entity['_id'] in entities and entities[entity['_id']] == no_of_params:
+						all_data[list_index]['values'][entity['_id']] += 1
+
+	json_data = []
+	for column_data in all_data:
+		values = [{'count':item[1], 'name':item[0]} for item in column_data['values'].items()]
+		if values:
+			max_count = max([item[1] for item in column_data['values'].items()])
+			values = [{'count': item['count'], 'name': item['name'], 'strength': item['count']/max_count} for item in values]
+			json_data.append({'key':column_data['key'], 'values': values})
+	
+	return json.dumps(json_data)
+
+def get_updated_list_contents_and_mode(params, column_list):
+	#Entities connected to all of the current selections, through a single document
+	outer_and_params = []
+	for column_params in params:
+		for column_value in column_params['values']:
+			 outer_and_params.append({ 'content.'+column_params['column']: column_value })
+	return get_aggregate_query_result({'$and':outer_and_params}, column_list)
+
+def get_updated_list_contents_all_any_mode(params, column_list):
+	#Entities connected to all of the selections across lists, but any of the selections within a list
+	and_params = []
+	for column_params in params:
+		and_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+	return get_aggregate_query_result({'$and':and_params}, column_list)
+
+def get_aggregate_query_result(match_params, column_list):
+	all_data = []
+
+	for header in column_list:
+		raw_list = JListInputFile._get_collection().aggregate([
+			{ '$match': match_params },
+			{ '$group':  {'_id': '$content.'+header, 'count': { '$sum': 1 }} },
+			{ '$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
+			{ '$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count', 'rate':{'$divide':["$$e.count", "$maxCount"]}}}}}},
+			{ '$unwind':'$docs'},
+			{ '$project':{'name':'$docs._id', 'count':'$docs.count','strength':'$docs.rate'}}
+		])['result']
+
+		all_data.append({
+			'key': header,
+			'values': raw_list
+		})
+	return json.dumps(all_data)
+
+
 @mod_list.route('/base')
 def base():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())
 	author_list = JListInputFile._get_collection().aggregate([{'$match':{ 'content.Author' : {'$ne' : ''} }}, {'$group':{'_id':'$content.Author','count': { '$sum': 1 }}} ])['result']
 	max_count = max(author['count'] for author in author_list)
-	list_author_contents = [(author['_id'],((1-(author['count']/max_count))*159)) for author in author_list]
+	list_author_contents = [(author['_id'],((1-(author['count']/max_count))*160)) for author in author_list]
 
-	#affiliation_list = JListInputFile._get_collection().aggregate([{'$match':{ 'content.Affiliation' : {'$ne' : ''} }}, {'$group':{'_id':'$content.Affiliation','count': { '$sum': 1 }}} ])['result']
-	#max_count = max(affiliation['count'] for affiliation in affiliation_list)
-	#list_affiliation_contents = [(affiliation['_id'],((1-(affiliation['count']/max_count))*159)) for affiliation in affiliation_list]
-	
 	year_list = JListInputFile._get_collection().aggregate([{'$match':{ 'content.Year' : {'$ne' : ''} }}, {'$group':{'_id':'$content.Year','count': { '$sum': 1 }}} ])['result']
 	max_count = max(year['count'] for year in year_list)
-	list_year_contents = [(year['_id'],((1-(year['count']/max_count))*159)) for year in year_list]
+	list_year_contents = [(year['_id'],((1-(year['count']/max_count))*160)) for year in year_list]
 
 	conference_list = JListInputFile._get_collection().aggregate([{'$match':{ 'content.Conference' : {'$ne' : ''} }}, {'$group':{'_id':'$content.Conference','count': { '$sum': 1 }}} ])['result']
 	max_count = max(conference['count'] for conference in conference_list)
-	list_conference_contents = [(conference['_id'],((1-(conference['count']/max_count))*159)) for conference in conference_list]
+	list_conference_contents = [(conference['_id'],((1-(conference['count']/max_count))*160)) for conference in conference_list]
 
 	return render_template('list/list_base.html', headers=headers, lists = [list_year_contents, list_author_contents, list_conference_contents])
 

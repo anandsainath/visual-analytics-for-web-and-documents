@@ -3,9 +3,11 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from flask.ext.script import Manager, Server
+from flask.ext.triangle import Triangle
 from app import app
 
 manager = Manager(app)
+Triangle(app)
 
 # Turn on debugger by default and reloader
 manager.add_command("runserver", Server(

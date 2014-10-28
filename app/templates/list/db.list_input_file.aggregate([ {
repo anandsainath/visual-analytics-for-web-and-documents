@@ -1,0 +1,50 @@
+db.list_input_file.aggregate([ {
+    $match : {
+        'content.Year' : {
+            $eq : '2006'
+        }
+    }
+}, {
+    $group : {
+        '_id' : '$content.Author',
+        count : {
+            $sum : 1
+        }
+    }
+}, {
+    $group : {
+        _id : 0,
+        maxCount : {            // get the largest count value
+            $max : "$count"
+        },
+        docs : {                // push all documents into one field to store as an array
+            $push : "$$ROOT"
+        }
+    }
+}, {
+    $project : {
+        _id : 0,
+        docs : {
+            $map : {
+                "input" : "$docs",
+                "as" : "e",
+                "in" : {                    // retrieve each element
+                    _id : "$$e._id",
+                    count : "$$e.count",
+                    rate : {                // add the normalized value here
+                        $divide : [ "$$e.count", "$maxCount"]
+                    }
+                }
+            }
+        }
+    }
+}, {
+    $unwind : "$docs"
+}, {
+    $project : {
+        name : "$docs._id",
+        count : {$multiply:["$docs.count",160]},
+        rate : "$docs.rate",
+        strength : {$multiply:["$docs.count",0]}
+    }
+} ]);

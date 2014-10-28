@@ -1,0 +1,79 @@
+	all_data = []
+	for header in headers:
+		raw_list = JListInputFile._get_collection.aggregate([
+			{
+				'$match':{
+					'content'.
+				}
+			}
+		])
+	
+
+	#		if raw_list:
+#			max_count = max(raw_item['count'] for raw_item in raw_list)
+#			formatted_list = [{ "name": item['_id'], "value":(1-(item['count']/max_count))*160, "strength":0} for item in raw_list]
+
+
+
+app.service(
+	"apiService",
+	function($http, $q){
+
+		var listContents = [];
+		var selectedLists = [];
+
+		//Return the public API
+		return({
+			fetchListContents: fetchListContents,
+			getListContents: getListContents,
+			addToSelectedList: addToSelectedList
+		});
+
+		/** Public methods **/
+
+		//Saves all the list contents to be stored in the Angular Model.
+		function fetchListContents(){
+			var request = $http({
+				method: "get",
+				url: "/list/get-list-contents"
+			});
+
+			return( request.then(function(response){
+				listContents = response.data;
+			}, handleError) );
+		}
+
+		//Returns the list contents
+		function getListContents(listName){
+			for(var index=0; index<listContents.length; index++){
+				if(listContents[index].key === listName){
+					return listContents[index].values;
+				}
+			}
+			return [];
+		}
+
+		function addToSelectedList(listName, selectedListItems){
+
+		}
+
+		/** Private methods **/
+
+		function handleError(response){
+			// The API response from the server should be returned in a
+            // nomralized format. However, if the request was not handled by the
+            // server (or what not handles properly - ex. server error), then we
+            // may have to normalize it on our end, as best we can.
+            if (
+                ! angular.isObject( response.data ) ||
+                ! response.data.message
+                ) {
+
+                return( $q.reject( "An unknown error occurred." ) );
+
+            }
+
+            // Otherwise, use expected error message.
+            return( $q.reject( response.data.message ) );
+		}
+	}

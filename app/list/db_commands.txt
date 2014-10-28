@@ -33,3 +33,30 @@ emit(key,value);
 db.list_input_file.aggregate([ {$match:{ '$content.Affiliation' : {$ne : ''} }}, {$group:{'_id':'$content.Affiliation', count: { $sum: 1 }}} , {$sort:{ count:-1 }} ])
 
 db.list_input_file.aggregate([ {$group:{'_id':'$content.Author', count: { $sum: 1 }}} ])
+
+
+
+db.list_input_file.aggregate([ {$match:{ 'content.Year' : {$eq : '2006'} }}, {$group:{'_id':'$content.Author', count:{$sum:1}}} ])
+
+db.list_input_file.aggregate([
+	{$match: {
+		$and:[ {'content.Year': '2006'},{'content.Year','2007'} ]
+	}}
+])
+
+
+db.list_input_file.aggregate([
+	{$match:{
+		'content.Year':{
+			$eq:'2005'
+		}
+	}},
+	{$project:{
+		'_id': 0,
+		'content.Author': 1
+	}},
+	{$group:{
+		'_id': null,
+		'content.Author': 1
+	}}
+])

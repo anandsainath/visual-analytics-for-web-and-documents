@@ -14,6 +14,10 @@
 	<title>List View</title>
 	<style type="text/css">
 
+	body{
+		padding-top: 0px;
+	}
+
 	.grid{
 		position: relative;
 		width: 100%;
@@ -23,6 +27,18 @@
 		background: #FAFAFA;
 		overflow: hidden;
 		overflow-x: scroll;
+	}
+
+	.min-height{
+		height: 550px;
+	}
+
+	.max-width{
+		width: 20px;
+	}
+
+	.top-margin{
+		margin-top: 90px;
 	}
 
 	.list-container{
@@ -39,15 +55,18 @@
 	}
 
 	.col-space{
-		width: 100px;
+		width: 50px;
 		height: 550px;
 		float: left;
+		padding-left: 2px;
 	}
 
 	.restrict {
 		overflow-x: hidden;
 		overflow-y: scroll;
 		height: 550px;
+		width: 323px;
+		margin: 0 auto;
 	}
 
 	.top-margin-10{
@@ -72,8 +91,12 @@
 		padding: 0px;
 	}
 
-	ul li{
+	ul.js-items-list li{
 		border-bottom: 1px solid #CCC;
+	}
+
+	.scrollbar-item{
+		background: #FAFAFA;
 	}
 
 	.panel-body{
@@ -82,10 +105,10 @@
 
 	.js-scroll-list::-webkit-scrollbar {
 	    -webkit-appearance: none;
-	    width: 7px;
+	    width: 0px;
 	}
 	.js-scroll-list::-webkit-scrollbar-thumb {
-	    border-radius: 4px;
+	    border-radius: 0px;
 	    background-color: rgba(0,0,0,.5);
 	    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 	}
@@ -162,7 +185,7 @@
 								<button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-frequency" data-toggle="tooltip" data-placement="top" title="Sort list by frequency">
 									<span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
 								</button>
-								<button type="button" class="btn btn-default btn-sm js-tooltip" data-toggle="tooltip" data-placement="top" title="Sort list by connection strength">
+								<button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-connection" data-toggle="tooltip" data-placement="top" title="Sort list by connection strength">
 									<span class="glyphicon glyphicon-align-justify"></span>
 								</button>
 							</div>
@@ -200,17 +223,26 @@
 					</div>
 				</div>
 			</div>
-			<div class="panel-body restrict js-scroll-list">
-				<ul>
-					{% for item in list_content %}
-					<li class="row" data-frequency="{{item.1}}" data-item="{{item.0}}">
-						<div class="col-xs-2 bar-container">
-							<div class="bar" style="width: {{item.1}}%"></div>
-						</div>
-						<span class="col-xs-10 padding-right-25 ellipsize">{{item.0}}</span>
-					</li>
-					{% endfor %}
-				</ul>
+			<div class="panel-body min-height">
+				<div class="restrict js-scroll-list" style="width: 303px; float:left;">
+					<ul class="js-items-list">
+						{% for item in list_content %}
+						<li class="row" data-frequency="{{item.1}}" data-item="{{item.0}}" data-strength="0">
+							<div class="col-xs-2 bar-container">
+								<div class="bar" style="width: {{item.1}}%"></div>
+							</div>
+							<span class="col-xs-10 padding-right-25 ellipsize">{{item.0}}</span>
+						</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="max-width min-height js-scrollbar" style="float:right; background: #f5f5f5; border-color: #ddd;">
+					<ul class="js-scrollbar-list">
+						{% for item in list_content %}
+							<li class="scrollbar-item" data-frequency="{{item.1}}" data-item="{{item.0}}" data-strength="0"></li>
+						{% endfor %}
+					</ul>
+				</div>
 			</div>
 		</div>
 	{% endmacro %}
@@ -221,7 +253,8 @@
 				<div class="js-list col-1-4">
 					{{ render_list(headers, list) }}
 				</div>
-				<div class="col-space"></div>
+				<div class="col-space top-margin js-list-scrollbar">
+				</div>
 			{% endfor %}
 		</div>
 	</div>
@@ -242,34 +275,62 @@
 		var selectionColors = d3.scale.linear()
                     .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
                     .range(seedSelectionColorSwatch);
-            
-		$(function(){
 
-			$('ul:eq(1) > li > span').click(function(){
-				var author = $(this).text().trim();
+        $(function(){
+        	$.fn.hasScrollBar = function() {
+        		return this.get(0).scrollHeight > this.height();
+    		}
+
+    		$('div.js-scroll-list').each(function(index, div){
+    			if($(div).hasScrollBar()){
+    				var liCount = $('ul.js-items-list:eq('+index+') > li').length;
+    				var liHeight = 550/liCount;
+    				$('ul.js-scrollbar-list:eq('+index+') > li').css({height: liHeight});
+    			}
+    		});
+
+
+			$('ul.js-items-list:eq(0) > li > span').click(function(){
+				var year = $(this).text().trim();
+				$(this).css({"background": currentSelection});
 				$.ajax({
 					type:'post',
 					contentType: 'application/json; charset=utf-8',
 					url:'/list/get-selections',
 					dataType: 'json',
-					data: JSON.stringify({'current':'Author','selection': author, 'related':['Year','Conference']}),
+					data: JSON.stringify({'current':'Year','selection': year, 'related':['Author','Conference']}),
 					success: function(data){
-						console.log(data[0].values, data[1].values);
-						$year = $('ul:first');
-						$year.find('li > span').css({"background": "#FFFFFF"});
-						var yearValues = data[0].values;
+						$author = $('ul.js-items-list:eq(1)');
+						$author.find('li > span').css({"background": "#FFFFFF"});
+						var authorValues = data[0].values;
 						var obj;
-						for(var index in yearValues){
-							obj = yearValues[index];
-							$year.find('li[data-item="'+obj._id+'"] > span').css({"background": selectionColors(obj.count)});
+						
+						$author.find('li').data('strength',0);
+						$('ul.js-scrollbar-list:eq(1) > li').css({"background":"#FAFAFA"}).data('strength',0);
+
+						for(var index in authorValues){
+							obj = authorValues[index];
+							$author.find('li[data-item="'+obj._id+'"]').data('strength',obj.count)
+								.find('span').css({"background": selectionColors(obj.count)});
+							$('ul.js-scrollbar-list:eq(1)').find('li[data-item="'+obj._id+'"]')
+								.data('strength',obj.count)
+								.css({"background": selectionColors(obj.count)});
 						}
 
-						$conference = $('ul:last');
+						//sort year..
+						/*if($year.data('sort-strength')){
+							console.log("Calling sort by connection strength..");
+							sortByConnectionStrength($year);
+						}*/
+
+						$conference = $('ul.js-items-list:last');
+						$conference.find('li').data('strength',0);
 						$conference.find('li > span').css({"background": "#FFFFFF"});
 						var conferenceValues = data[1].values;
 						for(var index in conferenceValues){
 							obj = conferenceValues[index];
-							$conference.find('li[data-item="'+obj._id+'"] > span').css({"background": selectionColors(obj.count)});
+							$conference.find('li[data-item="'+obj._id+'"]').data('strength',obj.count)
+								.find('span').css({"background": selectionColors(obj.count)});
 						}
 					}
 				});
@@ -279,60 +340,50 @@
 				container: 'body'
 			});
 
-			$(document).on("click",".js-sort-by-frequency", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
-				$(this).addClass('active').siblings('button').removeClass('active');
+			function sort(_thisButton, dataAttribute, sortByAttribute, sortAscending){
+				$panelBody = $(_thisButton).parents('div.panel-heading:first').siblings('.panel-body');
+				$ul = $panelBody.find('ul.js-items-list');
+				$scrollbarList = $panelBody.find('ul.js-scrollbar-list');
+
+				$(_thisButton).addClass('active').siblings('button').removeClass('active');
 				showLoader($ul);
-				
-				window.setTimeout(function(){
-					if(!$ul.data('sort-frequency')){
-						//attribute is either false or undefined
-						//either ways, sort alphabetically from A-Z
-						$ul.append(($ul.find('li').sort(sort_frequency_ascending)));
-						resetAllSort($ul);
-						$ul.data('sort-frequency', true);
+
+				function sort_function(a, b){
+					if(sortAscending){
+						return (parseInt($(b).data(sortByAttribute)) < parseInt($(a).data(sortByAttribute)))?1:-1;
+					}else{
+						return (parseInt($(b).data(sortByAttribute)) < parseInt($(a).data(sortByAttribute)))?-1:1;
 					}
-
-					/*$ul.find('li:first span').css({"background":currentSelection});
-					var index = 2;
-					var val = 1;
-					while(val >= 0){
-						$ul.find('li:nth-child('+index+') span').css({"background": selectionColors(val)});
-						val -= 0.04;
-						index++;
-					}*/
-
-					hideLoader();
-				}, 0);
-				
-				function sort_frequency_ascending(a, b){
-					return (parseInt($(b).data('frequency')) < parseInt($(a).data('frequency')))?1:-1;
 				}
+
+				window.setTimeout(function(){
+					if(!$ul.data(dataAttribute)){
+						//attribute is either false or undefined
+						//either ways, perform the sort operation
+						$ul.append(($ul.find('li').sort(sort_function)));
+						$scrollbarList.append(($scrollbarList.find('li').sort(sort_function)));
+						resetAllSort($ul);
+						$ul.data(dataAttribute, true);
+					}
+					hideLoader();
+				}, 10);
+			}
+
+			$(document).on("click",".js-sort-by-frequency", function(){
+				sort(this, 'sort-frequency','frequency', true);
 			});
 
 			$(document).on("click",".js-sort-alphabetically", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
-				$(this).addClass('active').siblings('button').removeClass('active');
-				showLoader($ul);
+				sort(this, 'sort-item', 'item', true);
+			});
 
-				window.setTimeout(function(){
-					if(!$ul.data('sort-item')){
-						//attribute is either false or undefined
-						//either ways, sort alphabetically from A-Z
-						$ul.append(($ul.find('li').sort(sort_a_to_z)));
-						resetAllSort($ul);
-						$ul.data('sort-item', true);
-					}
-					hideLoader();
-				}, 0);
-
-				function sort_a_to_z(a, b){
-				    return ($(b).data('item')) < ($(a).data('item')) ? 1 : -1;    
-				}
+			$(document).on("click", ".js-sort-by-connection", function(){
+				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul.js-items-list');
+				sortByConnectionStrength($ul);
 			});
 
 			$(document).on("click", ".js-align-left", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
+				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul.js-items-list');
 				$(this).addClass('active').siblings('button').removeClass('active');
 				
 				var currentAlign = $ul.data('align');
@@ -344,7 +395,7 @@
 			});
 
 			$(document).on("click", ".js-align-center", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
+				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul.js-items-list');
 				$(this).addClass('active').siblings('button').removeClass('active');
 
 				var currentAlign = $ul.data('align');
@@ -359,7 +410,7 @@
 			});
 
 			$(document).on("click", ".js-align-right", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
+				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul.js-items-list');
 				$(this).addClass('active').siblings('button').removeClass('active');
 
 				var currentAlign = $ul.data('align');
@@ -374,7 +425,7 @@
 			});
 
 			$(document).on("click", ".js-clear-selection", function(){
-				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul');
+				$ul = $(this).parents('div.panel-heading:first').siblings('.panel-body').find('ul.js-items-list');
 				$ul.find('li > span').css({"background": "#FFFFFF"});
 			});
 
@@ -382,6 +433,26 @@
 				$(this).addClass('active');
 			});
 		});
+
+		function sortByConnectionStrength($ul){
+			$(this).addClass('active').siblings('button').removeClass('active');
+			showLoader($ul);
+
+			window.setTimeout(function(){
+				if(!$ul.data('sort-strength')){
+					//attribute is either false or undefined
+					//either ways, sort alphabetically from A-Z
+					$ul.append(($ul.find('li').sort(sort_by_strength)));
+					resetAllSort($ul);
+					$ul.data('sort-strength', true);
+				}
+				hideLoader();
+			}, 10);
+
+			function sort_by_strength(a, b){
+			    return ($(b).data('strength')) < ($(a).data('strength')) ? -1 : 1;    
+			}
+		}
 
 		function resetAllSort($ul){
 			var sorterAttributes = $ul.data();
