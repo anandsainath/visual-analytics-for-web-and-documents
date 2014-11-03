@@ -1,9 +1,18 @@
 var app = angular.module('ngListViewApp',[]);
+
 app.controller('ListViewController', 
-	function($scope, DataFactory){
+	function($scope, $window, DataFactory){
+
+		var listViewWidth = 350;
 
 		$scope.isLoading = true;
 		$scope.mode  = "Any";
+		$scope.lists = [1,2];
+
+		$scope.width = $window.innerWidth;
+		$scope.height = $window.innerHeight;
+		$scope.gridHeight = $window.innerHeight - 75;
+		$scope.restrictedHeight = $window.innerHeight - 200;
 
 		loadRemoteData();
 
@@ -12,6 +21,10 @@ app.controller('ListViewController',
 		$scope.updateMode = function(newMode){
 			$scope.mode = newMode;
 			DataFactory.updateMode(newMode);
+		}
+
+		$scope.addList = function(){
+			$scope.lists.push($scope.lists.length+1);
 		}
 
 		/** Private Methods **/ 
@@ -35,6 +48,11 @@ app.controller("ListController",
 		$scope.isListLoading = false;
 		
 		$scope.selectedListItems = [];
+
+		//the below call would return an empty array when the controller is 
+		//called before the data is loaded, but would return the list of entities
+		//when the list is added dynamically..
+		$scope.headers = DataFactory.getListEntityTypes();
 
 		var currentSelection = "#FEF935";
 		var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
@@ -96,8 +114,51 @@ app.controller("ListController",
 		$scope.$on('loadComplete', function(){
 			$scope.isListLoading = false;
 		});
+
+		$scope.$on('entityTypesLoaded', function(){
+			$scope.headers = DataFactory.getListEntityTypes();
+		});
 	}
 );
+
+app.directive('myListView', function(){
+	myListView = {};
+	myListView.restrict = 'E';
+	myListView.templateUrl = '/static/directives/list-view.html'
+	myListView.link = function($scope, element, attrs){
+		var svg = d3.select(element[0]).select('.js-scrollbar')
+					.append('svg')
+					.attr("width", 20);
+
+		var heatmap = svg.append("g");
+		heatmap.append("rect").attr("class", "frame").attr("width", 20);
+
+		var page = heatmap.append("rect")
+						.datum({y: 0})
+						.attr("class", "page")
+						.attr("width", 20)
+    					.call(d3.behavior.drag().origin(Object).on("drag", drag));
+
+// function scroll() {
+//   var d = page.datum();
+//   page.attr("y", d.y = Math.max(0, Math.min(height - d.h, height * this.scrollTop / (textViewer.rowHeight() * lines.length))));
+// }
+
+		function drag(d) {
+		  d.y = Math.max(0, Math.min(height - d.h - 1, d3.event.y));
+		  text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
+		  page.attr("y", d.y);
+		}
+	};
+	return myListView;
+});
+
+app.directive('myListComponent', function(){
+	myListComponent = {};
+	myListComponent.restrict = 'E';
+	myListComponent.templateUrl = '/static/directives/list-component.html';
+	return myListComponent;
+});
 
 app.service(
 	"apiService",
@@ -106,10 +167,23 @@ app.service(
 		//Return the public API
 		return({
 			fetchListContents: fetchListContents,
+			fetchEntityTypes: fetchEntityTypes,
 			getUpdatedListContents: getUpdatedListContents
 		});
 
 		/** Public methods **/
+
+		//Saves all the entity types that are displayed in the list view
+		function fetchEntityTypes(){
+			var request = $http({
+				method: "get",
+				url: "/list/get-list-entity-types"
+			});
+
+			return(request.then(function(response){
+				return response.data;
+			}, handleError))
+		}
 
 		//Saves all the list contents to be stored in the Angular Model.
 		function fetchListContents(){
@@ -162,6 +236,7 @@ app.service(
 
 app.factory('DataFactory',function($rootScope, apiService){
 	var listContents = [];
+	var listEntityTypes = [];
 	
 	var selectedLists = [];
 	var listMode;
@@ -174,6 +249,12 @@ app.factory('DataFactory',function($rootScope, apiService){
 		apiService.fetchListContents()
 			.then(function(data){
 				listContents = data;
+			});
+
+		apiService.fetchEntityTypes()
+			.then(function(data){
+				listEntityTypes = data;
+				$rootScope.$broadcast('entityTypesLoaded');
 			});
 	}
 
@@ -188,6 +269,11 @@ app.factory('DataFactory',function($rootScope, apiService){
 			}
 		}
 		return [];
+	}
+
+	//Returns the list of entity headers
+	service.getListEntityTypes = function(){
+		return listEntityTypes;
 	}
 
 	service.setSelectedListItem = function(listName, selectedListItems){

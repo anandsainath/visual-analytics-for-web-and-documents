@@ -33,6 +33,11 @@ def new_base():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())
 	return render_template('list/new_list_base.html', headers=headers)
 
+@mod_list.route('/get-list-entity-types')
+def get_list_entity_types():
+	headers = sorted(JListInputFile.objects.first()["content"].keys())
+	return json.dumps(headers);
+
 @mod_list.route('/get-list-contents')
 def get_list_contents():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())

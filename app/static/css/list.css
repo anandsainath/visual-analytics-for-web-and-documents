@@ -1,0 +1,167 @@
+body{
+	padding-top: 10px;
+}
+
+.grid{
+	position: relative;
+	width: 100%;
+	/*height: 675px;*/
+	margin: 0 0 0 0;
+	padding-top: 10px;
+	background: #FAFAFA;
+	overflow: hidden;
+	overflow-x: scroll;
+}
+
+.min-height{
+	/*height: 550px;*/
+}
+
+.max-width{
+	width: 20px;
+}
+
+.overview-scrollbar{
+	width: 20px;
+	float: right;
+}
+
+.top-margin{
+	margin-top: 90px;
+}
+
+.list-container{
+	position: absolute;
+	height: 550px;
+}
+
+.col-1-4 {
+	margin-left: 10px;
+	width: 325px;
+	padding: 0px;
+	float: left;
+}
+
+.col-space{
+	width: 25px;
+	height: 550px;
+	float: left;
+	padding-left: 2px;
+}
+
+.restrict {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	/*height: 550px;*/
+	width: 323px;
+	margin: 0 auto;
+}
+
+.top-margin-10{
+	margin-top: 10px;
+}
+
+.padding-right-25{
+	padding-right: 25px;
+}
+
+.panel-heading{
+	padding: 7px 2px;
+}
+
+.btn-sm, .btn-group-sm>.btn {
+	padding: 5px 10px;
+}
+
+ol, ul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+ul.js-items-list li{
+	border-bottom: 1px solid #CCC;
+}
+
+.scrollbar-item{
+	background: #FAFAFA;
+}
+
+.panel-body{
+	padding: 0px;
+}
+
+.js-scroll-list::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 2px;
+}
+.js-scroll-list::-webkit-scrollbar-thumb {
+    border-radius: 0px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+.grid::-webkit-scrollbar {
+    -webkit-appearance: none;
+    height: 7px;
+}
+.grid::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+.bar-container{
+	margin: 3px 0px;
+	height: 14px;
+	background: black;
+}
+
+.bar{
+	background: white;
+	height: 14px;
+}
+
+.loader {
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+        url('/static/images/loading.gif') 
+        50% 50% 
+        no-repeat;
+}
+
+.small-loader {
+    position:   relative;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     50px;
+    width:      100%;
+    border-bottom: 2px solid #CCC;
+    background: rgba( 255, 255, 255, .8 ) 
+        url('/static/images/loading-small.gif') 
+        50% 50% 
+        no-repeat;
+}
+
+.ellipsize{
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+rect{
+		fill: none;
+		stroke: #ddd;
+}
+
+rect.page{
+	fill: #ff9;
+	stroke: #000;
+	fill-opacity: .7;
+	cursor: move;
+}
