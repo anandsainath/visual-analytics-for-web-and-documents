@@ -39,7 +39,7 @@ app.controller('ListViewController',
 app.controller("ListController",
 	function($scope, DataFactory){
 
-		$scope.list = [];
+		$scope.data = [];
 		$scope.itemHeight = 0;
 		$scope.align = "text-left";
 		$scope.sortArgs = [];
@@ -54,24 +54,24 @@ app.controller("ListController",
 		//when the list is added dynamically..
 		$scope.headers = DataFactory.getListEntityTypes();
 
-		var currentSelection = "#FEF935";
-		var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
-		var selectionColors = d3.scale.linear()
-                    .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
-                    .range(seedSelectionColorSwatch);
-
 		/** Public methods **/
 		$scope.listChanged = function(){
+			console.log("List Changed function called..");
 			var listData = DataFactory.getListContents($scope.selectedList);
 			var length = listData.length;
 			if(length > 26){
 				$scope.itemHeight = 550/length;
 			}
-			$scope.list = listData;
+			$scope.data = listData;
 		}
 
 		$scope.setAlignment = function(align){
 			$scope.align = align;
+		}
+
+		$scope.onReactItemClick = function(reactComponent){
+			var item = reactComponent.props.item;
+			console.log(item);
 		}
 
 		$scope.selectItem = function(itemName){
@@ -85,17 +85,8 @@ app.controller("ListController",
 			DataFactory.setSelectedListItem($scope.selectedList, $scope.selectedListItems);
 		}
 
-		$scope.getBackgroundColor = function(name, strength){
-			return ($scope.selectedListItems.indexOf(name) != -1) ? currentSelection : 
-				((strength == 0)? "#FFFFFF": selectionColors(strength));
-		}
-
 		$scope.getScrollBarBackgroundColor = function(name, strength){
 			return (strength == 0)? "#FAFAFA": selectionColors(strength);
-		}
-
-		$scope.getItemWidth = function(itemFrequency){
-			return ((1-itemFrequency) * 160)+"%";
 		}
 
 		$scope.clearSelections = function(){
@@ -121,34 +112,27 @@ app.controller("ListController",
 	}
 );
 
-app.directive('myListView', function(){
+app.directive('myListView', function($window){
 	myListView = {};
 	myListView.restrict = 'E';
-	myListView.templateUrl = '/static/directives/list-view.html'
+	myListView.templateUrl = '/static/directives/list-view.html';
+
 	myListView.link = function($scope, element, attrs){
-		var svg = d3.select(element[0]).select('.js-scrollbar')
-					.append('svg')
-					.attr("width", 20);
+		
+		// var page = d3.select(element[0]).select('rect.page')
+		// 			.datum({y: 0, h: 40})
+		// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
 
-		var heatmap = svg.append("g");
-		heatmap.append("rect").attr("class", "frame").attr("width", 20);
+		// $scope.$watch('height', function(newValue, oldValue){
+		// 	console.log("Height change detected! in the link function");
+		// });
 
-		var page = heatmap.append("rect")
-						.datum({y: 0})
-						.attr("class", "page")
-						.attr("width", 20)
-    					.call(d3.behavior.drag().origin(Object).on("drag", drag));
-
-// function scroll() {
-//   var d = page.datum();
-//   page.attr("y", d.y = Math.max(0, Math.min(height - d.h, height * this.scrollTop / (textViewer.rowHeight() * lines.length))));
-// }
-
-		function drag(d) {
-		  d.y = Math.max(0, Math.min(height - d.h - 1, d3.event.y));
-		  text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
-		  page.attr("y", d.y);
-		}
+		// function drag(d) {
+		// 	//console.log(d.h, d3.event.y);
+		// 	d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
+		//   	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
+		//   	page.attr("y", d.y);
+		// }
 	};
 	return myListView;
 });
@@ -159,6 +143,37 @@ app.directive('myListComponent', function(){
 	myListComponent.templateUrl = '/static/directives/list-component.html';
 	return myListComponent;
 });
+
+// app.directive('myList', function(){
+// 	myList = {};
+// 	myList.restrict = 'E';
+// 	myList.scope = {
+//     	data: '='
+//     };
+
+//     myList.link = function(scope, el, attrs){
+//     	console.log(scope.data);
+
+//     	scope.$watch('data', function(newValue, oldValue){
+//     		if(newValue.length){
+// 	    		React.renderComponent(
+// 		            listItemRepeater({data:newValue}),
+// 		            el[0]
+// 		        );	
+//     		}
+//       	});
+
+//       	scope.$watch('align', function(newValue, oldValue){
+//       		if(newValue){
+// 	      		React.renderComponent(
+// 		            listItemRepeater({data:newValue}),
+// 		            el[0]
+// 		        );	
+//       		}
+//       	});
+//   	};
+//   	return myList;
+// })
 
 app.service(
 	"apiService",
@@ -244,6 +259,14 @@ app.factory('DataFactory',function($rootScope, apiService){
 	var currentlyDisplayedLists = [];
 	var service = {};
 
+	var currentSelection = "#FEF935";
+	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
+	var selectionColors = d3.scale.linear()
+                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
+                .range(seedSelectionColorSwatch);
+
+		
+
 	service.init = function(defaultMode){
 		listMode = defaultMode;
 		apiService.fetchListContents()
@@ -316,6 +339,7 @@ app.factory('DataFactory',function($rootScope, apiService){
 			var list = listContents[listIndex]['values'];
 			for(var itemIndex=0; itemIndex<list.length; itemIndex++){
 				list[itemIndex]['strength'] = 0;
+				list[itemIndex]['background'] = "#FFFFFF";
 			}
 		}
 	}
@@ -325,8 +349,8 @@ app.factory('DataFactory',function($rootScope, apiService){
 			apiService.getUpdatedListContents({'mode':listMode, 'params': selectedLists, 'column_list': currentlyDisplayedLists})
 			.then(function(data){
 				resetStrengthData();
-
 				var listIndex, listContent, itemIndex;
+				var strength;
 				for(var index=0; index<data.length; index++){
 
 					listIndex = findInList(data[index]['key'], listContents, 'key');
@@ -335,9 +359,11 @@ app.factory('DataFactory',function($rootScope, apiService){
 					for(var sub_index=0; sub_index<listContent.length; sub_index++){
 						itemIndex = findInList(listContent[sub_index]['name'], listContents[listIndex]['values'], 'name');
 						if(itemIndex != -1){
-							listContents[listIndex]['values'][itemIndex]['strength'] = listContent[sub_index]['strength'];
+							strength = listContent[sub_index]['strength'];
+							listContents[listIndex]['values'][itemIndex]['strength'] = strength;
 							listContents[listIndex]['values'][itemIndex]['hasStrength']	= 1;
 							listContents[listIndex]['values'][itemIndex]['strengthCount'] = listContent[sub_index]['count'];
+							listContents[listIndex]['values'][itemIndex]['background'] = selectionColors(strength);
 						}
 					}
 				}
@@ -354,7 +380,6 @@ app.factory('DataFactory',function($rootScope, apiService){
 			}
 		}
 	}
-
 	return service;
 });
 

@@ -13,20 +13,13 @@ from collections import defaultdict
 import random
 import json
 import string
+import unicodedata
+import copy
 
 ITEMS_PER_PAGE = 12
 
 # Define the blueprint: 'list', set its url prefix: app.url/list
 mod_list = Blueprint('list', __name__, url_prefix='/list')
-
-@mod_list.route('/process-file')
-def insert_csv_file():
-	JListInputFile.drop_collection()
-
-	input_file = csv.DictReader(open("input.csv"))
-	for dict_row in input_file:
-		JListInputFile(content=dict_row).save()
-	return redirect(url_for('.index'))
 
 @mod_list.route('/new-base')
 def new_base():
@@ -49,7 +42,7 @@ def get_list_contents():
 				{'$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
 				{'$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count', 'rate':{'$divide':["$$e.count", "$maxCount"]}}}}}},
 				{'$unwind':'$docs'},
-				{'$project':{'name':'$docs._id', 'count':'$docs.count','frequency':'$docs.rate','strength':{'$multiply':[0,'$docs.count']},'hasStrength':{'$multiply':[0,'$docs.count']},'strengthCount':{'$multiply':[0,'$docs.count']}}}
+				{'$project':{'name':'$docs._id', 'count':'$docs.count','frequency':'$docs.rate','strength':{'$literal':0},'hasStrength':{'$literal':0},'strengthCount':{'$literal':0}}}
 			])['result']
 
 		all_data.append({
@@ -197,6 +190,15 @@ def get_selections():
 		})
 	return json.dumps(selection_data)
 
+@mod_list.route('/process-file')
+def insert_csv_file():
+	JListInputFile.drop_collection()
+
+	input_file = csv.DictReader(open("new-input.csv","rU"))
+	for dict_row in input_file:
+		JListInputFile(content=dict_row).save()
+	return redirect(url_for('.index'))
+
 @mod_list.route('/')
 def index():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())
@@ -274,6 +276,13 @@ def split_into_rows(page):
 					for key in newKeys:
 						try:
 							new_document.content[key] = temp[key][rowIndex]
+							
+							#Create a copy of all the values of the column, remove the current value and add
+							#the rest onto a hidden field that represents the connections..
+							connected_values = copy.copy(temp[key])
+							connected_values.remove(temp[key][rowIndex])
+							#filtering removes empty values that may be a part of the array..
+							new_document.hidden[key] = filter(None, connected_values)
 						except IndexError, e:
 							## Issues with the input CSV (unable to find correct number of elements)
 							new_document.content[key] = ""

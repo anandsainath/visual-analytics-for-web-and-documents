@@ -8,8 +8,6 @@ function resizeLists() {
         scope.height = window.innerHeight;
         scope.gridHeight = window.innerHeight - 75;
         scope.restrictedHeight = window.innerHeight - 200;
-
-        console.log(scope.restrictedHeight);
     });
 }
 

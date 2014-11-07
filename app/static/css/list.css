@@ -155,8 +155,8 @@ ul.js-items-list li{
 }
 
 rect{
-		fill: none;
-		stroke: #ddd;
+	fill: none;
+	stroke: #ddd;
 }
 
 rect.page{
@@ -164,4 +164,10 @@ rect.page{
 	stroke: #000;
 	fill-opacity: .7;
 	cursor: move;
+}
+
+.superscript { 
+	position: relative; 
+	top: -0.5em; 
+	font-size: 80%; 
 }

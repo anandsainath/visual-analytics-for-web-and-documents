@@ -7,6 +7,7 @@ class JListInputFile(db.Document):
 	__CollectionName__ = "list_input_file"
 
 	content = db.DictField(required=True)
+	hidden = db.DictField()
 
 	#Constructor
 	def __init__(self, *args, **kwargs):

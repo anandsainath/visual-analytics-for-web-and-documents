@@ -12,10 +12,15 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap/css/starter-template.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 	
-	<script src="{{ url_for('static', filename='lib/angular.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular/angular.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
+	
+	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>
 	<script src="{{ url_for('static', filename='lib/d3.v3.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/list/longscroll.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
+	
 	<title>List View</title>
 </head>
 <body id="bodyContainer" ng-controller="ListViewController">
@@ -41,5 +46,6 @@
 	</div>
 
 	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
+
 </body>
 </html>

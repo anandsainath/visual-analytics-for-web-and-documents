@@ -64,16 +64,28 @@
 	<div class="panel-body" style="height: {{restrictedHeight}}px;">
 		<div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; width: 303px; float:left;">
 			<div class="small-loader" ng-show="isListLoading"></div>
+			<!-- <div ng-react-component="ReactItemList" data="data"></div> -->
 			<ul class="js-items-list">
-				<li class="row" ng-repeat="item in list | orderBy:[firstOrderPredicate, orderByPredicate]">
-					<div class="col-xs-2 bar-container" data-toggle="tooltip" data-placement="top" title="{{item.count}}">
-						<div class="bar" ng-style="{'width': getItemWidth(item.frequency)};"></div>
+				<li class="row" ng-repeat="item in data | orderBy:[firstOrderPredicate, orderByPredicate] track by item.name">
+					<div class="col-xs-2 bar-container" title="{{item.count}}">
+						<div class="bar" ng-style="{'width': (1-item.frequency)*160 +'%' };"></div>
 					</div>
-					<span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': getBackgroundColor(item.name,item.strength)};" ng-click="selectItem(item.name)">{{item.name}} <sup ng-show="item.strengthCount>0">{{item.strengthCount}}</sup></span>
+					<span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': item.background};" ng-click="selectItem(item.name)"> {{item.name}} </span>
+					<!-- <span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-click="selectItem(item.name)">
+						{{item.name}}
+						<sup ng-show="item.strengthCount">{{item.strengthCount}}</sup>
+					</span> -->
 				</li>
 			</ul>
 		</div>
-		<div class="js-scrollbar overview-scrollbar"></div>
+		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[list.length<26]">
+			<svg width="20" ng-attr-height="{{restrictedHeight}}">
+				<g transform="translate(0,0)">
+					<rect class="frame" width="20" ng-attr-height="{{restrictedHeight}}"></rect>
+					<rect class="page" width="20" height="40"></rect>
+				</g>
+			</svg>
+		</div>
 				<!--<div class="max-width js-scrollbar" style="float:right; background: #f5f5f5; border-color: #ddd; height: {{restrictedHeight}}px; ">
 					<ul class="js-scrollbar-list">
 						<li class="scrollbar-item" ng-repeat="item in list | orderBy:[firstOrderPredicate, orderByPredicate]" style="height: {{itemHeight}}px"  ng-style="{'background-color': getScrollBarBackgroundColor(item.name,item.strength)};" ></li>
