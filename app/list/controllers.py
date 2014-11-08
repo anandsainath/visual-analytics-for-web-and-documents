@@ -66,7 +66,6 @@ def get_updated_list_contents():
 
 def get_updated_list_contents_any_mode(params, column_list):
 	#Return strengths for entities related to any of the current selections
-
 	connected_headers = JListInputFile.objects.first()["hidden"].keys()
 	or_params = []
 	for column_params in params:

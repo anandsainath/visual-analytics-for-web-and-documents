@@ -75,11 +75,13 @@
 				</li>
 			</ul>
 		</div>
-		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[list.length<26]">
-			<svg width="20" ng-attr-height="{{restrictedHeight}}">
+		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords == 0]">
+		 	<!-- ng-attr-height="{{restrictedHeight}}" -->
+			<svg width="20">
 				<g transform="translate(0,0)">
-					<rect class="frame" width="20" ng-attr-height="{{restrictedHeight}}"></rect>
-					<rect class="page" width="20" height="40"></rect>
+					<rect class="frame" width="20"></rect>
+					<g transform="translate(0,0)" id="overviewList"></g>
+					<rect class="page" width="20" ng-attr-height="{{totalRecords == 0 ? 0: (restrictedHeight/(totalRecords/itemsPerPage))}}"></rect>
 				</g>
 			</svg>
 		</div>

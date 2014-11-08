@@ -55,6 +55,8 @@ app.controller("ListController",
 		
 		$scope.selectedListItems = [];
 
+		$scope.dataWatchFlag = 0; //dummy flag that gets updated everytime the overview scroller should change..
+
 		//the below call would return an empty array when the controller is 
 		//called before the data is loaded, but would return the list of entities
 		//when the list is added dynamically..
@@ -64,6 +66,8 @@ app.controller("ListController",
 		$scope.listChanged = function(){
 			// console.log("List Changed function called..");
 			var _listData = DataFactory.getListContents($scope.selectedList);
+			$scope.dataWatchFlag ++;
+
 			$scope.totalRecords = _listData.length;
 			if($scope.totalRecords > 26){
 				$scope.itemHeight = 550/length;
@@ -97,11 +101,6 @@ app.controller("ListController",
 			$scope.align = align;
 		}
 
-		// $scope.onReactItemClick = function(reactComponent){
-		// 	var item = reactComponent.props.item;
-		// 	console.log(item);
-		// }
-
 		$scope.selectItem = function(itemName){
 			$scope.isListLoading = true;
 			var index = $scope.selectedListItems.indexOf(itemName);
@@ -124,6 +123,7 @@ app.controller("ListController",
 
 		$scope.$watch('orderByPredicate', function(newValue, oldValue){
 			resetDisplayList();
+			$scope.dataWatchFlag++;
 		});
 
 		$scope.setFirstOrderSort = function(sortParams){
@@ -134,6 +134,7 @@ app.controller("ListController",
 			}
 
 			resetDisplayList();
+			$scope.dataWatchFlag++;
 		}
 
 		function resetDisplayList(){
@@ -144,12 +145,17 @@ app.controller("ListController",
 
 		$scope.$on('loadComplete', function(){
 			$scope.isListLoading = false;
+			$scope.dataWatchFlag ++;
 			resetDisplayList();
 		});
 
 		$scope.$on('entityTypesLoaded', function(){
 			$scope.headers = DataFactory.getListEntityTypes();
 		});
+
+		$scope.getSortedData = function(){
+			return $filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate]);
+		}
 	}
 );
 
@@ -158,7 +164,83 @@ app.directive('myListView', function($window){
 	myListView.restrict = 'E';
 	myListView.templateUrl = '/static/directives/list-view.html';
 
-	//myListView.link = function($scope, element, attrs){
+	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
+	var selectionColors = d3.scale.linear()
+                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
+                .range(seedSelectionColorSwatch);
+
+
+	myListView.link = function($scope, element, attrs){
+		var svg = d3.select(element[0]).select('svg');
+		var page = svg.select('rect.page');
+		var frame = svg.select('rect.frame');
+		var overviewList = svg.select('#overviewList');
+
+		$scope.$watch('currentPage', function(newValue, oldValue){
+			page.attr("y", (newValue-2) * page.attr("height"));
+		});
+
+		$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
+			console.log("restrictedHeight changed");
+			svg.attr("height", newHeight);
+			frame.attr("height", newHeight);
+			page.attr("y", ($scope.currentPage-1)*page.attr("height"));
+			refreshOverviewList();
+		});
+
+		$scope.$watch('dataWatchFlag', function(){
+			refreshOverviewList();
+		});
+
+		function refreshOverviewList(){
+			if($scope.totalRecords == 0){
+				return;
+			}
+
+			var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
+			var sortedData = $scope.getSortedData();
+			
+			// var overview = overviewList.selectAll('.row-item').data(sortedData, function(datum){return datum;});
+
+			// overview.enter()
+			// 	.append("rect")
+			// 	.attr("class","row-item")
+			// 	.attr("x", 0)
+			// 	.attr("y", function(datum, index){
+			// 		return index * itemHeight;
+			// 	})
+			// 	.attr("width", 20)
+			// 	.attr("height", itemHeight)
+			// 	.attr("style", function(datum){
+			// 		var color = "#FFFFFF";
+			// 		if(datum.background){
+			// 			color = datum.background;
+			// 		}
+			// 		return "fill: "+ color;
+			// 	});
+
+			// overview.exit().remove();
+
+			overviewList.selectAll('.row-item').remove();
+			overviewList.selectAll('.row-item')
+				.data(sortedData).enter()
+				.append("rect")
+				.attr("class","row-item")
+				.attr("x", 0)
+				.attr("y", function(datum, index){
+					return index * itemHeight;
+				})
+				.attr("width", 20)
+				.attr("height", itemHeight)
+				.attr("style", function(datum){
+					var color = "#FFFFFF";
+					if(datum.background){
+						color = datum.background;
+					}
+					return "fill: "+ color;
+				});
+		}
+
 		
 		// var page = d3.select(element[0]).select('rect.page')
 		// 			.datum({y: 0, h: 40})
@@ -174,7 +256,7 @@ app.directive('myListView', function($window){
 		//   	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
 		//   	page.attr("y", d.y);
 		// }
-	//};
+	};
 	return myListView;
 });
 
