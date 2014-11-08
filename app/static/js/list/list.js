@@ -1,4 +1,4 @@
-var app = angular.module('ngListViewApp',[]);
+var app = angular.module('ngListViewApp',['pasvaz.bindonce', 'infinite-scroll']);
 
 app.controller('ListViewController', 
 	function($scope, $window, DataFactory){
@@ -37,9 +37,15 @@ app.controller('ListViewController',
 );
 
 app.controller("ListController",
-	function($scope, DataFactory){
+	function($scope, $window, $filter, DataFactory){
 
-		$scope.data = [];
+		$scope.data = []; // will contain the complete data that comes from the server..
+		$scope.listData = []; //will contain the actual data that is being shown on the list
+		
+		$scope.itemsPerPage = 100; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
+		$scope.currentPage = 1; //holds the current page being shown..
+		$scope.totalRecords = 0; //holds the total number of records that can be shown..
+
 		$scope.itemHeight = 0;
 		$scope.align = "text-left";
 		$scope.sortArgs = [];
@@ -56,23 +62,45 @@ app.controller("ListController",
 
 		/** Public methods **/
 		$scope.listChanged = function(){
-			console.log("List Changed function called..");
-			var listData = DataFactory.getListContents($scope.selectedList);
-			var length = listData.length;
-			if(length > 26){
+			// console.log("List Changed function called..");
+			var _listData = DataFactory.getListContents($scope.selectedList);
+			$scope.totalRecords = _listData.length;
+			if($scope.totalRecords > 26){
 				$scope.itemHeight = 550/length;
 			}
-			$scope.data = listData;
+			$scope.data = _listData;
+			$scope.loadMoreData(true);
+		}
+
+		$scope.loadMoreData = function(isFirstLoad){
+			isFirstLoad = isFirstLoad || false;
+
+			if(!isFirstLoad && ($scope.currentPage * $scope.itemsPerPage) > $scope.totalRecords){
+				return;
+			}
+
+			//item in items | limitTo: rpp * page | limitTo: rpp * page < count ? -rpp : rpp - (rpp * page - count)
+			//item in data | orderBy:[firstOrderPredicate, orderByPredicate] | limitTo:200
+			var _newData =  $filter('limitTo')( $filter('limitTo')(
+				$filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate]), 
+					$scope.itemsPerPage * $scope.currentPage
+				), ($scope.itemsPerPage * $scope.currentPage < $scope.totalRecords) ? -$scope.itemsPerPage : $scope.itemsPerPage - ($scope.itemsPerPage * $scope.currentPage - $scope.totalRecords)
+			);
+
+			if(_newData.length){
+				$scope.currentPage += 1;
+				$scope.listData.push.apply($scope.listData, _newData);
+			}
 		}
 
 		$scope.setAlignment = function(align){
 			$scope.align = align;
 		}
 
-		$scope.onReactItemClick = function(reactComponent){
-			var item = reactComponent.props.item;
-			console.log(item);
-		}
+		// $scope.onReactItemClick = function(reactComponent){
+		// 	var item = reactComponent.props.item;
+		// 	console.log(item);
+		// }
 
 		$scope.selectItem = function(itemName){
 			$scope.isListLoading = true;
@@ -94,16 +122,29 @@ app.controller("ListController",
 			DataFactory.setSelectedListItem($scope.selectedList, $scope.selectedListItems);
 		}
 
+		$scope.$watch('orderByPredicate', function(newValue, oldValue){
+			resetDisplayList();
+		});
+
 		$scope.setFirstOrderSort = function(sortParams){
 			if($scope.firstOrderPredicate == sortParams){
 				$scope.firstOrderPredicate = "";
 			} else{
 				$scope.firstOrderPredicate = sortParams;
 			}
+
+			resetDisplayList();
+		}
+
+		function resetDisplayList(){
+			$scope.currentPage = 1;
+			$scope.listData = [];
+			$scope.loadMoreData(true);
 		}
 
 		$scope.$on('loadComplete', function(){
 			$scope.isListLoading = false;
+			resetDisplayList();
 		});
 
 		$scope.$on('entityTypesLoaded', function(){
@@ -117,7 +158,7 @@ app.directive('myListView', function($window){
 	myListView.restrict = 'E';
 	myListView.templateUrl = '/static/directives/list-view.html';
 
-	myListView.link = function($scope, element, attrs){
+	//myListView.link = function($scope, element, attrs){
 		
 		// var page = d3.select(element[0]).select('rect.page')
 		// 			.datum({y: 0, h: 40})
@@ -133,7 +174,7 @@ app.directive('myListView', function($window){
 		//   	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
 		//   	page.attr("y", d.y);
 		// }
-	};
+	//};
 	return myListView;
 });
 
@@ -147,9 +188,6 @@ app.directive('myListComponent', function(){
 // app.directive('myList', function(){
 // 	myList = {};
 // 	myList.restrict = 'E';
-// 	myList.scope = {
-//     	data: '='
-//     };
 
 //     myList.link = function(scope, el, attrs){
 //     	console.log(scope.data);
@@ -157,7 +195,7 @@ app.directive('myListComponent', function(){
 //     	scope.$watch('data', function(newValue, oldValue){
 //     		if(newValue.length){
 // 	    		React.renderComponent(
-// 		            listItemRepeater({data:newValue}),
+// 		            ReactItemList({data:newValue}),
 // 		            el[0]
 // 		        );	
 //     		}
@@ -166,7 +204,7 @@ app.directive('myListComponent', function(){
 //       	scope.$watch('align', function(newValue, oldValue){
 //       		if(newValue){
 // 	      		React.renderComponent(
-// 		            listItemRepeater({data:newValue}),
+// 		            ReactItemList({data:newValue}),
 // 		            el[0]
 // 		        );	
 //       		}
@@ -314,7 +352,6 @@ app.factory('DataFactory',function($rootScope, apiService){
 		}
 
 		updateListContents();
-		$rootScope.$broadcast('loadComplete');
 	}
 
 	service.updateMode = function(newMode){
@@ -367,6 +404,20 @@ app.factory('DataFactory',function($rootScope, apiService){
 						}
 					}
 				}
+
+				var listIndex, itemIndex;
+				selectedLists.map(function(params){
+					listIndex = findInList(params.column, listContents, 'key');
+
+					params.values.map(function(itemName){
+						itemIndex = findInList(itemName, listContents[listIndex]['values'],'name');
+						if(itemIndex != -1){
+							listContents[listIndex]['values'][itemIndex]['background'] = currentSelection;
+							listContents[listIndex]['values'][itemIndex]['strengthCount'] = 0;
+						}
+					});
+				});
+				$rootScope.$broadcast('loadComplete');
 			});
 		} else {
 			//Reset the data here..
@@ -376,8 +427,10 @@ app.factory('DataFactory',function($rootScope, apiService){
 					list[itemIndex]['strength'] = 0;
 					list[itemIndex]['hasStrength'] = 0;
 					list[itemIndex]['strengthCount'] = 0;
+					list[itemIndex]['background'] = "#FFFFFF";
 				}
 			}
+			$rootScope.$broadcast('loadComplete');
 		}
 	}
 	return service;

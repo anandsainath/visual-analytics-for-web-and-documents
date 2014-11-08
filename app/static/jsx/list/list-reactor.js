@@ -28,7 +28,6 @@ window.ReactItem = React.createClass({
 
 window.ReactItemList = React.createClass({
 	render: function(){
-		console.log("INside Item list");
 		var scope = this.props.scope;
 		var data = scope.data;
 

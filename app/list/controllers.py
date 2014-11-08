@@ -28,12 +28,14 @@ def new_base():
 
 @mod_list.route('/get-list-entity-types')
 def get_list_entity_types():
-	headers = sorted(JListInputFile.objects.first()["content"].keys())
+	#headers = sorted(JListInputFile.objects.first()["content"].keys())
+	headers = headers = ["Author Name", "Conference", "Year"]
 	return json.dumps(headers);
 
 @mod_list.route('/get-list-contents')
 def get_list_contents():
-	headers = sorted(JListInputFile.objects.first()["content"].keys())
+	#headers = sorted(JListInputFile.objects.first()["content"].keys())
+	headers = ["Author Name", "Conference", "Year"]
 	all_data = []
 	for header in headers:
 		content_list = JListInputFile._get_collection().aggregate([
@@ -64,9 +66,13 @@ def get_updated_list_contents():
 
 def get_updated_list_contents_any_mode(params, column_list):
 	#Return strengths for entities related to any of the current selections
+
+	connected_headers = JListInputFile.objects.first()["hidden"].keys()
 	or_params = []
 	for column_params in params:
 		or_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+		if column_params['column'] in connected_headers:
+			or_params.append({ 'hidden.'+column_params['column']: {'$in' : column_params['values']} })
 	return get_aggregate_query_result({'$or':or_params}, column_list)
 
 def get_updated_list_contents_all_mode(params, column_list):

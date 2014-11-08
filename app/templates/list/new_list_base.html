@@ -12,11 +12,13 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap/css/starter-template.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 	
-	<script src="{{ url_for('static', filename='bower_components/angular/angular.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build/ng-infinite-scroll.js') }}"></script>
+	<!--<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
-	
-	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>
+	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>-->
 	<script src="{{ url_for('static', filename='lib/d3.v3.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/list/longscroll.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
@@ -41,7 +43,7 @@
 
 	<div class="grid" style="height: {{gridHeight|angular}}px;">
 		<div class="list-container" style="width: {{width|angular}}px;">
-			<my-list-component ng-repeat="list_index in lists"></my-list-component>
+			<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
 		</div>
 	</div>
 
