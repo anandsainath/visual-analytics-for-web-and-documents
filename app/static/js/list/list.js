@@ -7,7 +7,7 @@ app.controller('ListViewController',
 
 		$scope.isLoading = true;
 		$scope.mode  = "Any";
-		$scope.lists = [1,2];
+		$scope.lists = [1,2,3]; //Not used for the case of the demo.
 
 		$scope.width = $window.innerWidth;
 		$scope.height = $window.innerHeight;
@@ -41,7 +41,8 @@ app.controller("ListController",
 
 		$scope.data = []; // will contain the complete data that comes from the server..
 		$scope.listData = []; //will contain the actual data that is being shown on the list
-		
+		$scope.selectedList = "";
+
 		$scope.itemsPerPage = 100; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
 		$scope.currentPage = 1; //holds the current page being shown..
 		$scope.totalRecords = 0; //holds the total number of records that can be shown..
@@ -163,7 +164,16 @@ app.directive('myListView', function($window){
 	myListView = {};
 	myListView.restrict = 'E';
 	myListView.templateUrl = '/static/directives/list-view.html';
-
+	// myListView.scope = {
+	// 	'restrictedHeight':'=',
+	// 	'selectedList':'=',
+	// 	'getSortedData':'&',
+	// 	'currentPage':'=',
+	// 	'dataWatchFlag':'=',
+	// 	'totalRecords':'=',
+	// 	'currentPage':'='
+	// };
+	
 	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
 	var selectionColors = d3.scale.linear()
                 .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
@@ -181,7 +191,6 @@ app.directive('myListView', function($window){
 		});
 
 		$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
-			console.log("restrictedHeight changed");
 			svg.attr("height", newHeight);
 			frame.attr("height", newHeight);
 			page.attr("y", ($scope.currentPage-1)*page.attr("height"));
@@ -199,6 +208,10 @@ app.directive('myListView', function($window){
 
 			var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
 			var sortedData = $scope.getSortedData();
+
+			if(!sortedData){
+				return;
+			}
 			
 			// var overview = overviewList.selectAll('.row-item').data(sortedData, function(datum){return datum;});
 
@@ -458,6 +471,8 @@ app.factory('DataFactory',function($rootScope, apiService){
 			var list = listContents[listIndex]['values'];
 			for(var itemIndex=0; itemIndex<list.length; itemIndex++){
 				list[itemIndex]['strength'] = 0;
+				list[itemIndex]['hasStrength'] = 0;
+				list[itemIndex]['strengthCount'] = 0;
 				list[itemIndex]['background'] = "#FFFFFF";
 			}
 		}
@@ -495,7 +510,8 @@ app.factory('DataFactory',function($rootScope, apiService){
 						itemIndex = findInList(itemName, listContents[listIndex]['values'],'name');
 						if(itemIndex != -1){
 							listContents[listIndex]['values'][itemIndex]['background'] = currentSelection;
-							listContents[listIndex]['values'][itemIndex]['strengthCount'] = 0;
+							listContents[listIndex]['values'][itemIndex]['hasStrength'] = 0;
+							listContents[listIndex]['values'][itemIndex]['strength'] = 9999;
 						}
 					});
 				});
@@ -503,15 +519,16 @@ app.factory('DataFactory',function($rootScope, apiService){
 			});
 		} else {
 			//Reset the data here..
-			for(var listIndex=0; listIndex<listContents.length; listIndex++){
-				var list = listContents[listIndex]['values'];
-				for(var itemIndex=0; itemIndex<list.length; itemIndex++){
-					list[itemIndex]['strength'] = 0;
-					list[itemIndex]['hasStrength'] = 0;
-					list[itemIndex]['strengthCount'] = 0;
-					list[itemIndex]['background'] = "#FFFFFF";
-				}
-			}
+			// for(var listIndex=0; listIndex<listContents.length; listIndex++){
+			// 	var list = listContents[listIndex]['values'];
+			// 	for(var itemIndex=0; itemIndex<list.length; itemIndex++){
+			// 		list[itemIndex]['strength'] = 0;
+			// 		list[itemIndex]['hasStrength'] = 0;
+			// 		list[itemIndex]['strengthCount'] = 0;
+			// 		list[itemIndex]['background'] = "#FFFFFF";
+			// 	}
+			// }
+			resetStrengthData();
 			$rootScope.$broadcast('loadComplete');
 		}
 	}

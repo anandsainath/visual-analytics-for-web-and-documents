@@ -70,7 +70,7 @@
 						<div class="bar" bo-style="{'width': (1-item.frequency) * 145 +'%' };"></div>
 					</div>
 					<span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': item.background};" ng-click="selectItem(item.name)"> {{item.name}}
-						<sup ng-show="item.strengthCount">{{item.strengthCount}}</sup>
+						<sup ng-if="item.hasStrength == 1">{{item.strengthCount}}</sup>
 					</span>
 				</li>
 			</ul>

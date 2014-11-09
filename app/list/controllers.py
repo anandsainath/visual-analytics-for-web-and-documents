@@ -78,13 +78,29 @@ def get_updated_list_contents_all_mode(params, column_list):
 	# entities connected to all of the current selections, though not necessarily in the same document
 	entities = defaultdict(int)
 	no_of_params = 0
+	connected_headers = JListInputFile.objects.first()["hidden"].keys()
 
 	for column_params in params:
 		for column_value in column_params['values']:
 				no_of_params += 1
 				for header in column_list:
+
+					match_params = {}
+					if column_params['column'] in connected_headers:
+						or_params = []
+						or_params.append({ 'content.'+column_params['column']:{ '$eq': column_value } })
+						or_params.append({ 'hidden.'+column_params['column']:{ '$in': [column_value] } })
+						match_params = {'$or': or_params}
+					else:
+						match_params = { 'content.'+column_params['column']:{ '$eq': column_value } }
+					#or_params = []
+					#or_params.append({ 'content.'+column_params['column']:{ '$eq': column_value } });
+					#if column_params['column'] in connected_headers:
+					#	or_params.append({ 'hidden.'+column_params['column']: {'$in' : column_params['values']} })
+
 					connected_entities_list = JListInputFile._get_collection().aggregate([
-						{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
+						{ '$match':match_params },
+						#{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
 						{ '$project':{ '_id': 0, 'content.'+header: 1 }},
 						{ '$group':{ '_id':'$content.'+header }}
 					])['result']
@@ -128,17 +144,45 @@ def get_updated_list_contents_all_mode(params, column_list):
 
 def get_updated_list_contents_and_mode(params, column_list):
 	#Entities connected to all of the current selections, through a single document
+	connected_headers = JListInputFile.objects.first()["hidden"].keys()
 	outer_and_params = []
 	for column_params in params:
-		for column_value in column_params['values']:
-			 outer_and_params.append({ 'content.'+column_params['column']: column_value })
+		if column_params['column'] in connected_headers:
+			#check if the values are single value or multi valued..
+			if len(column_params['values']) > 1:
+				#need a two-part query match..
+				inner_and_params = []
+				column_values = column_params['values']
+				primary_and_parameter = column_values[0] #this will be used to test the equality of the column
+				column_values.remove(primary_and_parameter) #this will be used to search in the connected entities array..
+
+				inner_and_params.append({ 'content.'+column_params['column']: primary_and_parameter })
+				inner_and_params.append({ 'hidden.'+column_params['column']: {'$all': column_values} })
+				outer_and_params.append({ '$and': inner_and_params })
+			else:
+				#simple and would do..
+				outer_and_params.append({ 'content.'+column_params['column']: column_params['values'][0]  })
+		else:
+			#no need to check in the connected list as there is no such list..
+			#direct and of all the values..
+			for column_value in column_params['values']:
+				outer_and_params.append({ 'content.'+column_params['column']: column_value })
 	return get_aggregate_query_result({'$and':outer_and_params}, column_list)
 
 def get_updated_list_contents_all_any_mode(params, column_list):
 	#Entities connected to all of the selections across lists, but any of the selections within a list
+	connected_headers = JListInputFile.objects.first()["hidden"].keys()
 	and_params = []
 	for column_params in params:
-		and_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+		#check if the column is present in the connected column
+		if column_params['column'] in connected_headers:
+			or_params = []
+			or_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+			or_params.append({ 'hidden.'+column_params['column']: { '$in' : column_params['values'] } })
+			and_params.append({'$or' : or_params})
+		else:
+			#normal query format here..
+			and_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
 	return get_aggregate_query_result({'$and':and_params}, column_list)
 
 def get_aggregate_query_result(match_params, column_list):
