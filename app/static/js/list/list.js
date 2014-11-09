@@ -7,7 +7,7 @@ app.controller('ListViewController',
 
 		$scope.isLoading = true;
 		$scope.mode  = "Any";
-		$scope.lists = [1,2,3]; //Not used for the case of the demo.
+		$scope.lists = [1,2,3];
 
 		$scope.width = $window.innerWidth;
 		$scope.height = $window.innerHeight;
@@ -50,7 +50,7 @@ app.controller("ListController",
 		$scope.itemHeight = 0;
 		$scope.align = "text-left";
 		$scope.sortArgs = [];
-		$scope.orderByPredicate = "";
+		$scope.orderByPredicate = "name";
 		$scope.firstOrderPredicate = "";
 		$scope.isListLoading = false;
 		
@@ -164,7 +164,7 @@ app.directive('myListView', function($window){
 	myListView = {};
 	myListView.restrict = 'E';
 	myListView.templateUrl = '/static/directives/list-view.html';
-	// myListView.scope = {
+	// var scope = {
 	// 	'restrictedHeight':'=',
 	// 	'selectedList':'=',
 	// 	'getSortedData':'&',
@@ -173,6 +173,7 @@ app.directive('myListView', function($window){
 	// 	'totalRecords':'=',
 	// 	'currentPage':'='
 	// };
+	// myListView.scope = scope;
 	
 	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
 	var selectionColors = d3.scale.linear()
@@ -185,9 +186,12 @@ app.directive('myListView', function($window){
 		var page = svg.select('rect.page');
 		var frame = svg.select('rect.frame');
 		var overviewList = svg.select('#overviewList');
+		var mainList = d3.select(element[0]).select('.restrict');
 
-		$scope.$watch('currentPage', function(newValue, oldValue){
-			page.attr("y", (newValue-2) * page.attr("height"));
+		mainList.on("scroll", function(){
+			console.log("List Scrolled: "+ this.scrollTop);
+			var y = ((this.scrollTop/20) * page.attr("height"))/100;
+			page.attr("y", y);
 		});
 
 		$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
@@ -518,16 +522,6 @@ app.factory('DataFactory',function($rootScope, apiService){
 				$rootScope.$broadcast('loadComplete');
 			});
 		} else {
-			//Reset the data here..
-			// for(var listIndex=0; listIndex<listContents.length; listIndex++){
-			// 	var list = listContents[listIndex]['values'];
-			// 	for(var itemIndex=0; itemIndex<list.length; itemIndex++){
-			// 		list[itemIndex]['strength'] = 0;
-			// 		list[itemIndex]['hasStrength'] = 0;
-			// 		list[itemIndex]['strengthCount'] = 0;
-			// 		list[itemIndex]['background'] = "#FFFFFF";
-			// 	}
-			// }
 			resetStrengthData();
 			$rootScope.$broadcast('loadComplete');
 		}

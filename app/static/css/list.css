@@ -1,3 +1,13 @@
+/*html {
+    overflow: hidden;
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    overflow: auto;
+}*/
+
 body{
 	padding-top: 10px;
 }
@@ -100,13 +110,13 @@ ul.js-items-list li{
 
 .js-scroll-list::-webkit-scrollbar {
     -webkit-appearance: none;
-    width: 5px;
+    width: 0px;
 }
-.js-scroll-list::-webkit-scrollbar-thumb {
+/*.js-scroll-list::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-}
+}*/
 
 .grid::-webkit-scrollbar {
     -webkit-appearance: none;
@@ -169,8 +179,8 @@ rect.frame{
 rect.page{
 	fill: none;
 	stroke: #999;
-	fill-opacity: .5;
-	cursor: move;
+	fill-opacity: .6;
+	/*cursor: move;*/
 }
 
 .superscript { 
