@@ -21,8 +21,8 @@ ITEMS_PER_PAGE = 12
 # Define the blueprint: 'list', set its url prefix: app.url/list
 mod_list = Blueprint('list', __name__, url_prefix='/list')
 
-@mod_list.route('/new-base')
-def new_base():
+@mod_list.route('/')
+def index():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())
 	return render_template('list/new_list_base.html', headers=headers)
 
@@ -246,10 +246,10 @@ def insert_csv_file():
 	input_file = csv.DictReader(open("new-input.csv","rU"))
 	for dict_row in input_file:
 		JListInputFile(content=dict_row).save()
-	return redirect(url_for('.index'))
+	return redirect(url_for('.admin'))
 
-@mod_list.route('/')
-def index():
+@mod_list.route('/admin')
+def admin():
 	headers = sorted(JListInputFile.objects.first()["content"].keys())
 	return render_template('list/index.html', headers=headers)
 
