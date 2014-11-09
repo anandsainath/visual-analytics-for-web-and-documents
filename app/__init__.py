@@ -9,10 +9,13 @@ app.config["SECRET_KEY"] = "KeepThisS3cr3t"
 
 db = MongoEngine(app)
 
+@app.route("/")
+def index():
+	return "Hello World!"
+
 # Sample HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
-    #return render_template('404.html'), 404
     return "TODO: 404 page", 404
 
 
