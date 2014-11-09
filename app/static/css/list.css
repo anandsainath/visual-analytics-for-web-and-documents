@@ -2,6 +2,13 @@ body{
 	padding-top: 10px;
 }
 
+.my-nav{
+	margin-left: 50px;
+	margin-right: 50px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
 .grid{
 	position: relative;
 	width: 100%;
