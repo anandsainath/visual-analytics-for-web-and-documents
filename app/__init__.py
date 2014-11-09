@@ -1,5 +1,5 @@
 # Import flask and template operators
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from flask.ext.mongoengine import MongoEngine
 
 # Define the WSGI application object
@@ -11,7 +11,7 @@ db = MongoEngine(app)
 
 @app.route("/")
 def index():
-	return "Hello World!"
+	return redirect(url_for('.list.index'))
 
 # Sample HTTP error handling
 @app.errorhandler(404)
