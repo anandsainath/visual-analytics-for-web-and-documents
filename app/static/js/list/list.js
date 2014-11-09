@@ -63,6 +63,8 @@ app.controller("ListController",
 		//when the list is added dynamically..
 		$scope.headers = DataFactory.getListEntityTypes();
 
+		var notification;
+
 		/** Public methods **/
 		$scope.listChanged = function(){
 			// console.log("List Changed function called..");
@@ -104,6 +106,10 @@ app.controller("ListController",
 
 		$scope.selectItem = function(itemName){
 			$scope.isListLoading = true;
+			if(!notification){
+				notification = noty({});
+			}
+			
 			var index = $scope.selectedListItems.indexOf(itemName);
 			if(index != -1){
 				$scope.selectedListItems.splice(index, 1);
@@ -146,6 +152,10 @@ app.controller("ListController",
 
 		$scope.$on('loadComplete', function(){
 			$scope.isListLoading = false;
+			if(notification){
+				notification.close();
+				notification = undefined;
+			}
 			$scope.dataWatchFlag ++;
 			resetDisplayList();
 		});
