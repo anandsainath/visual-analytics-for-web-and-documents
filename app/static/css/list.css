@@ -8,6 +8,15 @@ body {
     overflow: auto;
 }*/
 
+.alert{
+	margin-bottom: 5px;
+}
+
+.alert-dismissible{
+	margin-left: 50px;
+	margin-right: 50px;
+}
+
 body{
 	padding-top: 10px;
 }
