@@ -7,9 +7,9 @@ app.controller('ListViewController',
 
 		$scope.isLoading = true;
 		$scope.mode  = "Any";
-		$scope.lists = [1,2,3];
+		$scope.lists = [1,2,3,4];
 
-		$scope.width = $window.innerWidth;
+		$scope.width = $window.innerWidth - 40;
 		$scope.height = $window.innerHeight;
 		$scope.gridHeight = $window.innerHeight - 75;
 		$scope.restrictedHeight = $window.innerHeight - 200;
@@ -186,9 +186,9 @@ app.directive('myListView', function($window){
 	// myListView.scope = scope;
 	
 	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
-	var selectionColors = d3.scale.linear()
-                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
-                .range(seedSelectionColorSwatch);
+	// var selectionColors = d3.scale.linear()
+ 	//                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
+ 	//                .range(seedSelectionColorSwatch);
 
 
 	myListView.link = function($scope, element, attrs){
@@ -199,7 +199,7 @@ app.directive('myListView', function($window){
 		var mainList = d3.select(element[0]).select('.restrict');
 
 		mainList.on("scroll", function(){
-			console.log("List Scrolled: "+ this.scrollTop);
+			// console.log("List Scrolled: "+ this.scrollTop);
 			var y = ((this.scrollTop/20) * page.attr("height"))/100;
 			page.attr("y", y);
 		});
@@ -408,9 +408,9 @@ app.factory('DataFactory',function($rootScope, apiService){
 
 	var currentSelection = "#FEF935";
 	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
-	var selectionColors = d3.scale.linear()
-                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
-                .range(seedSelectionColorSwatch);
+	// var selectionColors = d3.scale.linear()
+	//                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
+ 	//                .range(seedSelectionColorSwatch);
 
 		
 
@@ -507,11 +507,11 @@ app.factory('DataFactory',function($rootScope, apiService){
 					for(var sub_index=0; sub_index<listContent.length; sub_index++){
 						itemIndex = findInList(listContent[sub_index]['name'], listContents[listIndex]['values'], 'name');
 						if(itemIndex != -1){
-							strength = listContent[sub_index]['strength'];
-							listContents[listIndex]['values'][itemIndex]['strength'] = strength;
+							listContents[listIndex]['values'][itemIndex]['strength'] = listContent[sub_index]['strength'];
 							listContents[listIndex]['values'][itemIndex]['hasStrength']	= 1;
 							listContents[listIndex]['values'][itemIndex]['strengthCount'] = listContent[sub_index]['count'];
-							listContents[listIndex]['values'][itemIndex]['background'] = selectionColors(strength);
+							strength_count = (listContent[sub_index]['count'] > 8)? 8: listContent[sub_index]['count'];
+							listContents[listIndex]['values'][itemIndex]['background'] = seedSelectionColorSwatch[strength_count-1];
 						}
 					}
 				}

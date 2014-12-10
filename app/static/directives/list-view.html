@@ -2,16 +2,16 @@
 	<div class="panel-heading">
 		<div>
 			<div class="row">
-				<div class="col-xs-6 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
-					<select class="form-control" ng-model="selectedList">
+				<div class="col-xs-8 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
+					<select class="form-control" ng-model="selectedList" ng-change="listChanged()">
 						<option bindonce ng-repeat="header in headers">{{header}}</option>
 					</select>
 				</div>
-				<div class="col-xs-3 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Add all items of the selected type to the list">
+				<!-- <div class="col-xs-3 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Add all items of the selected type to the list">
 					<button type="button" class="btn btn-default" ng-click="listChanged()">Add all</button>
-				</div>
-				<div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear list" style="padding-left: 5px;">
-					<button type="button" class="btn btn-default">Clear</button>
+				</div> -->
+				<div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
+					<button type="button" class="btn btn-default" ng-click="clearSelections()">Clear List</button>
 				</div>
 			</div>
 			<div class="row top-margin-10">
@@ -28,7 +28,7 @@
 						</button>
 					</div>
 
-					&nbsp;|&nbsp;
+					&nbsp;&nbsp;|&nbsp;&nbsp;
 
 					<div class="btn-group">
 						<button type="button" class="btn btn-default btn-sm js-tooltip js-active-top" data-toggle="tooltip" data-placement="top" title="Bring active elements to the top of the list" ng-click="setFirstOrderSort('-hasStrength')" ng-class="{true:'active', false:''}[firstOrderPredicate=='-hasStrength']">
@@ -38,13 +38,13 @@
 
 					&nbsp;|&nbsp;
 
-					<div class="btn-group">
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-clear-selection" data-toggle="tooltip" data-placement="top" title="Clear Selection" ng-click="clearSelections()">
+					<!-- <div class="btn-group">
+						<button type="button" class="btn btn-default btn-sm js-tooltip js-clear-selection" data-toggle="tooltip" data-placement="top" title="Clear Selection">
 							<span class="glyphicon glyphicon-remove"></span>
 						</button>
 					</div>
 
-					&nbsp;|&nbsp;
+					&nbsp;|&nbsp; -->
 
 					<div class="btn-group">
 						<button type="button" class="btn btn-default btn-sm js-tooltip js-align-left" data-toggle="tooltip" data-placement="top" title="Align Left" ng-click="setAlignment('text-left')" ng-class="{true:'active', false:''}[align=='text-left']">
@@ -62,7 +62,7 @@
 		</div>
 	</div>
 	<div class="panel-body" style="height: {{restrictedHeight}}px;">
-		<div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; width: 328px; float:left;">
+		<div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; float:left;">
 			<!-- <div class="small-loader" ng-show="isListLoading"></div> -->
 			<ul class="js-items-list" infinite-scroll='loadMoreData()'>
 				<li class="row" ng-repeat="item in listData track by item.name">

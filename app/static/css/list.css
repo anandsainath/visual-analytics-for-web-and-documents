@@ -62,14 +62,14 @@ body{
 }
 
 .col-1-4 {
-	margin-left: 50px;
-	width: 350px;
+	margin-left: 15px;
+	width: 310px;
 	padding: 0px;
 	float: left;
 }
 
 .col-space{
-	width: 25px;
+	width: 15px;
 	height: 550px;
 	float: left;
 	padding-left: 2px;
@@ -79,7 +79,7 @@ body{
 	overflow-x: hidden;
 	overflow-y: scroll;
 	/*height: 550px;*/
-	width: 323px;
+	width: 283px;
 	margin: 0 auto;
 }
 
@@ -196,4 +196,11 @@ rect.page{
 	position: relative; 
 	top: -0.5em; 
 	font-size: 80%; 
+}
+
+
+.glyphicon{
+	top: auto;
+	font-size: 14px;
+	line-height: 1.5;
 }
