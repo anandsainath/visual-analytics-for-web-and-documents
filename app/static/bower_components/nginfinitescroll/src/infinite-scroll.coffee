@@ -2,8 +2,8 @@ mod = angular.module('infinite-scroll', [])
 
 mod.value('THROTTLE_MILLISECONDS', null)
 
-mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_MILLISECONDS', \
-                                  ($rootScope, $window, $timeout, THROTTLE_MILLISECONDS) ->
+mod.directive 'infiniteScroll', ['$rootScope', '$window', '$interval', 'THROTTLE_MILLISECONDS', \
+                                  ($rootScope, $window, $interval, THROTTLE_MILLISECONDS) ->
   scope:
     infiniteScroll: '&'
     infiniteScrollContainer: '='
@@ -12,7 +12,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     infiniteScrollUseDocumentBottom: '='
 
   link: (scope, elem, attrs) ->
-    $window = angular.element($window)
+    windowElement = angular.element($window)
 
     scrollDistance = null
     scrollEnabled = null
@@ -21,6 +21,22 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     immediateCheck = true
     useDocumentBottom = false
 
+    height = (elem) ->
+      elem = elem[0] or elem
+
+      if isNaN(elem.offsetHeight) then elem.document.documentElement.clientHeight else elem.offsetHeight
+
+    offsetTop = (elem) ->
+      if not elem[0].getBoundingClientRect or elem.css('none')
+        return
+
+      elem[0].getBoundingClientRect().top + pageYOffset(elem)
+
+    pageYOffset = (elem) ->
+      elem = elem[0] or elem
+
+      if isNaN(window.pageYOffset) then elem.document.documentElement.scrollTop else elem.ownerDocument.defaultView.pageYOffset
+
     # infinite-scroll specifies a function to call when the window,
     # or some other container specified by infinite-scroll-container,
     # is scrolled within a certain range from the bottom of the
@@ -28,21 +44,21 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     # with a boolean that is set to true when the function is
     # called in order to throttle the function call.
     handler = ->
-      if container == $window
-        containerBottom = container.height() + container.scrollTop()
-        elementBottom = elem.offset().top + elem.height()
+      if container == windowElement
+        containerBottom = height(container) + pageYOffset(container[0].document.documentElement)
+        elementBottom = offsetTop(elem) + height(elem)
       else
-        containerBottom = container.height()
+        containerBottom = height(container)
         containerTopOffset = 0
-        if container.offset() != undefined
-          containerTopOffset = container.offset().top
-        elementBottom = elem.offset().top - containerTopOffset + elem.height()
+        if offsetTop(container) != undefined
+          containerTopOffset = offsetTop(container)
+        elementBottom = offsetTop(elem) - containerTopOffset + height(elem)
 
       if(useDocumentBottom)
-        elementBottom = $(document).height()
+        elementBottom = height((elem[0].ownerDocument || elem[0].document).documentElement)
 
       remaining = elementBottom - containerBottom
-      shouldScroll = remaining <= container.height() * scrollDistance + 1
+      shouldScroll = remaining <= height(container) * scrollDistance + 1
 
       if shouldScroll
         checkWhenEnabled = true
@@ -66,7 +82,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
       previous = 0
       later = ->
         previous = new Date().getTime()
-        $timeout.cancel(timeout)
+        $interval.cancel(timeout)
         timeout = null
         func.call()
         context = null
@@ -76,17 +92,17 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
         remaining = wait - (now - previous)
         if remaining <= 0
           clearTimeout timeout
-          $timeout.cancel(timeout)
+          $interval.cancel(timeout)
           timeout = null
           previous = now
           func.call()
-        else timeout = $timeout(later, remaining) unless timeout
+        else timeout = $interval(later, remaining, 1) unless timeout
 
     if THROTTLE_MILLISECONDS?
       handler = throttle(handler, THROTTLE_MILLISECONDS)
 
     scope.$on '$destroy', ->
-      container.off 'scroll', handler
+      container.unbind 'scroll', handler
 
     # infinite-scroll-distance specifies how close to the bottom of the page
     # the window is allowed to be before we trigger a new scroll. The value
@@ -94,7 +110,7 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     # more when the bottom of the page is less than 3 container heights away,
     # specify a value of 3. Defaults to 0.
     handleInfiniteScrollDistance = (v) ->
-      scrollDistance = parseInt(v, 10) or 0
+      scrollDistance = parseFloat(v) or 0
 
     scope.$watch 'infiniteScrollDistance', handleInfiniteScrollDistance
     # If I don't explicitly call the handler here, tests fail. Don't know why yet.
@@ -131,13 +147,13 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     # a jQuery selector as a string.
     changeContainer = (newContainer) ->
       if container?
-        container.off 'scroll', handler
+        container.unbind 'scroll', handler
 
-      container = if typeof newContainer.last is 'function' && newContainer != $window then newContainer.last() else newContainer
+      container = newContainer
       if newContainer?
-        container.on 'scroll', handler
+        container.bind 'scroll', handler
 
-    changeContainer $window
+    changeContainer windowElement
 
     handleInfiniteScrollContainer = (newContainer) ->
       # TODO: For some reason newContainer is sometimes null instead
@@ -147,7 +163,14 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
       # So I leave both checks.
       if (not newContainer?) or newContainer.length == 0
         return
-      newContainer = angular.element newContainer
+
+      if newContainer instanceof HTMLElement
+        newContainer = angular.element newContainer
+      else if typeof newContainer.append == 'function'
+        newContainer = angular.element newContainer[newContainer.length - 1]
+      else if typeof newContainer == 'string'
+        newContainer = angular.element document.querySelector newContainer
+
       if newContainer?
         changeContainer newContainer
       else
@@ -167,8 +190,8 @@ mod.directive 'infiniteScroll', ['$rootScope', '$window', '$timeout', 'THROTTLE_
     if attrs.infiniteScrollImmediateCheck?
       immediateCheck = scope.$eval(attrs.infiniteScrollImmediateCheck)
 
-    $timeout (->
+    $interval (->
       if immediateCheck
         handler()
-    ), 0
+    ), 0, 1
 ]
