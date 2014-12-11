@@ -10,6 +10,7 @@ from app.list.pagination import Pagination
 from app import app
 from random import randint
 from collections import defaultdict
+from bson.objectid import ObjectId
 import random
 import json
 import string
@@ -24,29 +25,36 @@ mod_list = Blueprint('list', __name__, url_prefix='/list')
 @mod_list.route('/')
 def index():
 	#headers = sorted(JListInputFile.objects.first()["content"].keys())
-	headers = headers = ["Author Name", "Conference", "Year"]
+	headers = headers = ["Author", "Conference", "Year"]
 	return render_template('list/new_list_base.html', headers=headers)
 
 @mod_list.route('/get-list-entity-types')
 def get_list_entity_types():
 	#headers = sorted(JListInputFile.objects.first()["content"].keys())
-	headers = headers = ["Author Name", "Conference", "Year"]
+	headers = headers = ["Author", "Conference", "Year"]
 	return json.dumps(headers);
 
 @mod_list.route('/get-list-contents')
 def get_list_contents():
 	#headers = sorted(JListInputFile.objects.first()["content"].keys())
-	headers = ["Author Name", "Conference", "Year"]
+	headers = ["Author", "Conference", "Year"]
 	all_data = []
 	for header in headers:
-		content_list = JListInputFile._get_collection().aggregate([
+		aggregate_array = []
+		#TODO This has to be done dynamically..
+		if header == "Author":
+			aggregate_array.append({ '$unwind' : '$content.'+header })
+		
+		aggregate_array.extend([
 				{'$match':{ 'content.'+header : {'$ne' : ''} }}, 
 				{'$group':{'_id':'$content.'+header,'count': { '$sum': 1 }}},
 				{'$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
 				{'$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count', 'rate':{'$divide':["$$e.count", "$maxCount"]}}}}}},
 				{'$unwind':'$docs'},
 				{'$project':{'name':'$docs._id', 'count':'$docs.count','frequency':'$docs.rate','strength':{'$literal':0},'hasStrength':{'$literal':0},'strengthCount':{'$literal':0}}}
-			])['result']
+		])
+		
+		content_list = JListInputFile._get_collection().aggregate(aggregate_array)['result']
 
 		all_data.append({
 			"key": header,
@@ -58,146 +66,80 @@ def get_list_contents():
 @mod_list.route('/get-updated-list-contents', methods=["POST"])
 def get_updated_list_contents():
 	data = request.json
-	return {
-		'Any' : get_updated_list_contents_any_mode(data['params'], data['column_list']),
-		'All' : get_updated_list_contents_all_mode(data['params'], data['column_list']),
-		'And' : get_updated_list_contents_and_mode(data['params'], data['column_list']),
-		'All-Any' : get_updated_list_contents_all_any_mode(data['params'], data['column_list'])
-	}.get(data['mode'])
+	if data['mode'] == 'Any':
+		return get_updated_list_contents_any_mode(data['params'], data['column_list'])
+	elif data['mode'] == 'All':
+		return get_updated_list_contents_all_mode(data['params'], data['column_list'])
+	elif data['mode'] == 'And':
+		return get_updated_list_contents_and_mode(data['params'], data['column_list'])
+	elif data['mode'] == 'All-Any':
+		return get_updated_list_contents_all_any_mode(data['params'], data['column_list'])
 
 def get_updated_list_contents_any_mode(params, column_list):
-	#Return strengths for entities related to any of the current selections
-	connected_headers = JListInputFile.objects.first()["hidden"].keys()
+	'''
+	Return strengths for entities related to any of the current selections
+	'''
 	or_params = []
 	for column_params in params:
 		or_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
-		if column_params['column'] in connected_headers:
-			or_params.append({ 'hidden.'+column_params['column']: {'$in' : column_params['values']} })
 	return get_aggregate_query_result({'$or':or_params}, column_list)
 
-def get_updated_list_contents_all_mode(params, column_list):
-	# entities connected to all of the current selections, though not necessarily in the same document
-	entities = defaultdict(int)
-	no_of_params = 0
-	connected_headers = JListInputFile.objects.first()["hidden"].keys()
-
-	for column_params in params:
-		for column_value in column_params['values']:
-				no_of_params += 1
-				for header in column_list:
-
-					match_params = {}
-					if column_params['column'] in connected_headers:
-						or_params = []
-						or_params.append({ 'content.'+column_params['column']:{ '$eq': column_value } })
-						or_params.append({ 'hidden.'+column_params['column']:{ '$in': [column_value] } })
-						match_params = {'$or': or_params}
-					else:
-						match_params = { 'content.'+column_params['column']:{ '$eq': column_value } }
-					#or_params = []
-					#or_params.append({ 'content.'+column_params['column']:{ '$eq': column_value } });
-					#if column_params['column'] in connected_headers:
-					#	or_params.append({ 'hidden.'+column_params['column']: {'$in' : column_params['values']} })
-
-					connected_entities_list = JListInputFile._get_collection().aggregate([
-						{ '$match':match_params },
-						#{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
-						{ '$project':{ '_id': 0, 'content.'+header: 1 }},
-						{ '$group':{ '_id':'$content.'+header }}
-					])['result']
-
-					for entity in connected_entities_list:
-						entities[entity['_id']] += 1
-
-	header_index_map = defaultdict(int)
-	all_data = []
-	
-	for column_params in params:
-		for column_value in column_params['values']:
-			for header in column_list:
-
-				if header in header_index_map:
-					list_index = header_index_map[header]
-				else:
-					value_dict = defaultdict(int)
-					all_data.append({'key':header, 'values':value_dict})
-					list_index = len(all_data)-1
-					header_index_map[header] = list_index
-
-				connected_entities_list = JListInputFile._get_collection().aggregate([
-						{ '$match':{ 'content.'+column_params['column']:{ '$eq': column_value } }},
-						{ '$project':{ '_id': 0, 'content.'+header: 1 }},
-						{ '$group':{ '_id':'$content.'+header }}
-					])['result']
-				for entity in connected_entities_list:
-					if entity['_id'] in entities and entities[entity['_id']] == no_of_params:
-						all_data[list_index]['values'][entity['_id']] += 1
-
-	json_data = []
-	for column_data in all_data:
-		values = [{'count':item[1], 'name':item[0]} for item in column_data['values'].items()]
-		if values:
-			max_count = max([item[1] for item in column_data['values'].items()])
-			values = [{'count': item['count'], 'name': item['name'], 'strength': item['count']/max_count} for item in values]
-			json_data.append({'key':column_data['key'], 'values': values})
-	
-	return json.dumps(json_data)
-
 def get_updated_list_contents_and_mode(params, column_list):
-	#Entities connected to all of the current selections, through a single document
-	connected_headers = JListInputFile.objects.first()["hidden"].keys()
-	outer_and_params = []
-	for column_params in params:
-		if column_params['column'] in connected_headers:
-			#check if the values are single value or multi valued..
-			if len(column_params['values']) > 1:
-				#need a two-part query match..
-				inner_and_params = []
-				column_values = column_params['values']
-				primary_and_parameter = column_values[0] #this will be used to test the equality of the column
-				column_values.remove(primary_and_parameter) #this will be used to search in the connected entities array..
-
-				inner_and_params.append({ 'content.'+column_params['column']: primary_and_parameter })
-				inner_and_params.append({ 'hidden.'+column_params['column']: {'$all': column_values} })
-				outer_and_params.append({ '$and': inner_and_params })
-			else:
-				#simple and would do..
-				outer_and_params.append({ 'content.'+column_params['column']: column_params['values'][0]  })
-		else:
-			#no need to check in the connected list as there is no such list..
-			#direct and of all the values..
-			for column_value in column_params['values']:
-				outer_and_params.append({ 'content.'+column_params['column']: column_value })
-	return get_aggregate_query_result({'$and':outer_and_params}, column_list)
-
-def get_updated_list_contents_all_any_mode(params, column_list):
-	#Entities connected to all of the selections across lists, but any of the selections within a list
-	connected_headers = JListInputFile.objects.first()["hidden"].keys()
+	'''
+	Entities connected to all of the current selections, through a single document
+	'''
 	and_params = []
 	for column_params in params:
-		#check if the column is present in the connected column
-		if column_params['column'] in connected_headers:
-			or_params = []
-			or_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
-			or_params.append({ 'hidden.'+column_params['column']: { '$in' : column_params['values'] } })
-			and_params.append({'$or' : or_params})
-		else:
-			#normal query format here..
-			and_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+		and_params.append({ 'content.'+column_params['column']: { '$all' : column_params['values'] } })
 	return get_aggregate_query_result({'$and':and_params}, column_list)
+
+def get_updated_list_contents_all_any_mode(params, column_list):
+	'''
+	Entities connected to all of the selections across lists, but any of the selections within a list
+	'''
+	and_params = []
+	for column_params in params:
+		and_params.append({ 'content.'+column_params['column']: { '$in' : column_params['values'] } })
+	return get_aggregate_query_result({'$and':and_params}, column_list)
+
+def get_updated_list_contents_all_mode(params, column_list):
+	'''
+	Entities connected to all of the current selections, though not necessarily in the same document
+	'''
+	intersecting_document_ids = []
+	for column_params in params:
+		document_id_list = JListInputFile._get_collection().aggregate([
+			{'$match':{ 'content.'+column_params['column']: { '$in' : column_params['values'] } }},
+			{'$project':{ '_id':1 }}
+		])['result']
+
+		document_id_list = [str(record['_id']) for record in document_id_list]
+
+		if not intersecting_document_ids:
+			intersecting_document_ids = document_id_list
+		else:
+			intersecting_document_ids = list(set(intersecting_document_ids) & set(document_id_list))
+	
+	intersecting_document_ids = [ObjectId(_id) for _id in intersecting_document_ids]
+	return get_aggregate_query_result({ '_id' : { '$in' : intersecting_document_ids }}, column_list)
 
 def get_aggregate_query_result(match_params, column_list):
 	all_data = []
 
 	for header in column_list:
-		raw_list = JListInputFile._get_collection().aggregate([
-			{ '$match': match_params },
+		aggregate_array = [{ '$match': match_params }]
+		#TODO This has to be done dynamically..
+		if header == "Author":
+			aggregate_array.append({ '$unwind' : '$content.'+header })
+		
+		aggregate_array.extend([
 			{ '$group':  {'_id': '$content.'+header, 'count': { '$sum': 1 }} },
 			{ '$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
 			{ '$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count', 'rate':{'$divide':["$$e.count", "$maxCount"]}}}}}},
 			{ '$unwind':'$docs'},
 			{ '$project':{'name':'$docs._id', 'count':'$docs.count','strength':'$docs.rate'}}
-		])['result']
+		])	
+		raw_list = JListInputFile._get_collection().aggregate(aggregate_array)['result']
 
 		all_data.append({
 			'key': header,
@@ -239,6 +181,8 @@ def get_selections():
 			'values': document_list
 		})
 	return json.dumps(selection_data)
+
+## Backend admin end points..
 
 @mod_list.route('/process-file')
 def insert_csv_file():
@@ -307,6 +251,8 @@ def split_into_rows(page):
 	keysToSplit = request.json['keysToSplit']
 	newKeys = request.json['newKeys']
 	separator = request.json['separator']
+
+
 	for document in JListInputFile.objects:
 		contentDict = document.content
 		if all(key in contentDict for key in keysToSplit):
@@ -317,27 +263,29 @@ def split_into_rows(page):
 			
 			try:
 				for index in range(0, len(keysToSplit)):
-					temp[newKeys[index]] = [key.strip() for key in contentDict[keysToSplit[index]].split(separator)]
-					no_of_elements = len(temp[newKeys[index]])
+					contentDict[newKeys[index]] = [key.strip() for key in contentDict[keysToSplit[index]].split(separator)]
+					#no_of_elements = len(temp[newKeys[index]])
 					del contentDict[keysToSplit[index]]
-			
-				for rowIndex in range(0, no_of_elements):
-					new_document = JListInputFile(content=contentDict)
-					for key in newKeys:
-						try:
-							new_document.content[key] = temp[key][rowIndex]
+
+				document.content = contentDict
+				document.save()
+				# for rowIndex in range(0, no_of_elements):
+				# 	new_document = JListInputFile(content=contentDict)
+				# 	for key in newKeys:
+				# 		try:
+				# 			new_document.content[key] = temp[key][rowIndex]
 							
-							#Create a copy of all the values of the column, remove the current value and add
-							#the rest onto a hidden field that represents the connections..
-							connected_values = copy.copy(temp[key])
-							connected_values.remove(temp[key][rowIndex])
-							#filtering removes empty values that may be a part of the array..
-							new_document.hidden[key] = filter(None, connected_values)
-						except IndexError, e:
-							## Issues with the input CSV (unable to find correct number of elements)
-							new_document.content[key] = ""
-					new_document.save()
-				document.delete()
+				# 			#Create a copy of all the values of the column, remove the current value and add
+				# 			#the rest onto a hidden field that represents the connections..
+				# 			connected_values = copy.copy(temp[key])
+				# 			connected_values.remove(temp[key][rowIndex])
+				# 			#filtering removes empty values that may be a part of the array..
+				# 			new_document.hidden[key] = filter(None, connected_values)
+				# 		except IndexError, e:
+				# 			## Issues with the input CSV (unable to find correct number of elements)
+				# 			new_document.content[key] = ""
+				# 	new_document.save()
+				# document.delete()
 			except AttributeError, e:
 				## When a particular key in the contentDict is null, it wouldn't have
 				## an attribute called split.
