@@ -16,6 +16,7 @@ import json
 import string
 import unicodedata
 import copy
+import os
 
 ITEMS_PER_PAGE = 12
 
@@ -186,9 +187,10 @@ def get_selections():
 
 @mod_list.route('/process-file')
 def insert_csv_file():
+	base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 	JListInputFile.drop_collection()
 
-	input_file = csv.DictReader(open("new-input.csv","rU"))
+	input_file = csv.DictReader(open(base_path+"/new-input.csv","rU"))
 	for dict_row in input_file:
 		JListInputFile(content=dict_row).save()
 	return redirect(url_for('.admin'))
