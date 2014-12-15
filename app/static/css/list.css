@@ -75,14 +75,6 @@ body{
 	padding-left: 2px;
 }
 
-.restrict {
-	overflow-x: hidden;
-	overflow-y: scroll;
-	/*height: 550px;*/
-	width: 283px;
-	margin: 0 auto;
-}
-
 .top-margin-10{
 	margin-top: 10px;
 }
@@ -114,13 +106,32 @@ ul.js-items-list li{
 }
 
 .panel-body{
+	width: 283px;
 	padding: 0px;
+	overflow: hidden;
 }
+
+.scroller{
+	width: 400px;
+	overflow: auto;
+}
+
+.restrict {
+	/*overflow-x: hidden;
+	overflow-y: scroll;*/
+	/*height: 550px;*/
+	width: 283px;
+	/*margin: 0 auto;*/
+}
+
 
 .js-scroll-list::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 0px;
 }
+
+.js-scroll-list { -ms-overflow-style: none; }
+
 /*.js-scroll-list::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
@@ -131,6 +142,9 @@ ul.js-items-list li{
     -webkit-appearance: none;
     height: 7px;
 }
+
+.grid { -ms-overflow-style: none; }
+
 .grid::-webkit-scrollbar-thumb {
     border-radius: 5px;
     background-color: rgba(0,0,0,.5);

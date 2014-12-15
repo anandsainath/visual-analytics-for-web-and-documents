@@ -170,10 +170,11 @@ app.controller("ListController",
 	}
 );
 
-app.directive('myListView', function($window){
+app.directive('myListView', function($window, $parse){
 	myListView = {};
 	myListView.restrict = 'E';
 	myListView.templateUrl = '/static/directives/list-view.html';
+
 	// var scope = {
 	// 	'restrictedHeight':'=',
 	// 	'selectedList':'=',
@@ -191,102 +192,114 @@ app.directive('myListView', function($window){
  	//                .range(seedSelectionColorSwatch);
 
 
-	myListView.link = function($scope, element, attrs){
-		var svg = d3.select(element[0]).select('svg');
-		var page = svg.select('rect.page');
-		var frame = svg.select('rect.frame');
-		var overviewList = svg.select('#overviewList');
-		var mainList = d3.select(element[0]).select('.restrict');
+ 	myListView.compile = function(element, attrs){
 
-		mainList.on("scroll", function(){
-			// console.log("List Scrolled: "+ this.scrollTop);
-			// console.log("Total: "+ $scope.totalRecords);
-			// console.log(page.attr("height"), $scope.restrictedHeight);
-			var y = ((this.scrollTop/21) * ($scope.restrictedHeight/$scope.totalRecords));
-			page.attr("y", y);
-		});
+ 		return {
+ 			pre: function($scope, element, attrs){
+ 				$scope.list_index = attrs.index;
+				$scope.parent_container_selector = "#parentContainer"+$scope.list_index;
+				console.log($scope.list_index+" is the index! [compile]");
+				console.log($scope.parent_container_selector);
+ 			},
+ 			post: function($scope, element, attrs){
+				console.log("Link function called!!");
+				var svg = d3.select(element[0]).select('svg');
+				var page = svg.select('rect.page');
+				var frame = svg.select('rect.frame');
+				var overviewList = svg.select('#overviewList');
+				var mainList = d3.select(element[0]).select('.scroller');
+				console.log(mainList, $scope.parent_container_selector);
 
-		$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
-			svg.attr("height", newHeight);
-			frame.attr("height", newHeight);
-			page.attr("y", ($scope.currentPage-1)*page.attr("height"));
-			refreshOverviewList();
-		});
-
-		$scope.$watch('dataWatchFlag', function(){
-			refreshOverviewList();
-		});
-
-		function refreshOverviewList(){
-			if($scope.totalRecords == 0){
-				return;
-			}
-
-			var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
-			var sortedData = $scope.getSortedData();
-
-			if(!sortedData){
-				return;
-			}
-			
-			// var overview = overviewList.selectAll('.row-item').data(sortedData, function(datum){return datum;});
-
-			// overview.enter()
-			// 	.append("rect")
-			// 	.attr("class","row-item")
-			// 	.attr("x", 0)
-			// 	.attr("y", function(datum, index){
-			// 		return index * itemHeight;
-			// 	})
-			// 	.attr("width", 20)
-			// 	.attr("height", itemHeight)
-			// 	.attr("style", function(datum){
-			// 		var color = "#FFFFFF";
-			// 		if(datum.background){
-			// 			color = datum.background;
-			// 		}
-			// 		return "fill: "+ color;
-			// 	});
-
-			// overview.exit().remove();
-
-			overviewList.selectAll('.row-item').remove();
-			overviewList.selectAll('.row-item')
-				.data(sortedData).enter()
-				.append("rect")
-				.attr("class","row-item")
-				.attr("x", 0)
-				.attr("y", function(datum, index){
-					return index * itemHeight;
-				})
-				.attr("width", 20)
-				.attr("height", itemHeight)
-				.attr("style", function(datum){
-					var color = "#FFFFFF";
-					if(datum.background){
-						color = datum.background;
-					}
-					return "fill: "+ color;
+				mainList.on("scroll", function(){
+					// console.log("List Scrolled: "+ this.scrollTop);
+					// console.log("Total: "+ $scope.totalRecords);
+					// console.log(page.attr("height"), $scope.restrictedHeight);
+					var y = ((this.scrollTop/21) * ($scope.restrictedHeight/$scope.totalRecords));
+					page.attr("y", y);
 				});
-		}
 
-		console.log(page);
-		page.call(d3.behavior.drag().origin(Object).on("drag",drag));
-		// var page = d3.select(element[0]).select('rect.page')
-		// 			.datum({y: 0, h: 40})
-		// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
+				$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
+					svg.attr("height", newHeight);
+					frame.attr("height", newHeight);
+					page.attr("y", ($scope.currentPage-1)*page.attr("height"));
+					refreshOverviewList();
+				});
 
-		// $scope.$watch('height', function(newValue, oldValue){
-		// 	console.log("Height change detected! in the link function");
-		// });
+				$scope.$watch('dataWatchFlag', function(){
+					refreshOverviewList();
+				});
 
-		function drag(d) {
-			//console.log(d.h, d3.event.y);
-			d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
-		  	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
-		  	page.attr("y", d.y);
-		}
-	};
+				function refreshOverviewList(){
+					if($scope.totalRecords == 0){
+						return;
+					}
+
+					var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
+					var sortedData = $scope.getSortedData();
+
+					if(!sortedData){
+						return;
+					}
+					
+					// var overview = overviewList.selectAll('.row-item').data(sortedData, function(datum){return datum;});
+
+					// overview.enter()
+					// 	.append("rect")
+					// 	.attr("class","row-item")
+					// 	.attr("x", 0)
+					// 	.attr("y", function(datum, index){
+					// 		return index * itemHeight;
+					// 	})
+					// 	.attr("width", 20)
+					// 	.attr("height", itemHeight)
+					// 	.attr("style", function(datum){
+					// 		var color = "#FFFFFF";
+					// 		if(datum.background){
+					// 			color = datum.background;
+					// 		}
+					// 		return "fill: "+ color;
+					// 	});
+
+					// overview.exit().remove();
+
+					overviewList.selectAll('.row-item').remove();
+					overviewList.selectAll('.row-item')
+						.data(sortedData).enter()
+						.append("rect")
+						.attr("class","row-item")
+						.attr("x", 0)
+						.attr("y", function(datum, index){
+							return index * itemHeight;
+						})
+						.attr("width", 20)
+						.attr("height", itemHeight)
+						.attr("style", function(datum){
+							var color = "#FFFFFF";
+							if(datum.background){
+								color = datum.background;
+							}
+							return "fill: "+ color;
+						});
+				}
+
+				page.call(d3.behavior.drag().origin(Object).on("drag",drag));
+				// var page = d3.select(element[0]).select('rect.page')
+				// 			.datum({y: 0, h: 40})
+				// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
+
+				// $scope.$watch('height', function(newValue, oldValue){
+				// 	console.log("Height change detected! in the link function");
+				// });
+
+				function drag(d) {
+					//console.log(d.h, d3.event.y);
+					d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
+				  	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
+				  	page.attr("y", d.y);
+				}
+ 			}
+ 		}
+ 	}
 	return myListView;
 });
 
