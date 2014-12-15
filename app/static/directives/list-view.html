@@ -62,9 +62,9 @@
 		</div>
 	</div>
 	<div class="panel-body" style="height: {{restrictedHeight}}px;">
-		<div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; float:left;">
+		<div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; float:left;" id="parentContainer">
 			<!-- <div class="small-loader" ng-show="isListLoading"></div> -->
-			<ul class="js-items-list" infinite-scroll='loadMoreData()'>
+			<ul class="js-items-list" infinite-scroll='loadMoreData()' infinite-scroll-distance="1" infinite-scroll-container="'#parentContainer'" infinite-scroll-parent>
 				<li class="row" ng-repeat="item in listData track by item.name">
 					<div class="col-xs-2 bar-container" bo-attr bo-attr-title="{{item.count}}">
 						<div class="bar" bo-style="{'width': (1-item.frequency) * 145 +'%' };"></div>
@@ -75,13 +75,14 @@
 				</li>
 			</ul>
 		</div>
-		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords == 0]">
+		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords < (restrictedHeight/21)]">
 		 	<!-- ng-attr-height="{{restrictedHeight}}" -->
 			<svg width="20">
 				<g transform="translate(0,0)">
 					<rect class="frame" width="20"></rect>
 					<g transform="translate(0,0)" id="overviewList"></g>
-					<rect class="page" width="20" ng-attr-height="{{totalRecords == 0 ? 0: (restrictedHeight/(totalRecords/itemsPerPage))}}"></rect>
+					<rect class="page" width="20" ng-attr-height="{{totalRecords == 0 ? 0: ((restrictedHeight/totalRecords)*(restrictedHeight/21))}}"></rect>
+					<!-- <rect class="page" width="20" ng-attr-height="{{totalRecords == 0 ? 0: (restrictedHeight/(totalRecords/itemsPerPage))}}"></rect> -->
 				</g>
 			</svg>
 		</div>

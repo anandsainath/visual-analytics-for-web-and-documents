@@ -200,7 +200,9 @@ app.directive('myListView', function($window){
 
 		mainList.on("scroll", function(){
 			// console.log("List Scrolled: "+ this.scrollTop);
-			var y = ((this.scrollTop/20) * page.attr("height"))/100;
+			// console.log("Total: "+ $scope.totalRecords);
+			// console.log(page.attr("height"), $scope.restrictedHeight);
+			var y = ((this.scrollTop/21) * ($scope.restrictedHeight/$scope.totalRecords));
 			page.attr("y", y);
 		});
 
@@ -268,7 +270,8 @@ app.directive('myListView', function($window){
 				});
 		}
 
-		
+		console.log(page);
+		page.call(d3.behavior.drag().origin(Object).on("drag",drag));
 		// var page = d3.select(element[0]).select('rect.page')
 		// 			.datum({y: 0, h: 40})
 		// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
@@ -277,12 +280,12 @@ app.directive('myListView', function($window){
 		// 	console.log("Height change detected! in the link function");
 		// });
 
-		// function drag(d) {
-		// 	//console.log(d.h, d3.event.y);
-		// 	d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
-		//   	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
-		//   	page.attr("y", d.y);
-		// }
+		function drag(d) {
+			//console.log(d.h, d3.event.y);
+			d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
+		  	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
+		  	page.attr("y", d.y);
+		}
 	};
 	return myListView;
 });
