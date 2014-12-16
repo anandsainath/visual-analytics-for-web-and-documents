@@ -27,11 +27,14 @@ app.controller('ListViewController',
 			$scope.lists.push($scope.lists.length+1);
 		}
 
+		$scope.$on('entityTypesLoaded', function(){
+			$scope.isLoading = false;
+		});
+
 		/** Private Methods **/ 
 
 		function loadRemoteData(){
 			DataFactory.init($scope.mode);
-			$scope.isLoading = false;
 		}
 	}
 );
