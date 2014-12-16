@@ -53,6 +53,7 @@ app.controller("ListController",
 		$scope.orderByPredicate = "name";
 		$scope.firstOrderPredicate = "";
 		$scope.isListLoading = false;
+		$scope.isListLoadedOnce = false;
 		
 		$scope.selectedListItems = [];
 
@@ -69,14 +70,10 @@ app.controller("ListController",
 		$scope.listChanged = function(){
 			// console.log("List Changed function called..");
 			var _listData = DataFactory.getListContents($scope.selectedList);
-			$scope.dataWatchFlag ++;
-
 			$scope.totalRecords = _listData.length;
-			if($scope.totalRecords > 26){
-				$scope.itemHeight = 550/length;
-			}
 			$scope.data = _listData;
 			$scope.loadMoreData(true);
+			$scope.dataWatchFlag ++;
 		}
 
 		$scope.loadMoreData = function(isFirstLoad){
@@ -162,6 +159,11 @@ app.controller("ListController",
 
 		$scope.$on('entityTypesLoaded', function(){
 			$scope.headers = DataFactory.getListEntityTypes();
+			if(!$scope.isListLoadedOnce && $scope.list_index < 4){
+				$scope.isListLoadedOnce = true;
+				$scope.selectedList = $scope.headers[$scope.list_index - 1];
+				$scope.listChanged();
+			}
 		});
 
 		$scope.getSortedData = function(){
@@ -173,24 +175,8 @@ app.controller("ListController",
 app.directive('myListView', function($window, $parse){
 	myListView = {};
 	myListView.restrict = 'E';
-	myListView.templateUrl = '/static/directives/list-view.html';
-
-	// var scope = {
-	// 	'restrictedHeight':'=',
-	// 	'selectedList':'=',
-	// 	'getSortedData':'&',
-	// 	'currentPage':'=',
-	// 	'dataWatchFlag':'=',
-	// 	'totalRecords':'=',
-	// 	'currentPage':'='
-	// };
-	// myListView.scope = scope;
-	
+	myListView.templateUrl = '/static/directives/list-view.html';	
 	var seedSelectionColorSwatch = ["#ffdc8c", '#ffd278','#ffc864','#ffbe50','#ffb43c','#ffaa28','#ffa014','#ff9600'];
-	// var selectionColors = d3.scale.linear()
- 	//                .domain(d3.range(0, 1, 1.0 / (seedSelectionColorSwatch.length - 1)))
- 	//                .range(seedSelectionColorSwatch);
-
 
  	myListView.compile = function(element, attrs){
 
@@ -198,8 +184,6 @@ app.directive('myListView', function($window, $parse){
  			pre: function($scope, element, attrs){
  				$scope.list_index = attrs.index;
 				$scope.parent_container_selector = "#parentContainer"+$scope.list_index;
-				console.log($scope.list_index+" is the index! [compile]");
-				console.log($scope.parent_container_selector);
  			},
  			post: function($scope, element, attrs){
 				// console.log("Link function called!!");
@@ -314,34 +298,6 @@ app.directive('myListComponent', function(){
 	return myListComponent;
 });
 
-// app.directive('myList', function(){
-// 	myList = {};
-// 	myList.restrict = 'E';
-
-//     myList.link = function(scope, el, attrs){
-//     	console.log(scope.data);
-
-//     	scope.$watch('data', function(newValue, oldValue){
-//     		if(newValue.length){
-// 	    		React.renderComponent(
-// 		            ReactItemList({data:newValue}),
-// 		            el[0]
-// 		        );	
-//     		}
-//       	});
-
-//       	scope.$watch('align', function(newValue, oldValue){
-//       		if(newValue){
-// 	      		React.renderComponent(
-// 		            ReactItemList({data:newValue}),
-// 		            el[0]
-// 		        );	
-//       		}
-//       	});
-//   	};
-//   	return myList;
-// })
-
 app.service(
 	"apiService",
 	function($http, $q){
@@ -439,12 +395,11 @@ app.factory('DataFactory',function($rootScope, apiService){
 		apiService.fetchListContents()
 			.then(function(data){
 				listContents = data;
-			});
-
-		apiService.fetchEntityTypes()
-			.then(function(data){
-				listEntityTypes = data;
-				$rootScope.$broadcast('entityTypesLoaded');
+				apiService.fetchEntityTypes()
+				.then(function(data){
+					listEntityTypes = data;
+					$rootScope.$broadcast('entityTypesLoaded');
+				});
 			});
 	}
 

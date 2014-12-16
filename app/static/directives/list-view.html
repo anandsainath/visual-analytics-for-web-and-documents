@@ -7,9 +7,6 @@
 						<option bindonce ng-repeat="header in headers">{{header}}</option>
 					</select>
 				</div>
-				<!-- <div class="col-xs-3 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Add all items of the selected type to the list">
-					<button type="button" class="btn btn-default" ng-click="listChanged()">Add all</button>
-				</div> -->
 				<div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
 					<button type="button" class="btn btn-default" ng-click="clearSelections()">Clear List</button>
 				</div>
@@ -62,7 +59,7 @@
 		</div>
 	</div>
 	<div class="scroll-list-container" style="height: {{restrictedHeight}}px;">
-		<div class="panel-body" style="float: left;">
+		<div class="panel-body">
 			<div class="scroller"  id="parentContainer{{list_index}}" style="height: {{restrictedHeight}}px;">
 				<div class="restrict">
 					<ul class="js-items-list" infinite-scroll='loadMoreData()' infinite-scroll-distance="1" infinite-scroll-container="parent_container_selector" infinite-scroll-parent>
@@ -80,19 +77,6 @@
 		</div>
 
 		<!-- <div class="small-loader" ng-show="isListLoading"></div> -->
-			
-		<!-- <div class="restrict js-scroll-list" style="height: {{restrictedHeight}}px; float:left;" id="parentContainer">
-			<ul class="js-items-list" infinite-scroll='loadMoreData()' infinite-scroll-distance="1" infinite-scroll-container="'#parentContainer'" infinite-scroll-parent>
-				<li class="row" ng-repeat="item in listData track by item.name">
-					<div class="col-xs-2 bar-container" bo-attr bo-attr-title="{{item.count}}">
-						<div class="bar" bo-style="{'width': (1-item.frequency) * 145 +'%' };"></div>
-					</div>
-					<span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': item.background};" ng-click="selectItem(item.name)"> {{item.name}}
-						<sup ng-if="item.hasStrength == 1">{{item.strengthCount}}</sup>
-					</span>
-				</li>
-			</ul>
-		</div> -->
 		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords < (restrictedHeight/21)]">
 			<!-- ng-attr-height="{{restrictedHeight}}" -->
 			<svg width="20">
@@ -103,10 +87,5 @@
 				</g>
 			</svg>
 		</div>
-				<!--<div class="max-width js-scrollbar" style="float:right; background: #f5f5f5; border-color: #ddd; height: {{restrictedHeight}}px; ">
-					<ul class="js-scrollbar-list">
-						<li class="scrollbar-item" ng-repeat="item in list | orderBy:[firstOrderPredicate, orderByPredicate]" style="height: {{itemHeight}}px"  ng-style="{'background-color': getScrollBarBackgroundColor(item.name,item.strength)};" ></li>
-					</ul>
-				</div>-->
 	</div>
 </div>
