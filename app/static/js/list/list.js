@@ -202,13 +202,13 @@ app.directive('myListView', function($window, $parse){
 				console.log($scope.parent_container_selector);
  			},
  			post: function($scope, element, attrs){
-				console.log("Link function called!!");
+				// console.log("Link function called!!");
 				var svg = d3.select(element[0]).select('svg');
 				var page = svg.select('rect.page');
 				var frame = svg.select('rect.frame');
 				var overviewList = svg.select('#overviewList');
 				var mainList = d3.select(element[0]).select('.scroller');
-				console.log(mainList, $scope.parent_container_selector);
+				// console.log(mainList, $scope.parent_container_selector);
 
 				mainList.on("scroll", function(){
 					// console.log("List Scrolled: "+ this.scrollTop);
@@ -282,7 +282,10 @@ app.directive('myListView', function($window, $parse){
 						});
 				}
 
-				page.call(d3.behavior.drag().origin(Object).on("drag",drag));
+				// console.log("Page:",page);
+				var drag = d3.behavior.drag().on("drag",dragEvent);
+				// console.log(drag);
+				// page.call(drag);
 				// var page = d3.select(element[0]).select('rect.page')
 				// 			.datum({y: 0, h: 40})
 				// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
@@ -291,7 +294,8 @@ app.directive('myListView', function($window, $parse){
 				// 	console.log("Height change detected! in the link function");
 				// });
 
-				function drag(d) {
+				function dragEvent(d) {
+					console.log("Drag function called!!");
 					//console.log(d.h, d3.event.y);
 					d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
 				  	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
