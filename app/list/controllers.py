@@ -107,22 +107,72 @@ def get_updated_list_contents_all_mode(params, column_list):
 	'''
 	Entities connected to all of the current selections, though not necessarily in the same document
 	'''
-	intersecting_document_ids = []
-	for column_params in params:
-		document_id_list = JListInputFile._get_collection().aggregate([
-			{'$match':{ 'content.'+column_params['column']: { '$in' : column_params['values'] } }},
-			{'$project':{ '_id':1 }}
-		])['result']
 
-		document_id_list = [str(record['_id']) for record in document_id_list]
+	all_data = []
 
-		if not intersecting_document_ids:
-			intersecting_document_ids = document_id_list
-		else:
-			intersecting_document_ids = list(set(intersecting_document_ids) & set(document_id_list))
-	
-	intersecting_document_ids = [ObjectId(_id) for _id in intersecting_document_ids]
-	return get_aggregate_query_result({ '_id' : { '$in' : intersecting_document_ids }}, column_list)
+	for header in column_list:
+		values_set_once = False
+
+		dict_intersecting_column_values = {}
+		for column_params in params:
+			column_name = 'content.'+column_params['column']
+			for column_value in column_params['values']:
+				aggregate_array = [{'$match':{ column_name : column_value }}]
+
+				if header == "Author":
+					aggregate_array.append({ '$unwind' : '$content.' + header })
+
+				aggregate_array.extend([
+					{ '$group':  {'_id': '$content.'+header, 'count': { '$sum': 1 }} },
+					{ '$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
+					{ '$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count'}}}}},
+					{ '$unwind':'$docs'},
+					{ '$project':{'name':'$docs._id', 'count':'$docs.count'}}
+				]);
+				
+				value_match_list = JListInputFile._get_collection().aggregate(aggregate_array)['result']
+				dict_values_match = dict((x['name'], x) for x in value_match_list)
+
+				if not dict_intersecting_column_values and not values_set_once:
+					values_set_once = True
+					dict_intersecting_column_values = dict_values_match
+				else:
+					dict_intersecting_column_values = get_intersecting_documents(dict_intersecting_column_values, dict_values_match)
+				
+				if not dict_intersecting_column_values:
+					break
+
+				print column_name, column_value, value_match_list
+
+			if not dict_intersecting_column_values:
+				all_data.append({'key':header, 'values':[]})
+				break
+		
+		if dict_intersecting_column_values:
+			all_data.append({'key':header, 'values': get_column_values(dict_intersecting_column_values)})
+
+	return json.dumps(all_data)
+
+def get_column_values(dict_values):
+	list_values = []
+	total_count = 0
+	for key, value in dict_values.iteritems():
+		total_count += value['count']
+
+	for key, value in dict_values.iteritems():
+		value['strength'] = value['count'] / total_count
+		list_values.append(value)
+
+	return list_values
+
+def get_intersecting_documents(dict_a, dict_b):
+	dict_intersection = {}
+	for key in dict_a.keys():
+		if key in dict_b:
+			dict_intersection[key] = {}
+			dict_intersection[key]['name'] = dict_a[key]['name']
+			dict_intersection[key]['count'] = dict_a[key]['count'] + dict_b[key]['count']
+	return dict_intersection
 
 def get_aggregate_query_result(match_params, column_list):
 	all_data = []

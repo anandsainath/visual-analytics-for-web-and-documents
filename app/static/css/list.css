@@ -8,6 +8,10 @@ body {
     overflow: auto;
 }*/
 
+.colored{
+	color: #ff9600;
+}
+
 .alert{
 	margin-bottom: 5px;
 }
