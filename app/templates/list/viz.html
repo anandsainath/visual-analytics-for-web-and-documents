@@ -1,0 +1,85 @@
+{% extends "viz_layout.html" %}
+
+{% block title %}
+	VISLists, VIS 25 - All the Papers and Citations
+{% endblock %}
+
+{% block head_script_content %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
+	
+	<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
+	<!--<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
+	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>-->
+	<script src="{{ url_for('static', filename='libs/d3.v3.js') }}"></script>
+	<!--<script src="{{ url_for('static', filename='js/list/longscroll.js') }}"></script>-->
+	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
+	<script src="{{ url_for('static', filename='libs/jquery.noty.packaged.min.js') }}"></script>
+{% endblock %}
+
+{% block toolbar_header_left_link_content %}
+	<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
+	<li class="divider"><a href="/list/tutorial">Tutorial</a></li>
+{% endblock %}
+
+{% block toolbar_page_content %}
+<p class="navbar-text">List Modes</p>
+<div class="btn-group navbar-nav navbar-center">
+	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
+	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
+	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
+	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="loader" ng-show="isLoading"></div>
+<div class="grid" style="height: {{gridHeight|angular}}px;">
+	<div class="list-container" style="width: {{width|angular}}px; margin-left: 35px;">
+		<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+	</div>
+</div>
+{% endblock %}
+
+{% block script_content %}
+	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
+	<script type="text/javascript">
+
+		$(function(){
+
+			$('#closeBtn').click(function(){ $(this).parent().remove(); });
+
+			$.noty.defaults = {
+				layout: 'topCenter',
+				theme: 'defaultTheme',
+				type: 'alert',
+			    text: 'Loading Connections', // can be html or string
+			    dismissQueue: false, // If you want to use queue feature set this true
+			    template: '<div class="noty_message"><span class="noty_text"></span><div class="noty_close"></div></div>',
+			    animation: {
+			    	open: {height: 'toggle'},
+			    	close: {height: 'toggle'},
+			    	easing: 'swing',
+			        speed: 100 // opening & closing animation speed
+			    },
+			    timeout: false, // delay for closing event. Set false for sticky notifications
+			    force: false, // adds notification to the beginning of queue when set to true
+			    modal: false,
+			    maxVisible: 1, // you can set max visible notification for dismissQueue true option,
+			    killer: false, // for close all notifications before show
+			    closeWith: ['click'], // ['click', 'button', 'hover', 'backdrop'] // backdrop click will close all open notifications
+			    callback: {
+			    	onShow: function() {},
+			    	afterShow: function() {},
+			    	onClose: function() {},
+			    	afterClose: function() {}
+			    },
+			    buttons: false // an array of buttons
+			};
+		});
+        
+	</script>
+{% endblock %}

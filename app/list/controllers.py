@@ -27,7 +27,11 @@ mod_list = Blueprint('list', __name__, url_prefix='/list')
 def index():
 	#headers = sorted(JListInputFile.objects.first()["content"].keys())
 	headers = headers = ["Author", "Conference", "Year"]
-	return render_template('list/new_list_base.html', headers=headers)
+	return render_template('list/viz.html', headers=headers)
+
+@mod_list.route('/tutorial')
+def tutorial():
+	return render_template('list/tutorial.html')
 
 @mod_list.route('/get-list-entity-types')
 def get_list_entity_types():

@@ -21,17 +21,17 @@ body {
 	margin-right: 50px;
 }
 
-body{
+/*body{
 	padding-top: 10px;
-}
+}*/
 
-.my-nav{
+/*.my-nav{
 	margin-left: 50px;
 	margin-right: 50px;
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
-
+*/
 .grid{
 	position: relative;
 	width: 100%;
@@ -43,9 +43,9 @@ body{
 	overflow-x: scroll;
 }
 
-.min-height{
-	/*height: 550px;*/
-}
+/*.min-height{
+	height: 550px;
+}*/
 
 .max-width{
 	width: 20px;

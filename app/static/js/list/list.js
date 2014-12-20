@@ -105,6 +105,7 @@ app.controller("ListController",
 		}
 
 		$scope.selectItem = function(itemName){
+			// console.log("Select Item: "+itemName);
 			$scope.isListLoading = true;
 			if(!notification){
 				notification = noty({});
@@ -426,18 +427,24 @@ app.factory('DataFactory',function($rootScope, apiService){
 
 	service.setSelectedListItem = function(listName, selectedListItems){
 		var index = findInList(listName, selectedLists, 'column');
+
+		// console.log("Pushing value: "+ selectedListItems+" in list "+ listName);
+		// console.log("SelectedListItems.length: "+ selectedListItems.length);
 		var params = { 'column' : listName, 'values' : selectedListItems };
 
 		if(index != -1){
 			if(selectedListItems.length){
+				// console.log("Updating params");
 				selectedLists[index] = params;	
 			}else{
+				// console.log("Removing params");
 				selectedLists.splice(index, 1);
 			}
 		}else{
 			selectedLists.push(params);
 		}
 
+		// console.log("SelectedLists", selectedLists);
 		updateListContents();
 	}
 

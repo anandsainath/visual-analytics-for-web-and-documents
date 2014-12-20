@@ -1,0 +1,18 @@
+body {
+	padding-top: 10px;
+}
+
+.my-nav {
+	margin: 5px 50px;
+}
+
+.divider{
+	border-right: 3px solid #E7E7E7;
+}
+
+.footer {
+	margin: 5px 50px;
+	padding-top: 19px;
+	color: #777;
+	border-top: 1px solid #e5e5e5;
+}

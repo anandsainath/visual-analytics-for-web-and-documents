@@ -1,0 +1,59 @@
+{% extends "viz_layout.html" %}
+
+{% block title %}
+	VISLists, VIS 25 - Tutorial
+{% endblock %}
+
+{% block head_script_content %}
+<style type="text/css">
+	img{
+		width: 95%;
+	}
+</style>
+{% endblock %}
+
+{% block toolbar_header_left_link_content %}
+	<li><a href="/list">Home</a></li>
+	<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+	<div class="jumbotron">
+		<h1>ListVIS</h1>
+
+		<p>The VISLists visualization summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis).</p>
+	</div>
+	
+	<h1 id="type" class="page-header">Interactions</h1>
+	<div class="row">
+		<div class="col-md-4">
+			<img src="/static/images/list.png">
+		</div>
+		<div class="col-md-8">
+			<p>You can choose which entity to place in each column via the menu at the column top: authors, conferences, or years. The bar in front of each entity encodes that entity’s frequency, that is, for how many papers in the entire collection is that entity connected to.</p>
+
+			<p>When you click on an entity, it is selected (yellow background). All of the connected entities are then drawn with an orange background, with darker orange signifying a stronger connection. So, if you click on an author, that person’s co-authors will be shown in orange, as will the conferences and years of that person’s papers. If you click on a conference, shown in orange will be all the authors who have ever published a paper in that conference, and the years column will show the years that conference has been held. The quantitative connection strength, that is, the number of connected papers, is shown by a numeric value in a superscript following the entity name. If you click on an already selected entity, it will toggle off to be unselected. You can also use the “Clear List” button to remove all selections from a list.</p>
+
+			<p>The leftmost three buttons under the list menu selection control the ordering of items in the list. From left to right they are alphabetical/numeric order, by frequency (most to least), and by connection strength. In the final mode, all connected items (orange) are brought to the top with the darkest orange highest.</p>
+			<p>The next button, the up arrow, manually brings all connected items to the top. The rightmost three buttons simply control the alignment of the entity names.</p>
+		</div>
+	</div>
+	
+	<h1 id="type" class="page-header">List Modes</h1>
+	<p>The four list modes at the top (Any, All, Same, and All-Any) come into play when more than one entity is selected.  This mode defines which entities are considered to be connected and how the connection strength is calculated. Here is how they work.</p>
+
+	<h3>Any</h3>
+	<p>Connected items are considered to be entities that have a connection to any one or more of the currently selected entities (like a logical “OR” mode). So, for example, if a conference and a year are selected, then shown in orange will be authors who have published a paper in that conference (any year) or have published a paper in that year (any conference).</p>
+
+	<h3>All</h3>
+	<p>Connected items are considered to be entities that have a connection to all of the currently selected entities (like a logical “AND” mode). So, for example, if a conference and a year are selected, then shown in orange will be authors who have published a paper in that conference during that specific year. Alternatively, if multiple years are selected, then only authors who published papers during all of those years will show up as connected. If an author and a conference are selected, shown in orange will be the years that person published papers in that conference. If a conference and a year are selected, then the connected authors will be people who have published papers at that conference (possibly any year) and have published papers during that year (possibly any conference).</p>
+
+	<h3>Same</h3>
+	<p>Connected items are considered to be entities that are connected to all of the selected entities via some exact same paper. So, for example, if two authors are selected, then the year(s), conference(s), and coauthors of the papers they wrote together will appear in orange. If a conference and a year are selected, then the author connections will be people who published papers at that conference during that year. Note that if two years are selected, nothing can be connected because no one paper ever appears for more than one year.</p>
+
+	<h3>All-Any</h3>
+	<p>Connected items are considered to be entities that are connected to at least one selected entity from each list. That is, this mode is like doing an “AND” between lists but an “OR” within a list. So, for example, if one conference is selected and three years are selected, then the connected authors will be people who published a paper at that conference during any one or more of those selected years.</p>
+</div>
+{% endblock %}
