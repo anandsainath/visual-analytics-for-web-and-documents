@@ -111,7 +111,6 @@ def get_updated_list_contents_all_mode(params, column_list):
 	'''
 	Entities connected to all of the current selections, though not necessarily in the same document
 	'''
-
 	all_data = []
 
 	for header in column_list:
@@ -127,15 +126,12 @@ def get_updated_list_contents_all_mode(params, column_list):
 					aggregate_array.append({ '$unwind' : '$content.' + header })
 
 				aggregate_array.extend([
-					{ '$group':  {'_id': '$content.'+header, 'count': { '$sum': 1 }} },
-					{ '$group':{'_id':0, 'maxCount':{'$max':'$count'}, 'docs':{'$push':'$$ROOT'}}},
-					{ '$project':{'_id':0, 'docs':{'$map':{'input':'$docs','as':'e', 'in':{'_id':'$$e._id', 'count':'$$e.count'}}}}},
-					{ '$unwind':'$docs'},
-					{ '$project':{'name':'$docs._id', 'count':'$docs.count'}}
+					{ '$group':  {'_id': '$content.'+header, 'ids' : {'$addToSet': '$_id'}} }
 				]);
 				
 				value_match_list = JListInputFile._get_collection().aggregate(aggregate_array)['result']
-				dict_values_match = dict((x['name'], x) for x in value_match_list)
+				dict_values_match = dict((x['_id'], x['ids']) for x in value_match_list)
+				print dict_values_match
 
 				if not dict_intersecting_column_values and not values_set_once:
 					values_set_once = True
@@ -161,11 +157,14 @@ def get_column_values(dict_values):
 	list_values = []
 	total_count = 0
 	for key, value in dict_values.iteritems():
-		total_count += value['count']
+		total_count += len(value)
 
 	for key, value in dict_values.iteritems():
-		value['strength'] = value['count'] / total_count
-		list_values.append(value)
+		list_value = {}
+		list_value['count'] = len(value)
+		list_value['strength'] = list_value['count'] / total_count
+		list_value['name'] = key
+		list_values.append(list_value)
 
 	return list_values
 
@@ -174,8 +173,7 @@ def get_intersecting_documents(dict_a, dict_b):
 	for key in dict_a.keys():
 		if key in dict_b:
 			dict_intersection[key] = {}
-			dict_intersection[key]['name'] = dict_a[key]['name']
-			dict_intersection[key]['count'] = dict_a[key]['count'] + dict_b[key]['count']
+			dict_intersection[key] = list(set(dict_a[key] + dict_b[key]))
 	return dict_intersection
 
 def get_aggregate_query_result(match_params, column_list):
