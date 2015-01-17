@@ -304,6 +304,14 @@ app.directive('myListView', function($window, $parse){
 								color = datum.background;
 							}
 							return "fill: "+ color;
+						}).on("click", function(){
+							// console.log(d3.select(this).attr("y"))
+							// console.log(d3.event.y, "Click event handled", $scope.restrictedHeight);
+
+							// console.log(d3.select(this).attr("y"));
+							var y = d3.select(this).attr("y") * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+							mainList.transition().duration(10)
+		        				.tween("mainScrollListTween", scrollTopTween(y));
 						});
 				}
 
