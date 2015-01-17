@@ -196,6 +196,7 @@ app.directive('myListView', function($window, $parse){
 				var frame = svg.select('rect.frame');
 				var overviewList = svg.select('#overviewList');
 				var mainList = d3.select(element[0]).select('.scroller');
+				var thumb = d3.select(element[0]).select('.thumb');
 				// console.log(mainList, $scope.parent_container_selector);
 
 				mainList.on("scroll", function(){
@@ -204,12 +205,46 @@ app.directive('myListView', function($window, $parse){
 					// console.log(page.attr("height"), $scope.restrictedHeight);
 					var y = ((this.scrollTop/21) * ($scope.restrictedHeight/$scope.totalRecords));
 					page.attr("y", y);
+					thumb.attr("y", y + (page.attr("height")/2) - 20);
 				});
+
+				function dragEvent(d) {
+					var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+					mainList.transition().duration(10)
+        				.tween("mainScrollListTween", scrollTopTween(y));
+				}
+
+				function scrollTopTween(scrollTop) { 
+				    return function() { 
+				        var i = d3.interpolateNumber(this.scrollTop, scrollTop); 
+				        return function(t) { this.scrollTop = i(t); }; 
+				    }; 
+				}
+
+				function thumbDragEvent(){
+					var y = (d3.event.y + 20 - (page.attr("height")/2))  * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+					mainList.transition().duration(10)
+        				.tween("mainScrollListTweenViaThumb", scrollTopTween(y));
+				}
+
+				function refreshScrollerPositions(){
+					// console.log("Refreshing scroller positions..");
+
+					var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/21));
+					// console.log("Page Height", pageHeight);
+					// console.log("Current Page", $scope.currentPage);
+					
+					page.attr("height", pageHeight);
+					var y = ($scope.currentPage-2)*pageHeight;
+					
+					page.attr("y", y);
+					thumb.attr("y", (y + (pageHeight/2)) - 20);
+				}
 
 				$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
 					svg.attr("height", newHeight);
 					frame.attr("height", newHeight);
-					page.attr("y", ($scope.currentPage-1)*page.attr("height"));
+
 					refreshOverviewList();
 				});
 
@@ -221,6 +256,8 @@ app.directive('myListView', function($window, $parse){
 					if($scope.totalRecords == 0){
 						return;
 					}
+
+					refreshScrollerPositions();
 
 					var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
 					var sortedData = $scope.getSortedData();
@@ -271,9 +308,8 @@ app.directive('myListView', function($window, $parse){
 				}
 
 				// console.log("Page:",page);
-				var drag = d3.behavior.drag().on("drag",dragEvent);
-				// console.log(drag);
-				// page.call(drag);
+				page.call(d3.behavior.drag().on("drag", dragEvent));
+				thumb.call(d3.behavior.drag().on("drag", thumbDragEvent));
 				// var page = d3.select(element[0]).select('rect.page')
 				// 			.datum({y: 0, h: 40})
 				// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));
@@ -281,14 +317,6 @@ app.directive('myListView', function($window, $parse){
 				// $scope.$watch('height', function(newValue, oldValue){
 				// 	console.log("Height change detected! in the link function");
 				// });
-
-				function dragEvent(d) {
-					console.log("Drag function called!!");
-					//console.log(d.h, d3.event.y);
-					d.y = Math.max(0, Math.min($scope.restrictedHeight - d.h - 1, d3.event.y));
-				  	//text.node().scrollTop = d.y * textViewer.rowHeight() * lines.length / height;
-				  	page.attr("y", d.y);
-				}
  			}
  		}
  	}

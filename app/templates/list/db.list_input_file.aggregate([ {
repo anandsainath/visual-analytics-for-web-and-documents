@@ -1,4 +1,4 @@
-db.list_input_file.aggregate([ {
+adb.list_input_file.aggregate([ {
     $match : {
         'content.Year' : {
             $eq : '2006'

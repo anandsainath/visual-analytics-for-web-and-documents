@@ -200,11 +200,23 @@ rect.frame{
 	stroke: #ddd;
 }
 
+.reset-padding{
+	padding-left: 0px !important;
+	padding-right: 0px !important;
+}
+
 rect.page{
-	fill: none;
+	fill: #FFF;
 	stroke: #999;
-	fill-opacity: .6;
-	/*cursor: move;*/
+	fill-opacity: .4;
+	cursor: move;
+}
+
+rect.thumb{
+	fill: #0A0A0A;
+	stroke: #999;
+	fill-opacity: .4;
+	cursor: move;
 }
 
 .superscript { 
