@@ -203,13 +203,13 @@ app.directive('myListView', function($window, $parse){
 					// console.log("List Scrolled: "+ this.scrollTop);
 					// console.log("Total: "+ $scope.totalRecords);
 					// console.log(page.attr("height"), $scope.restrictedHeight);
-					var y = ((this.scrollTop/21) * ($scope.restrictedHeight/$scope.totalRecords));
+					var y = ((this.scrollTop/20) * ($scope.restrictedHeight/$scope.totalRecords));
 					page.attr("y", y);
 					thumb.attr("y", y + (page.attr("height")/2) - 20);
 				});
 
 				function dragEvent(d) {
-					var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+					var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 20;
 					mainList.transition().duration(10)
         				.tween("mainScrollListTween", scrollTopTween(y));
 				}
@@ -222,7 +222,7 @@ app.directive('myListView', function($window, $parse){
 				}
 
 				function thumbDragEvent(){
-					var y = (d3.event.y + 20 - (page.attr("height")/2))  * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+					var y = (d3.event.y + 20 - (page.attr("height")/2))  * ($scope.totalRecords/$scope.restrictedHeight) * 20;
 					mainList.transition().duration(10)
         				.tween("mainScrollListTweenViaThumb", scrollTopTween(y));
 				}
@@ -230,7 +230,7 @@ app.directive('myListView', function($window, $parse){
 				function refreshScrollerPositions(){
 					// console.log("Refreshing scroller positions..");
 
-					var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/21));
+					var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/20));
 					// console.log("Page Height", pageHeight);
 					// console.log("Current Page", $scope.currentPage);
 					
@@ -305,11 +305,18 @@ app.directive('myListView', function($window, $parse){
 							}
 							return "fill: "+ color;
 						}).on("click", function(){
-							// console.log(d3.select(this).attr("y"))
-							// console.log(d3.event.y, "Click event handled", $scope.restrictedHeight);
+							var eventY = parseFloat(d3.select(this).attr("y"));
+							var pageY = parseFloat(page.attr("y"));
+							// console.log(pageY, eventY);
+							var currentPage = Math.ceil((pageY * $scope.totalRecords)/($scope.itemsPerPage * $scope.restrictedHeight));
 
-							// console.log(d3.select(this).attr("y"));
-							var y = d3.select(this).attr("y") * ($scope.totalRecords/$scope.restrictedHeight) * 21;
+							if(eventY < pageY){
+								currentPage = currentPage - 1;
+							}else if(eventY > pageY){
+								currentPage = currentPage + 1;
+							}
+
+							var y = currentPage * $scope.itemsPerPage * 20;
 							mainList.transition().duration(10)
 		        				.tween("mainScrollListTween", scrollTopTween(y));
 						});
