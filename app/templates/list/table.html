@@ -71,17 +71,17 @@
       </tr>
     </thead>
     <tbody id="table-body">
-      {% for row in data.items %}
+      {% for row in data %}
       <tr>
         {% for header in headers %}
-        {% if row.content[header] is string %}
-          {% if row.content[header] | length > 40 %}
-            <td class="js-td-tooltip" title="{{ row.content[header] }}" data-toggle="tooltip">{{ row.content[header]|truncate(length=40) }}</td>
+        {% if row[header] is string %}
+          {% if row[header] | length > 40 %}
+            <td class="js-td-tooltip" title="{{ row[header] }}" data-toggle="tooltip">{{ row[header]|truncate(length=40) }}</td>
           {% else %}
-            <td>{{ row.content[header] }}</td>
+            <td>{{ row[header] }}</td>
           {% endif %}
         {% else %}
-          <td>{{ row.content[header] }}</td>
+          <td>{{ row[header] }}</td>
         {% endif %}
         {% endfor %}    
       </tr>

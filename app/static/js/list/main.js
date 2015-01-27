@@ -17,16 +17,3 @@ document.addEventListener("DOMContentLoaded", resizeLists, false);
 
 //calling tellAngular on resize event
 window.onresize = resizeLists;
-
-$(function(){
-	var select_array = $('select');
-
-	if(select_array.length){
-		// console.log(select_array);
-		$(select_array[0]).val("Author Name");
-		$(select_array[1]).val("Conference");
-		$(select_array[2]).val("Year");
-		
-		select_array.trigger('change');	
-	}
-});

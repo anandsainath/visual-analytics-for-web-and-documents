@@ -9,6 +9,10 @@ from app import app
 manager = Manager(app)
 Triangle(app)
 
+UPLOAD_FOLDER = os.path.join('.', os.path.dirname(__file__), 'upload/')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
 # Turn on debugger by default and reloader
 manager.add_command("runserver", Server(
     use_debugger = True,

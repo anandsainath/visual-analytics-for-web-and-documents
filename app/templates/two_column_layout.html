@@ -1,0 +1,18 @@
+{% extends "base_layout.html" %}
+
+{% block title %}
+	VISLists, VIS 25 - All the Papers and Citations
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+	    <div class="row">
+	      <div class="col-md-2 sidebar-container">
+	        {% block sidebar_content %}{% endblock %}
+	      </div>
+	      <div class="col-md-10">
+	        {% block main_content %}{% endblock %}
+	      </div>
+	    </div>
+  	</div>
+{% endblock %}

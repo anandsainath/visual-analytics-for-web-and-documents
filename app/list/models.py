@@ -11,6 +11,7 @@ class JListInputFile(db.Document):
 
 	#Constructor
 	def __init__(self, *args, **kwargs):
+		self.__CollectionName__ = "dummy"
 		db.Document.__init__(self, *args, **kwargs)
 		try:
 			self.content = kwargs['content']

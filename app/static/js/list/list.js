@@ -46,7 +46,7 @@ app.controller("ListController",
 		$scope.listData = []; //will contain the actual data that is being shown on the list
 		$scope.selectedList = "";
 
-		$scope.itemsPerPage = 100; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
+		$scope.itemsPerPage = 200; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
 		$scope.currentPage = 1; //holds the current page being shown..
 		$scope.totalRecords = 0; //holds the total number of records that can be shown..
 
@@ -196,7 +196,7 @@ app.directive('myListView', function($window, $parse){
 				var frame = svg.select('rect.frame');
 				var overviewList = svg.select('#overviewList');
 				var mainList = d3.select(element[0]).select('.scroller');
-				var thumb = d3.select(element[0]).select('.thumb');
+				// var thumb = d3.select(element[0]).select('.thumb');
 				// console.log(mainList, $scope.parent_container_selector);
 
 				mainList.on("scroll", function(){
@@ -204,11 +204,21 @@ app.directive('myListView', function($window, $parse){
 					// console.log("Total: "+ $scope.totalRecords);
 					// console.log(page.attr("height"), $scope.restrictedHeight);
 					var y = ((this.scrollTop/20) * ($scope.restrictedHeight/$scope.totalRecords));
+					if(page.attr("height") <= 10){
+						// console.log("Fraction", page.attr("y")/($scope.restrictedHeight-page.attr("height")));
+						var diff = (page.attr("y")/($scope.restrictedHeight-page.attr("height")))*page.attr('height')*2;
+						y = y - diff;
+					}
 					page.attr("y", y);
-					thumb.attr("y", y + (page.attr("height")/2) - 20);
+					// thumb.attr("y", y + (page.attr("height")/2) - 20);
 				});
 
 				function dragEvent(d) {
+					// console.log(page.attr("y"), d3.event.y);
+					// var y = d3.event.y - ((d3.event.y/($scope.restrictedHeight))*page.attr("height"));
+					// console.log("Original Y", d3.event.y);
+					// console.log("Computed Y", y);
+					
 					var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 20;
 					mainList.transition().duration(10)
         				.tween("mainScrollListTween", scrollTopTween(y));
@@ -221,24 +231,27 @@ app.directive('myListView', function($window, $parse){
 				    }; 
 				}
 
-				function thumbDragEvent(){
-					var y = (d3.event.y + 20 - (page.attr("height")/2))  * ($scope.totalRecords/$scope.restrictedHeight) * 20;
-					mainList.transition().duration(10)
-        				.tween("mainScrollListTweenViaThumb", scrollTopTween(y));
-				}
+				// function thumbDragEvent(){
+				// 	var y = (d3.event.y + 20 - (page.attr("height")/2))  * ($scope.totalRecords/$scope.restrictedHeight) * 20;
+				// 	mainList.transition().duration(10)
+    //     				.tween("mainScrollListTweenViaThumb", scrollTopTween(y));
+				// }
 
 				function refreshScrollerPositions(){
 					// console.log("Refreshing scroller positions..");
-
+					console.log("restrictedHeight", $scope.restrictedHeight);
+					console.log("totalRecords", $scope.totalRecords);
 					var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/20));
 					// console.log("Page Height", pageHeight);
 					// console.log("Current Page", $scope.currentPage);
-					
-					page.attr("height", pageHeight);
 					var y = ($scope.currentPage-2)*pageHeight;
-					
 					page.attr("y", y);
-					thumb.attr("y", (y + (pageHeight/2)) - 20);
+					if (pageHeight < 10){
+						console.log("Original page height: ", pageHeight);
+						pageHeight = 10;
+					}
+					page.attr("height", pageHeight);
+					// thumb.attr("y", (y + (pageHeight/2)) - 20);
 				}
 
 				$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
@@ -324,7 +337,7 @@ app.directive('myListView', function($window, $parse){
 
 				// console.log("Page:",page);
 				page.call(d3.behavior.drag().on("drag", dragEvent));
-				thumb.call(d3.behavior.drag().on("drag", thumbDragEvent));
+				// thumb.call(d3.behavior.drag().on("drag", thumbDragEvent));
 				// var page = d3.select(element[0]).select('rect.page')
 				// 			.datum({y: 0, h: 40})
 				// 			.call(d3.behavior.drag().origin(Object).on("drag", drag));

@@ -1,305 +1,177 @@
-{% extends "layout.html" %}
+{% extends "base_layout.html" %}
 
-{% block header_links %}
-<ul class="nav navbar-nav">
-	<li><a href="#">Home</a></li>
-	<li class="active"><a href="/list">ListViz</a></li>
-</ul>
+{% block title %}
+VISLists, VIS 25 - All the Papers and Citations
 {% endblock %}
 
-{% block sidebar_content %}
-
-<div class="panel panel-default">
-	<div class="panel-heading">1. Refine</div>
-	<div class="panel-body">
-		<p>Modify the data columns present in the file by clicking on the column headings</p>
-	</div>
-</div>
+{% block head_script_content %}
+<style type="text/css">
 	
-<div class="panel panel-default">
-	<div class="panel-heading">2. Visualize</div>
-	<div class="panel-body">
-		<p>Visualize the contents of the file using a ListView</p>
-		<button type="button" class="btn btn-primary btn-sm btn-block">Visualize this!</button>
-	</div>
-</div>
+	.jumbotron{
+		background-color: transparent !important;
+		padding-left: 30px !important;
+		padding-right: 30px !important;
+		padding-top: 24px !important;
+		padding-bottom: 24px !important;
+		text-align: center;
+	}
+
+	.footer {
+		padding-top: 40px;
+		padding-bottom: 40px;
+		margin-top: 40px;
+		border-top: 1px solid #eee;
+	}
+
+	.btn-file {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.btn-file input[type=file] {
+		position: absolute;
+		top: 0;
+		right: 0;
+		min-width: 100%;
+		min-height: 100%;
+		font-size: 100px;
+		text-align: right;
+		filter: alpha(opacity=0);
+		opacity: 0;
+		background: red;
+		cursor: inherit;
+		display: block;
+	}
+
+	input[readonly] {
+		background-color: white !important;
+		cursor: text !important;
+	}
+
+	.bs-callout-warning {
+		background-color: #faf8f0;
+		border-color: #faebcc;
+	}
+	
+	.bs-callout {
+		margin: 20px 0;
+		padding: 20px;
+		border-left: 3px solid #faebcc;
+	}
+
+	.bs-callout-warning h4 {
+		color: #8a6d3b;
+	}
+
+	.bs-callout h4 {
+		margin-top: 0;
+		margin-bottom: 5px;
+	}
+
+	.padding-left-0 {
+		padding-left: 0px !important;
+	}
+
+	.right-padding-5 {
+		padding-right: 5px !important;
+	}
+
+</style>
+{% endblock %}
+
+{% block toolbar_header_left_link_content %}
+<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
+<li><a href="/list/tutorial">Help</a></li>
 {% endblock %}
 
 {% block content %}
+<div class="container">
+	<div class="jumbotron">
+		<h1>ListVIS</h1>
+		<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
 
-<!-- Modal Dialogs-->
-<!-- Rename Dialogs -->
-<div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title" id="renameModalLabel">Rename Column <small id="rename-column-name"></small></h4>
-			</div>
-			<div class="modal-body">
-				<form class="form-horizontal" role="form">
-					<div class="form-group">
-						<label class="col-sm-5 control-label">Existing Column Name</label>
-						<div class="col-sm-7">
-							<p class="form-control-static" id="oldName"></p>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="inputPassword" class="col-sm-5 control-label">New Column Name</label>
-						<div class="col-sm-7">
-							<input type="text" class="form-control" id="newName" placeholder="New Column Name Here">
-						</div>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" data-loading-text="Processing..." id="btnRename">Rename Column</button>
-			</div>
-		</div>
+		<p><strong>VISLists</strong> summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis). </p>
+		<p><a class="btn btn-lg btn-success" href="/list/vis25" role="button">Go to VISLists »</a></p>
+
 	</div>
-</div>
-
-<!-- Split column -->
-<div class="modal fade" id="splitModal" tabindex="-1" role="dialog" aria-labelledby="splitModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title" id="splitModalLabel">Split Column <small id="split-column-name"></small></h4>
-			</div>
-			<div class="modal-body">
+	<div class="row">
+		<div class="col-md-6">
+			<form id="fileUploadForm" method="post" enctype="multipart/form-data">
+				<h3>Upload a file</h3>
+				<p>Select a file that you want to visualize using the ListVIS</p>
 				<div class="row">
-					<div class="col-md-6">
-						<input type="text" class="form-control" name="separator" placeholder="Separator">
+					<div class="col-md-10 padding-right-5">
+						<div class="input-group">
+							<span class="input-group-btn">
+								<span class="btn btn-primary btn-file">
+									Browse <input type="file" name="file" accept="text/csv" multiple>
+								</span>
+							</span>
+							<input type="text" class="form-control" readonly>
+						</div>		
 					</div>
-					<div class="col-md-6 text-right">
-						Split into &nbsp;&nbsp;
-						<div class="btn-group" data-toggle="buttons">
-						  <label class="btn btn-primary active">
-						    <input type="radio" value="row" name="options" id="rows" checked> Rows
-						  </label>
-						  <label class="btn btn-primary">
-						    <input type="radio" value="col" name="options" id="columns"> Columns
-						  </label>
-						</div>
+					<div class="col-md-2 padding-left-0">
+						<input type="submit" class="btn btn-success"/>
 					</div>
 				</div>
-				<div id="split-rows">
-					<hr/>
-					<div class="js-split-row row">
-						<div class="col-md-4">
-							<input class="form-control" name="column[]" id="old-column-name" type="text" placeholder="Selected column" disabled>
-						</div>
-						<div class="col-md-1">
-							<span class="glyphicon glyphicon-arrow-right"></span>
-						</div>
-						<div class="col-md-5">
-							<input class="form-control" id="new-column-name" type="text" placeholder="New column header" name="new_column[]">
-						</div>
-						<div class="col-md-2">
-							<button type="button" class="btn btn-sm btn-info js-tooltip js-add-splitter" data-toggle="tooltip" data-placement="left" title="Add field">+</button>
-						</div>
-					</div>
-					<div class="js-split-row row hidden" id="row-template">
-						<br/>
-						<div class="col-md-4" id="column-select">
 
-						</div>
-						<div class="col-md-1">
-							<span class="glyphicon glyphicon-arrow-right"></span>
-						</div>
-						<div class="col-md-5">
-							<input class="form-control" id="new-column-name" type="text" placeholder="New column header" name="new_column[]">
-						</div>
-						<div class="col-md-2">
-							<button type="button" class="btn btn-sm btn-info js-tooltip js-add-splitter" data-toggle="tooltip" data-placement="left" title="Add field">+</button>
-							<button type="button" class="btn btn-sm btn-warning js-sub-splitter js-tooltip" data-toggle="tooltip" data-placement="left" title="Remove field">-</button>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" data-loading-text="Processing..." id="btnSplit">Split Column</button>
+				<span class="help-block" id="fileUploadFormResponse">
+					Currently Supported File Types: *.csv
+				</span>
+			</form>
+		</div>
+		<!-- <div class="col-md-4">
+			<h3>VISLists</h3>
+			<p>This visualization summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis).</p>
+			<p><a class="btn btn-primary" href="#" role="button">Go to VISLists »</a></p>
+		</div> -->
+		<div class="col-md-6">
+			<h3>Resume saved session</h3>
+			<p>Enter the session code to resume a previous session.</p>
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Saved Session Code">
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="button">Go!</button>
+				</span>
 			</div>
 		</div>
-	</div>
-</div>
 
-<div id="table-container"></div>
+	</div>
+
+	<div class="bs-callout bs-callout-warning">
+        <h4>Warning</h4>
+        <p>Files uploaded to this site may be removed without any prior warning. It's always best to have a copy of the file that was uploaded to the site as a backup for future usage.</p>
+    </div>
+
+	<footer class="footer">
+		<p>© II Lab - Georgia Institute of Technology</p>
+	</footer>
+</div>
 {% endblock %}
 
 {% block script_content %}
+<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
 <script type="text/javascript">
-var sorter = {}
-$(function(){
-	$('.js-tooltip').tooltip();
+	$(function(){
 
-	$('body').on('click','.js-add-splitter', function(){
-		var $newRow = $('#row-template').clone();
-		$newRow.attr("id","").removeClass('hidden').show();
-		$('#split-rows').append($newRow);
-		$('.js-tooltip').tooltip();
-	});
+		$(document).on('change', '.btn-file :file', function() {
+			var input = $(this),
+			numFiles = input.get(0).files ? input.get(0).files.length : 1,
+			label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+			input.trigger('fileselect', [numFiles, label]);
+		});
 
-	$('body').on('click', '.js-sub-splitter', function(){
-		$(this).parents('.js-split-row:first').remove();
-	});
+		$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+			var input = $(this).parents('.input-group').find(':text'),
+			log = numFiles > 1 ? numFiles + ' files selected' : label;
 
-	$.post('/list/rows/', function(content){
-		$('#table-container').html(content);
-	});
-
-	$('#btnRename').click(function(){
-		var newColumnName = $('#newName').val();
-		if(newColumnName && newColumnName !== $(this).data('column')){
-			$('#btnRename').button('loading');
-			$.ajax({
-				type: 'post',
-				contentType: 'application/json; charset=utf-8',
-				url: '/list/rename-column/page/'+ $('.js-pagination.js-active').text(),
-				data: JSON.stringify({'old': $(this).data('column'), 'new': $('#newName').val()}),
-				success: function(content){
-					$('#table-container').html(content);
-					$('#newName').val("");
-					$('#renameModal').modal('hide');
-				}
-			}).always(function () {
-		      	$('#btnRename').button('reset');
-		    });
-		}
-	});
-
-	$('input[name="options"]').change(function(){
-		switch($('input[name="options"]:checked').val()){
-			case 'row':
-				$('#split-rows').show();
-				break;
-			case 'col':
-				$('#split-rows').hide();
-				break;
-		}
-	});
-
-	$('#btnSplit').click(function(){
-		$('#btnSplit').button('loading');
-		switch($('input[name="options"]:checked').val()){
-			case 'row':
-				splitIntoRows();
-				break;
-			case 'col':
-				splitIntoCols();
-				break;
-		}
-	});
-
-	function splitIntoRows(){
-		var json = {};
-		json["keysToSplit"] = [$('input[name="column[]"]').val()];
-		$.merge(json["keysToSplit"],$.map($('.js-split-row').filter(":not('#row-template')").find('[name="column[]"]').serializeArray(), function(value){ return value.value; }));
-		json["newKeys"] = $.map($('.js-split-row').filter(":not('#row-template')").find('[name="new_column[]"]').serializeArray(), function(value){ return value.value; });
-		json["separator"] = $('input[name="separator"]').val();
-
-		$.ajax({
-			type: 'post',
-			contentType: 'application/json; charset=utf-8',
-			url: '/list/split-column-into-rows/page/'+ $('.js-pagination.js-active').text(),
-			data: JSON.stringify(json),
-			success: function(content){
-				$('#table-container').html(content);
-				$('#splitModal').modal('hide');
+			if( input.length ) {
+				input.val(log);
+			} else {
+				if( log ) alert(log);
 			}
-		}).always(function () {
-		    $('#btnSplit').button('reset');
 		});
-	}
-
-	function splitIntoCols(){
-		var json = {
-			'column': $('input[name="column[]"]').val(),
-			'separator' : $('input[name="separator"]').val()
-		};
-
-		$.ajax({
-			type: 'post',
-			contentType: 'application/json; charset=utf-8',
-			url: '/list/split-column-into-cols/page/'+ $('.js-pagination.js-active').text(),
-			data: JSON.stringify(json),
-			success: function(content){
-				$('#table-container').html(content);
-				$('#splitModal').modal('hide');
-			}
-		}).always(function () {
-		    $('#btnSplit').button('reset');
-		});
-	}
-				
-
-	$('body').on("click", ".js-menu-item", function(){
-		var column = $(this).parents('div:first').find('.js-title').text(); 
-		switch($(this).data('action')){
-			case 'delete':
-			$.ajax({
-				type: 'post',
-				contentType: 'application/json; charset=utf-8',
-				url: '/list/delete-column/page/'+ $('.js-pagination.js-active').text(),
-				data: JSON.stringify({'column': column}),
-				success: function(content){
-					$('#table-container').html(content);
-				}
-			})
-			break;
-			case 'split':
-				$('input[name="column[]"]').val(column);
-				$('#split-column-name').text(column);
-				$.post('/list/show-select', function(content){
-					$('#column-select').empty().html(content);
-					$('#splitModal').modal('show');
-				});
-			break;
-			case 'rename':
-				$('#rename-column-name').text(column);
-				$('#oldName').text(column);
-				$('#btnRename').data('column', column);
-				$('#renameModal').modal('show');
-			break;
-			case 'sort_asc':
-			$.ajax({
-				type:'post',
-				contentType: 'application/json; charset=utf-8',
-				url: '/list/rows/sort/page/'+ $('.js-pagination.js-active').text(),
-				data: JSON.stringify({'column': column, "sort": "asc"}),
-				success: function(content){
-					$('#table-container').html(content);
-				}
-			});
-			break;
-			case 'sort_desc':
-			$.ajax({
-				type:'post',
-				contentType: 'application/json; charset=utf-8',
-				url: '/list/rows/sort/page/'+ $('.js-pagination.js-active').text(),
-				data: JSON.stringify({'column': column, "sort": "desc"}),
-				success: function(content){
-					$('#table-container').html(content);
-				}
-			});
-			break;
-		}
-		});
-
-		$('body').on("click", ".js-pagination", function(){
-			if(!$(this).hasClass('js-active')){
-				var href = $(this).attr('href');
-				var pagination_href = $(this).data('pagination-url');
-
-				$.post(href, function(content){
-					$('#table-container').html(content);
-				});	
-			}
-			return false;
-		});
-});
+	});
 </script>
+
 {% endblock %}

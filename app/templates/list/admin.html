@@ -1,0 +1,141 @@
+{% extends "two_column_layout.html" %}
+
+<!-- {% block header_links %}
+<ul class="nav navbar-nav">
+	<li><a href="#">Home</a></li>
+	<li class="active"><a href="/list">ListViz</a></li>
+</ul>
+{% endblock %} -->
+
+{% block head_script_content %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block sidebar_content %}
+
+<div class="panel panel-default">
+	<div class="panel-heading">1. Refine it</div>
+	<div class="panel-body">
+		<p>Modify the data columns present in the file by clicking on the column headings</p>
+	</div>
+</div>
+	
+<div class="panel panel-default">
+	<div class="panel-heading">2. Visualize</div>
+	<div class="panel-body">
+		<p>Visualize the contents of the file using a ListView</p>
+		<button type="button" class="btn btn-primary btn-sm btn-block">Visualize this!</button>
+	</div>
+</div>
+{% endblock %}
+
+{% block main_content %}
+
+<!-- Modal Dialogs-->
+<!-- Rename Dialogs -->
+<div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title" id="renameModalLabel">Rename Column <small id="rename-column-name"></small></h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="col-sm-5 control-label">Existing Column Name</label>
+						<div class="col-sm-7">
+							<p class="form-control-static" id="oldName"></p>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputPassword" class="col-sm-5 control-label">New Column Name</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" id="newName" placeholder="New Column Name Here">
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-loading-text="Processing..." id="btnRename">Rename Column</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Split column -->
+<div class="modal fade" id="splitModal" tabindex="-1" role="dialog" aria-labelledby="splitModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title" id="splitModalLabel">Split Column <small id="split-column-name"></small></h4>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-6">
+						<input type="text" class="form-control" name="separator" placeholder="Separator">
+					</div>
+					<div class="col-md-6 text-right">
+						Split into &nbsp;&nbsp;
+						<div class="btn-group" data-toggle="buttons">
+						  <label class="btn btn-primary active">
+						    <input type="radio" value="row" name="options" id="rows" checked> Rows
+						  </label>
+						  <label class="btn btn-primary">
+						    <input type="radio" value="col" name="options" id="columns"> Columns
+						  </label>
+						</div>
+					</div>
+				</div>
+				<div id="split-rows">
+					<hr/>
+					<div class="js-split-row row">
+						<div class="col-md-4">
+							<input class="form-control" name="column[]" id="old-column-name" type="text" placeholder="Selected column" disabled>
+						</div>
+						<div class="col-md-1">
+							<span class="glyphicon glyphicon-arrow-right"></span>
+						</div>
+						<div class="col-md-5">
+							<input class="form-control" id="new-column-name" type="text" placeholder="New column header" name="new_column[]">
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-sm btn-info js-tooltip js-add-splitter" data-toggle="tooltip" data-placement="left" title="Add field">+</button>
+						</div>
+					</div>
+					<div class="js-split-row row hidden" id="row-template">
+						<br/>
+						<div class="col-md-4" id="column-select">
+
+						</div>
+						<div class="col-md-1">
+							<span class="glyphicon glyphicon-arrow-right"></span>
+						</div>
+						<div class="col-md-5">
+							<input class="form-control" id="new-column-name" type="text" placeholder="New column header" name="new_column[]">
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-sm btn-info js-tooltip js-add-splitter" data-toggle="tooltip" data-placement="left" title="Add field">+</button>
+							<button type="button" class="btn btn-sm btn-warning js-sub-splitter js-tooltip" data-toggle="tooltip" data-placement="left" title="Remove field">-</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-loading-text="Processing..." id="btnSplit">Split Column</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="table-container"></div>
+{% endblock %}
+
+{% block script_content %}
+<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/list/admin.js') }}"></script>
+{% endblock %}

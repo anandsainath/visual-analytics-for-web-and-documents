@@ -1,16 +1,21 @@
-{% extends "viz_layout.html" %}
+{% extends "base_layout.html" %}
 
 {% block title %}
-	VISLists, VIS 25 - All the Papers and Citations
+VISLists, VIS 25 - All the Papers and Citations
 {% endblock %}
 
 {% block head_script_content %}
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
-	
-	<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
+<style type="text/css">
+	.top-margin-15{
+		margin-top: 15px;
+	}
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
+
+<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
 	<!--<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
 	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>-->
@@ -18,33 +23,51 @@
 	<!--<script src="{{ url_for('static', filename='js/list/longscroll.js') }}"></script>-->
 	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
 	<script src="{{ url_for('static', filename='libs/jquery.noty.packaged.min.js') }}"></script>
-{% endblock %}
+	<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
+	{% endblock %}
 
-{% block toolbar_header_left_link_content %}
+	{% block toolbar_header_left_link_content %}
 	<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
 	<li class="divider"><a href="/list/tutorial">Help</a></li>
-{% endblock %}
+	{% endblock %}
 
-{% block toolbar_page_content %}
-<p class="navbar-text">List Modes</p>
-<div class="btn-group navbar-nav navbar-center">
-	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
-	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
-	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
-	<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
-</div>
-{% endblock %}
-
-{% block content %}
-<div class="loader" ng-show="isLoading"></div>
-<div class="grid" style="height: {{gridHeight|angular}}px;">
-	<div class="list-container" style="width: {{width|angular}}px; margin-left: 35px;">
-		<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+	{% block toolbar_page_content %}
+	<p class="navbar-text">List Modes</p>
+	<div class="btn-group navbar-nav navbar-center">
+		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
+		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
+		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
+		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
 	</div>
-</div>
-{% endblock %}
 
-{% block script_content %}
+	<!-- <div class="btn-group">
+		<button type="button" class="btn btn-info">{{token}}</button>
+		<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+			<span class="caret"></span>
+			<span class="sr-only">Toggle Dropdown</span>
+		</button>
+		<ul class="dropdown-menu" role="menu">
+			<li><a href="#">Copy Session ID</a></li>
+			<li><a href="#">Get Shareable Link</a></li>
+		</ul>
+	</div> -->
+
+	<!-- Single button -->
+	<ul class="nav navbar-nav navbar-right top-margin-15">
+		<li><strong>Session Code</strong> {{token}}</li>
+	</ul>
+	{% endblock %}
+
+	{% block content %}
+	<div class="loader" ng-show="isLoading"></div>
+	<div class="grid" style="height: {{gridHeight|angular}}px;">
+		<div class="list-container" style="width: {{width|angular}}px; margin-left: 35px;">
+			<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+		</div>
+	</div>
+	{% endblock %}
+
+	{% block script_content %}
 	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
 	<script type="text/javascript">
 
@@ -80,6 +103,6 @@
 			    buttons: false // an array of buttons
 			};
 		});
-        
-	</script>
+
+</script>
 {% endblock %}
