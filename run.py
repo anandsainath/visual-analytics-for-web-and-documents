@@ -14,7 +14,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Turn on debugger by default and reloader
-manager.add_command("runserver", Server(
+manager.add_command("runserver", Server( 
     use_debugger = True,
     use_reloader = True,
     host = '0.0.0.0')

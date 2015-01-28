@@ -1,9 +1,14 @@
 # Import flask and template operators
 from flask import Flask, render_template, redirect, url_for
+from flask.ext.compress import Compress
 
 # Define the WSGI application object
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+Compress(app)
+app.config['COMPRESS_DEBUG'] = True
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config["MONGODB_SETTINGS"] = {'DB': "jigsaw"}
 app.config["SECRET_KEY"] = "c39dcb77e31b57bb094e816c4982ac3c"
@@ -11,6 +16,7 @@ app.config["SECRET_KEY"] = "c39dcb77e31b57bb094e816c4982ac3c"
 ##Below configurations need to be changed in the server.
 app.config["VIS25_DB"] = "56bcf92a4e6ac231598459b95de86410"
 app.config["SITE_DOMAIN"] = "127.0.0.1:5000"
+
 
 @app.route("/")
 def index():

@@ -46,7 +46,7 @@ app.controller("ListController",
 		$scope.listData = []; //will contain the actual data that is being shown on the list
 		$scope.selectedList = "";
 
-		$scope.itemsPerPage = 200; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
+		$scope.itemsPerPage = 100; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
 		$scope.currentPage = 1; //holds the current page being shown..
 		$scope.totalRecords = 0; //holds the total number of records that can be shown..
 
