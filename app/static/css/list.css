@@ -101,7 +101,7 @@ ol, ul {
 	padding: 0px;
 }
 
-ul.js-items-list li{
+.js-items-list > ul > li{
 	border-bottom: 1px solid #CCC;
 }
 
@@ -125,14 +125,18 @@ ul.js-items-list li{
 	width: 286px;
 }
 
-
-.js-scroll-list::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 0px;
+.row {
+	margin-right: -15px !important;
+	margin-left: -15px !important;
 }
 
-.js-scroll-list { -ms-overflow-style: none; }
+/*.js-scroll-list::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 0px;
+}*/
 
+/*.js-scroll-list { -ms-overflow-style: none; }
+*/
 /*.js-scroll-list::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);

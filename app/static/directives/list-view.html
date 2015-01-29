@@ -1,92 +1,93 @@
 <div class="panel panel-default">
-	<div class="panel-heading">
-		<div>
-			<div class="row">
-				<div class="col-xs-8 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
-					<select class="form-control" ng-model="selectedList" ng-change="listChanged()">
-						<option bindonce ng-repeat="header in headers">{{header}}</option>
-					</select>
-				</div>
-				<div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
-					<button type="button" class="btn btn-default" ng-click="clearSelections()">Clear List</button>
-				</div>
-			</div>
-			<div class="row top-margin-10">
-				<div class="col-xs-12" style="padding-left: 20px;">
-					<div class="btn-group">
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-sort-alphabetically" data-toggle="tooltip" data-placement="top" title="Sort list alphabetically" ng-click="orderByPredicate='name';" ng-class="{true:'active', false:''}[orderByPredicate=='name']">
-							<span class="glyphicon glyphicon-sort-by-alphabet"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-frequency" data-toggle="tooltip" data-placement="top" title="Sort list by frequency" ng-click="orderByPredicate='-frequency';" ng-class="{true:'active', false:''}[orderByPredicate=='-frequency']">
-							<span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-connection" data-toggle="tooltip" data-placement="top" title="Sort list by connection strength"  ng-click="orderByPredicate='-strength';" ng-class="{true:'active', false:''}[orderByPredicate=='-strength']">
-							<span class="glyphicon glyphicon-align-justify colored"></span>
-						</button>
-					</div>
+  <div class="panel-heading">
+    <div>
+      <div class="row">
+        <div class="col-xs-8 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
+          <select class="form-control" ng-model="selectedList" ng-change="listChanged()">
+            <option bindonce ng-repeat="header in headers">{{header}}</option>
+          </select>
+        </div>
+        <div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
+          <button type="button" class="btn btn-default" ng-click="clearSelections()">Clear List</button>
+        </div>
+      </div>
+      <div class="row top-margin-10">
+        <div class="col-xs-12" style="padding-left: 20px;">
+          <div class="btn-group">
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-sort-alphabetically" data-toggle="tooltip" data-placement="top" title="Sort list alphabetically" ng-click="orderByPredicate='name';" ng-class="{true:'active', false:''}[orderByPredicate=='name']">
+              <span class="glyphicon glyphicon-sort-by-alphabet"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-frequency" data-toggle="tooltip" data-placement="top" title="Sort list by frequency" ng-click="orderByPredicate='-frequency';" ng-class="{true:'active', false:''}[orderByPredicate=='-frequency']">
+              <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-sort-by-connection" data-toggle="tooltip" data-placement="top" title="Sort list by connection strength"  ng-click="orderByPredicate='-strength';" ng-class="{true:'active', false:''}[orderByPredicate=='-strength']">
+              <span class="glyphicon glyphicon-align-justify colored"></span>
+            </button>
+          </div>
 
-					&nbsp;|&nbsp;&nbsp;
+          &nbsp;|&nbsp;&nbsp;
 
-					<div class="btn-group">
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-active-top" data-toggle="tooltip" data-placement="top" title="Bring active elements to the top of the list" ng-click="setFirstOrderSort('-hasStrength')" ng-class="{true:'active', false:''}[firstOrderPredicate=='-hasStrength']">
-							<span class="glyphicon glyphicon-arrow-up"></span>
-						</button>
-					</div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-active-top" data-toggle="tooltip" data-placement="top" title="Bring active elements to the top of the list" ng-click="setFirstOrderSort('-hasStrength')" ng-class="{true:'active', false:''}[firstOrderPredicate=='-hasStrength']">
+              <span class="glyphicon glyphicon-arrow-up"></span>
+            </button>
+          </div>
 
-					&nbsp;&nbsp;|&nbsp;
+          &nbsp;&nbsp;|&nbsp;
 
-					<!-- <div class="btn-group">
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-clear-selection" data-toggle="tooltip" data-placement="top" title="Clear Selection">
-							<span class="glyphicon glyphicon-remove"></span>
-						</button>
-					</div>
+          <!-- <div class="btn-group">
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-clear-selection" data-toggle="tooltip" data-placement="top" title="Clear Selection">
+              <span class="glyphicon glyphicon-remove"></span>
+            </button>
+          </div>
 
-					&nbsp;|&nbsp; -->
+          &nbsp;|&nbsp; -->
 
-					<div class="btn-group">
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-align-left" data-toggle="tooltip" data-placement="top" title="Align Left" ng-click="setAlignment('text-left')" ng-class="{true:'active', false:''}[align=='text-left']">
-							<span class="glyphicon glyphicon-align-left"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-align-center" data-toggle="tooltip" data-placement="top" title="Center" ng-click="setAlignment('text-center')" ng-class="{true:'active', false:''}[align=='text-center']">
-							<span class="glyphicon glyphicon-align-center"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-sm js-tooltip js-align-right" data-toggle="tooltip" data-placement="top" title="Align Right" ng-click="setAlignment('text-right')" ng-class="{true:'active', false:''}[align=='text-right']">
-							<span class="glyphicon glyphicon-align-right"></span>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="scroll-list-container" style="height: {{restrictedHeight}}px;">
-		<div class="panel-body">
-			<div class="scroller"  id="parentContainer{{list_index}}" style="height: {{restrictedHeight}}px;">
-				<div class="restrict">
-					<ul class="js-items-list" infinite-scroll='loadMoreData()' infinite-scroll-distance="1" infinite-scroll-container="parent_container_selector" infinite-scroll-parent>
-						<li class="row" ng-repeat="item in listData track by item.name">
-							<div class="col-xs-2 bar-container" bo-attr bo-attr-title="{{item.count}}">
-								<div class="bar" bo-style="{'width': (1-item.frequency) * 145 +'%' };"></div>
-							</div>
-							<span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': item.background};" ng-click="selectItem(item.name)"> {{item.name}}
-								<sup ng-if="item.hasStrength == 1">{{item.strengthCount}}</sup>
-							</span>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-align-left" data-toggle="tooltip" data-placement="top" title="Align Left" ng-click="setAlignment('text-left')" ng-class="{true:'active', false:''}[align=='text-left']">
+              <span class="glyphicon glyphicon-align-left"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-align-center" data-toggle="tooltip" data-placement="top" title="Center" ng-click="setAlignment('text-center')" ng-class="{true:'active', false:''}[align=='text-center']">
+              <span class="glyphicon glyphicon-align-center"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-sm js-tooltip js-align-right" data-toggle="tooltip" data-placement="top" title="Align Right" ng-click="setAlignment('text-right')" ng-class="{true:'active', false:''}[align=='text-right']">
+              <span class="glyphicon glyphicon-align-right"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-list-container" style="height: {{restrictedHeight}}px;">
+    <div class="panel-body">
+      <div class="scroller"  id="parentContainer{{list_index}}" style="height: {{restrictedHeight}}px;">
+        <div class="js-items-list viewport real restrict" style="overflow-x: hidden; overflow-y: auto; max-height: {{restrictedHeight}}px;">
+          <ul>
+            <li class="row" sf-virtual-repeat="item in listData">
+              <div class="col-xs-2 bar-container" title="{{item.count}}">
+                <div class="bar" ng-style="{'width': (1-item.frequency) * 145 +'%' };"></div>
+              </div>
+              <span class="col-xs-10 padding-right-25 ellipsize {{align}}" ng-style="{'background-color': item.background};" ng-click="selectItem(item.name)"> {{item.name}}
+                <sup ng-if="item.hasStrength == 1">{{item.strengthCount}}</sup>
+              </span>
+            </li>
+          </ul>
+        </div>
 
-		<!-- <div class="small-loader" ng-show="isListLoading"></div> -->
-		<div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords < (restrictedHeight/21)]">
-			<!-- ng-attr-height="{{restrictedHeight}}" -->
-			<svg width="20">
-				<g transform="translate(0,0)">
-					<rect class="frame" width="20"></rect>
-					<g transform="translate(0,0)" id="overviewList"></g>
-					<!--  ng-attr-height="{{totalRecords == 0 ? 0: }}" -->
-					<rect class="page" width="20"></rect>
-				</g>
-			</svg>
-		</div>
-	</div>
+      </div>
+    </div>
+
+    <!-- <div class="small-loader" ng-show="isListLoading"></div> -->
+    <div class="js-scrollbar overview-scrollbar" ng-class="{true:'hidden', false:''}[totalRecords < (restrictedHeight/21)]">
+      <!-- ng-attr-height="{{restrictedHeight}}" -->
+      <svg width="20">
+        <g transform="translate(0,0)">
+          <rect class="frame" width="20"></rect>
+          <g transform="translate(0,0)" id="overviewList"></g>
+          <!--  ng-attr-height="{{totalRecords == 0 ? 0: }}" -->
+          <!-- <rect class="page" width="20"></rect> -->
+        </g>
+      </svg>
+    </div>
+  </div>
 </div>

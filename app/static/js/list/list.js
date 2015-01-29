@@ -1,4 +1,9 @@
-var app = angular.module('ngListViewApp',['pasvaz.bindonce', 'infinite-scroll']);
+var app = angular.module('ngListViewApp',['sf.virtualScroll','pasvaz.bindonce']);
+
+app.config(function($logProvider){
+  $logProvider.debugEnabled(false);
+});
+
 
 app.controller('ListViewController', 
 	function($scope, $window, DataFactory){
@@ -45,8 +50,9 @@ app.controller("ListController",
 		$scope.data = []; // will contain the complete data that comes from the server..
 		$scope.listData = []; //will contain the actual data that is being shown on the list
 		$scope.selectedList = "";
+		$scope.scrollModel = {};
 
-		$scope.itemsPerPage = 100; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
+		$scope.itemsPerPage = 4000; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
 		$scope.currentPage = 1; //holds the current page being shown..
 		$scope.totalRecords = 0; //holds the total number of records that can be shown..
 
@@ -72,32 +78,35 @@ app.controller("ListController",
 		/** Public methods **/
 		$scope.listChanged = function(){
 			// console.log("List Changed function called..");
-			var _listData = DataFactory.getListContents($scope.selectedList);
-			$scope.totalRecords = _listData.length;
-			$scope.data = _listData;
+			$scope.data = DataFactory.getListContents($scope.selectedList);
+			$scope.totalRecords = $scope.data.length;
 			$scope.loadMoreData(true);
 			$scope.dataWatchFlag ++;
 		}
 
 		$scope.loadMoreData = function(isFirstLoad){
-			isFirstLoad = isFirstLoad || false;
+			// isFirstLoad = isFirstLoad || false;
 
-			if(!isFirstLoad && ($scope.currentPage * $scope.itemsPerPage) > $scope.totalRecords){
-				return;
-			}
+			// if(!isFirstLoad && ($scope.currentPage * $scope.itemsPerPage) > $scope.totalRecords){
+			// 	return;
+			// }
 
-			//item in items | limitTo: rpp * page | limitTo: rpp * page < count ? -rpp : rpp - (rpp * page - count)
-			//item in data | orderBy:[firstOrderPredicate, orderByPredicate] | limitTo:200
-			var _newData =  $filter('limitTo')( $filter('limitTo')(
-				$filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate]), 
-					$scope.itemsPerPage * $scope.currentPage
-				), ($scope.itemsPerPage * $scope.currentPage < $scope.totalRecords) ? -$scope.itemsPerPage : $scope.itemsPerPage - ($scope.itemsPerPage * $scope.currentPage - $scope.totalRecords)
-			);
+			$scope.listData = []
+			var _newData = $filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate])
 
-			if(_newData.length){
-				$scope.currentPage += 1;
-				$scope.listData.push.apply($scope.listData, _newData);
-			}
+			// //item in items | limitTo: rpp * page | limitTo: rpp * page < count ? -rpp : rpp - (rpp * page - count)
+			// //item in data | orderBy:[firstOrderPredicate, orderByPredicate] | limitTo:200
+			// var _newData =  $filter('limitTo')( $filter('limitTo')(
+			// 	$filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate]), 
+			// 		$scope.itemsPerPage * $scope.currentPage
+			// 	), ($scope.itemsPerPage * $scope.currentPage < $scope.totalRecords) ? -$scope.itemsPerPage : $scope.itemsPerPage - ($scope.itemsPerPage * $scope.currentPage - $scope.totalRecords)
+			// );
+
+			// if(_newData.length){
+			// 	$scope.currentPage += 1;
+			console.log("ListData Length: ",_newData.length);
+			$scope.listData.push.apply($scope.listData, _newData);
+			// }
 		}
 
 		$scope.setAlignment = function(align){
@@ -146,8 +155,8 @@ app.controller("ListController",
 		}
 
 		function resetDisplayList(){
-			$scope.currentPage = 1;
-			$scope.listData = [];
+			// $scope.currentPage = 1;
+			// $scope.listData = [];
 			$scope.loadMoreData(true);
 		}
 
@@ -192,42 +201,45 @@ app.directive('myListView', function($window, $parse){
  			post: function($scope, element, attrs){
 				// console.log("Link function called!!");
 				var svg = d3.select(element[0]).select('svg');
-				var page = svg.select('rect.page');
+				// var page = svg.select('rect.page');
 				var frame = svg.select('rect.frame');
 				var overviewList = svg.select('#overviewList');
-				var mainList = d3.select(element[0]).select('.scroller');
+				var mainList = d3.select(element[0]).select('.js-items-list');
 				// var thumb = d3.select(element[0]).select('.thumb');
 				// console.log(mainList, $scope.parent_container_selector);
 
-				mainList.on("scroll", function(){
-					// console.log("List Scrolled: "+ this.scrollTop);
-					// console.log("Total: "+ $scope.totalRecords);
-					// console.log(page.attr("height"), $scope.restrictedHeight);
-					var y = ((this.scrollTop/20) * ($scope.restrictedHeight/$scope.totalRecords));
-					if(page.attr("height") <= 10){
-						// console.log("Fraction", page.attr("y")/($scope.restrictedHeight-page.attr("height")));
-						var diff = (page.attr("y")/($scope.restrictedHeight-page.attr("height")))*page.attr('height')*2;
-						y = y - diff;
-					}
-					page.attr("y", y);
-					// thumb.attr("y", y + (page.attr("height")/2) - 20);
-				});
+				// mainList.on("scroll", function(){
+				// 	// console.log("List Scrolled: "+ this.scrollTop);
+				// 	// console.log("Total: "+ $scope.totalRecords);
+				// 	// console.log(page.attr("height"), $scope.restrictedHeight);
+				// 	var y = ((this.scrollTop/20) * ($scope.restrictedHeight/$scope.totalRecords));
+				// 	if(page.attr("height") <= 10){
+				// 		// console.log("Fraction", page.attr("y")/($scope.restrictedHeight-page.attr("height")));
+				// 		var diff = (page.attr("y")/($scope.restrictedHeight-page.attr("height")))*page.attr('height')*2;
+				// 		y = y - diff;
+				// 	}
+				// 	page.attr("y", y);
+				// 	// thumb.attr("y", y + (page.attr("height")/2) - 20);
+				// });
 
-				function dragEvent(d) {
-					// console.log(page.attr("y"), d3.event.y);
-					// var y = d3.event.y - ((d3.event.y/($scope.restrictedHeight))*page.attr("height"));
-					// console.log("Original Y", d3.event.y);
-					// console.log("Computed Y", y);
+				// function dragEvent(d) {
+				// 	// console.log(page.attr("y"), d3.event.y);
+				// 	// var y = d3.event.y - ((d3.event.y/($scope.restrictedHeight))*page.attr("height"));
+				// 	// console.log("Original Y", d3.event.y);
+				// 	// console.log("Computed Y", y);
 					
-					var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 20;
-					mainList.transition().duration(10)
-        				.tween("mainScrollListTween", scrollTopTween(y));
-				}
+				// 	var y = d3.event.y * ($scope.totalRecords/$scope.restrictedHeight) * 20;
+				// 	mainList.transition().duration(10)
+    //     				.tween("mainScrollListTween", scrollTopTween(y));
+    //  				// mainList.attr("scrollTop",y);
+    //  				// mainList.scrollTop = y;
+				// }
 
 				function scrollTopTween(scrollTop) { 
 				    return function() { 
 				        var i = d3.interpolateNumber(this.scrollTop, scrollTop); 
 				        return function(t) { this.scrollTop = i(t); }; 
+				        // this.scrollTop = scrollTop;
 				    }; 
 				}
 
@@ -237,22 +249,22 @@ app.directive('myListView', function($window, $parse){
     //     				.tween("mainScrollListTweenViaThumb", scrollTopTween(y));
 				// }
 
-				function refreshScrollerPositions(){
+				// function refreshScrollerPositions(){
 					// console.log("Refreshing scroller positions..");
-					console.log("restrictedHeight", $scope.restrictedHeight);
-					console.log("totalRecords", $scope.totalRecords);
-					var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/20));
-					// console.log("Page Height", pageHeight);
-					// console.log("Current Page", $scope.currentPage);
-					var y = ($scope.currentPage-2)*pageHeight;
-					page.attr("y", y);
-					if (pageHeight < 10){
-						console.log("Original page height: ", pageHeight);
-						pageHeight = 10;
-					}
-					page.attr("height", pageHeight);
+					// console.log("restrictedHeight", $scope.restrictedHeight);
+					// console.log("totalRecords", $scope.totalRecords);
+					// var pageHeight = (($scope.restrictedHeight/$scope.totalRecords)*($scope.restrictedHeight/20));
+					// // console.log("Page Height", pageHeight);
+					// // console.log("Current Page", $scope.currentPage);
+					// var y = ($scope.currentPage-2)*pageHeight;
+					// page.attr("y", y);
+					// if (pageHeight < 10){
+					// 	console.log("Original page height: ", pageHeight);
+					// 	pageHeight = 10;
+					// }
+					// page.attr("height", pageHeight);
 					// thumb.attr("y", (y + (pageHeight/2)) - 20);
-				}
+				// }
 
 				$scope.$watch('restrictedHeight', function(newHeight, oldHeight){
 					svg.attr("height", newHeight);
@@ -270,7 +282,7 @@ app.directive('myListView', function($window, $parse){
 						return;
 					}
 
-					refreshScrollerPositions();
+					// refreshScrollerPositions();
 
 					var itemHeight = $scope.restrictedHeight / $scope.totalRecords;
 					var sortedData = $scope.getSortedData();
@@ -317,26 +329,27 @@ app.directive('myListView', function($window, $parse){
 								color = datum.background;
 							}
 							return "fill: "+ color;
-						}).on("click", function(){
-							var eventY = parseFloat(d3.select(this).attr("y"));
-							var pageY = parseFloat(page.attr("y"));
-							// console.log(pageY, eventY);
-							var currentPage = Math.ceil((pageY * $scope.totalRecords)/($scope.itemsPerPage * $scope.restrictedHeight));
+						})
+						// .on("click", function(){
+							// var eventY = parseFloat(d3.select(this).attr("y"));
+							// var pageY = parseFloat(page.attr("y"));
+							// // console.log(pageY, eventY);
+							// var currentPage = Math.ceil((pageY * $scope.totalRecords)/($scope.itemsPerPage * $scope.restrictedHeight));
 
-							if(eventY < pageY){
-								currentPage = currentPage - 1;
-							}else if(eventY > pageY){
-								currentPage = currentPage + 1;
-							}
+							// if(eventY < pageY){
+							// 	currentPage = currentPage - 1;
+							// }else if(eventY > pageY){
+							// 	currentPage = currentPage + 1;
+							// }
 
-							var y = currentPage * $scope.itemsPerPage * 20;
-							mainList.transition().duration(10)
-		        				.tween("mainScrollListTween", scrollTopTween(y));
-						});
+							// var y = currentPage * $scope.itemsPerPage * 20;
+							// mainList.transition().duration(10)
+		     //    				.tween("mainScrollListTween", scrollTopTween(y));
+						// });
 				}
 
 				// console.log("Page:",page);
-				page.call(d3.behavior.drag().on("drag", dragEvent));
+				//page.call(d3.behavior.drag().on("drag", dragEvent));
 				// thumb.call(d3.behavior.drag().on("drag", thumbDragEvent));
 				// var page = d3.select(element[0]).select('rect.page')
 				// 			.datum({y: 0, h: 40})

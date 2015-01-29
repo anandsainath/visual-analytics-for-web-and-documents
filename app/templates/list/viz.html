@@ -5,17 +5,18 @@ VISLists, VIS 25 - All the Papers and Citations
 {% endblock %}
 
 {% block head_script_content %}
-<style type="text/css">
-	.top-margin-15{
-		margin-top: 15px;
-	}
-</style>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
+	<style type="text/css">
+		.top-margin-15{
+			margin-top: 15px;
+		}
+	</style>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 
-<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
-<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
 	<!--<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
 	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>-->
