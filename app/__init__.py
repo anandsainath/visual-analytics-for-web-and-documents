@@ -1,6 +1,7 @@
 # Import flask and template operators
 from flask import Flask, render_template, redirect, url_for
 from flask.ext.compress import Compress
+import os
 
 # Define the WSGI application object
 app = Flask(__name__)
@@ -17,6 +18,9 @@ app.config["SECRET_KEY"] = "c39dcb77e31b57bb094e816c4982ac3c"
 app.config["VIS25_DB"] = "56bcf92a4e6ac231598459b95de86410"
 app.config["SITE_DOMAIN"] = "127.0.0.1:5000"
 
+UPLOAD_FOLDER = os.path.join('.', os.path.abspath(os.path.join(__file__, '..')), 'upload/')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 @app.route("/")
 def index():

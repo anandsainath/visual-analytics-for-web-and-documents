@@ -17,9 +17,9 @@ Triangle(application)
 #file_handler.setLevel(logging.WARNING)
 #application.logger.addHandler(file_handler)
 
-UPLOAD_FOLDER = os.path.join('.', os.path.dirname(__file__), 'upload/')
-appplication.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-appplication.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+#UPLOAD_FOLDER = os.path.join('.', os.path.dirname(__file__), 'upload/')
+#appplication.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#appplication.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 if __name__ == "__main__":
     application.run()
