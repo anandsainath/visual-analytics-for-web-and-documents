@@ -1,11 +1,11 @@
-var app = angular.module('ngListViewApp',['sf.virtualScroll','pasvaz.bindonce']);
+var app = angular.module('ngJigsawApp',['sf.virtualScroll','pasvaz.bindonce']);
 
 app.config(function($logProvider){
   $logProvider.debugEnabled(false);
 });
 
 
-app.controller('ListViewController', 
+app.controller('JigViewController', 
 	function($scope, $window, DataFactory){
 
 		var listViewWidth = 350;
@@ -50,6 +50,7 @@ app.controller("ListController",
 		$scope.data = []; // will contain the complete data that comes from the server..
 		$scope.listData = []; //will contain the actual data that is being shown on the list
 		$scope.selectedList = "";
+		$scope.previousList = undefined;
 		$scope.scrollModel = {};
 
 		$scope.itemsPerPage = 4000; //every time an infinite scroll is triggered, 100 items would be fetched and displayed.
@@ -77,36 +78,21 @@ app.controller("ListController",
 
 		/** Public methods **/
 		$scope.listChanged = function(){
-			// console.log("List Changed function called..");
+			if($scope.previousList){
+				$scope.selectedListItems = [];
+				DataFactory.setSelectedListItem($scope.previousList, $scope.selectedListItems);
+			}
 			$scope.data = DataFactory.getListContents($scope.selectedList);
 			$scope.totalRecords = $scope.data.length;
 			$scope.loadMoreData(true);
 			$scope.dataWatchFlag ++;
+			$scope.previousList = $scope.selectedList;
 		}
 
 		$scope.loadMoreData = function(isFirstLoad){
-			// isFirstLoad = isFirstLoad || false;
-
-			// if(!isFirstLoad && ($scope.currentPage * $scope.itemsPerPage) > $scope.totalRecords){
-			// 	return;
-			// }
-
 			$scope.listData = []
 			var _newData = $filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate])
-
-			// //item in items | limitTo: rpp * page | limitTo: rpp * page < count ? -rpp : rpp - (rpp * page - count)
-			// //item in data | orderBy:[firstOrderPredicate, orderByPredicate] | limitTo:200
-			// var _newData =  $filter('limitTo')( $filter('limitTo')(
-			// 	$filter('orderBy')($scope.data, [$scope.firstOrderPredicate, $scope.orderByPredicate]), 
-			// 		$scope.itemsPerPage * $scope.currentPage
-			// 	), ($scope.itemsPerPage * $scope.currentPage < $scope.totalRecords) ? -$scope.itemsPerPage : $scope.itemsPerPage - ($scope.itemsPerPage * $scope.currentPage - $scope.totalRecords)
-			// );
-
-			// if(_newData.length){
-			// 	$scope.currentPage += 1;
-			console.log("ListData Length: ",_newData.length);
 			$scope.listData.push.apply($scope.listData, _newData);
-			// }
 		}
 
 		$scope.setAlignment = function(align){
@@ -114,7 +100,6 @@ app.controller("ListController",
 		}
 
 		$scope.selectItem = function(itemName){
-			// console.log("Select Item: "+itemName);
 			$scope.isListLoading = true;
 			if(!notification){
 				notification = noty({});
@@ -393,7 +378,7 @@ app.service(
 
 			return(request.then(function(response){
 				return response.data;
-			}, handleError))
+			}, handleError));
 		}
 
 		//Saves all the list contents to be stored in the Angular Model.
@@ -510,10 +495,12 @@ app.factory('DataFactory',function($rootScope, apiService){
 				selectedLists.splice(index, 1);
 			}
 		}else{
-			selectedLists.push(params);
+			if(selectedListItems.length){
+				selectedLists.push(params);
+			}
 		}
 
-		// console.log("SelectedLists", selectedLists);
+		console.log("SelectedLists", selectedLists);
 		updateListContents();
 	}
 

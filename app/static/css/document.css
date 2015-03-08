@@ -1,0 +1,123 @@
+.doc-list > li {
+	border-bottom: 1px solid #CCC;
+}
+
+.bs-summary {
+	position: relative;
+	padding: 5px 20px 0px;
+}
+
+.bs-summary:after {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	font-size: 12px;
+	font-weight: 700;
+	color: #959595;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	content: "Summary";
+}
+
+.bs-content {
+	position: relative;
+	padding: 35px 20px 0px;
+}
+
+.bs-content:after {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	font-size: 12px;
+	font-weight: 700;
+	color: #959595;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	content: "Content";
+}
+
+.bs-entities {
+	position: relative;
+	padding: 35px 10px 0px;
+}
+
+.bs-entities:after {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	font-size: 12px;
+	font-weight: 700;
+	color: #959595;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	content: "Affiliated Entities";
+}
+
+.list-group{
+	margin-bottom: 0px !important;
+}
+
+.list-group-item{
+	border: none !important;
+}
+
+.wc-label{
+	/*font-size: 100% !important;*/
+	border-radius: 0px !important;
+	font-weight: 500 !important;
+}
+
+.label-space{
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
+.summary-panel{
+	padding: 20px !important;
+	padding-top: 0px !important;
+	padding-bottom: 5px !important;
+}
+
+.summary-panel span {
+	display: inline-block;
+}
+
+.entity-editor{
+	min-height: 40px;
+	background: #EEE;
+}
+
+/*Grid CSS*/
+.label-margin-top{
+	margin-top: 32%;
+}
+
+.controls-panel{
+	background: #eee;
+	padding: 20px !important;
+	padding-top: 0px !important;
+	padding-bottom: 5px !important;
+}
+
+.grid-container{
+	margin: 0px;
+	line-height: 0.75em;
+	background: #eee;
+	padding: 1px;
+}
+
+.document {
+	display: inline-block;
+	width: 18px;
+	height: 24px;
+	border: 1px solid #eee;
+	background: #FFF;
+}
+
+.selected {
+	border: 2px solid #f03b20 !important;
+}
+
+.clicked{
+	border: 2px solid #FEF935 !important;
+}

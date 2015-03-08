@@ -5,8 +5,7 @@
 }
 
 .table-container{
-  background: none repeat scroll 0 0 #FAFAFA;
-  overflow: auto;
+  overflow-y: auto;
   max-height: 550px;
   padding: 5px;
   width: auto;
@@ -36,30 +35,30 @@ td{
   line-height: 2;
 }
 
-.table-container::-webkit-scrollbar {
+/*.table-container::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
-
-.table-container::-webkit-scrollbar-track {
+*/
+/*.table-container::-webkit-scrollbar-track {
   background-color: rgba(113,112,107,0.1);
   -webkit-border-radius: 10px;
-}
+}*/
 
-.table-container::-webkit-scrollbar-thumb:vertical {
+/*.table-container::-webkit-scrollbar-thumb:vertical {
   background-color: rgba(0,0,0,.2);
   -webkit-border-radius: 10px;
 }
-
-.table-container::-webkit-scrollbar-thumb:vertical:hover,
+*/
+/*.table-container::-webkit-scrollbar-thumb:vertical:hover,
 .table-container::-webkit-scrollbar-thumb:horizontal:hover {
   background: red;
 }
-
-.table-container::-webkit-scrollbar-thumb:horizontal {
+*/
+/*.table-container::-webkit-scrollbar-thumb:horizontal {
   background-color: rgba(0,0,0,.2);
   -webkit-border-radius: 10px;
-}
+}*/
 
 .tooltip{
   font-size: 14px;

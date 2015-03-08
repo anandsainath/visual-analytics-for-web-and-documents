@@ -1,0 +1,21 @@
+{% extends "base_layout.html" %}
+
+{% block title %}
+	Document Grid View
+{% endblock %}
+
+{% block head_script_content %}
+	<script src="{{ url_for('static', filename='libs/d3.v3.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-sanitize/angular-sanitize.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+	
+	<script src="{{ url_for('static', filename='js/grid/grid.js') }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<my-doc-grid-component val="gridData"></my-doc-grid-component>
+	</div>
+{% endblock %}

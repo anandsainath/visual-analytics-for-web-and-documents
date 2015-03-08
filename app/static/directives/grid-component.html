@@ -1,0 +1,84 @@
+<div class="row" ng-controller="GridController">
+	<div class="col-sm-10 col-sm-offset-1">
+		<div class="panel panel-default padding-1 border-eee">
+			<div class="row">
+				<!-- Viz Controls section -->
+				<div class="col-sm-12">
+					<div class="panel panel-default controls-panel margin-bottom-2">
+						<div class="panel-body padding-bottom-0">
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="row">
+										<div class="col-sm-4">
+											<p class="text-center label-margin-top">Sort By</p>
+										</div>
+										<div class="col-sm-8">
+											<div class="row padding-3">
+												<select ng-model="sortByAttribute" class="form-control">
+											        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+											            {{obj.label}}
+											        </option>
+											    </select>
+											</div>
+											<div class="row padding-3">
+												<select class="form-control" ng-options="obj.value as obj.label for obj in sortByOrderOptions" ng-model="sortByOrder"></select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<div class="row">
+										<div class="col-sm-4">
+											<p class="text-center label-margin-top">Color By</p>
+										</div>
+										<div class="col-sm-8">
+											<div class="row padding-3">
+												<select ng-model="colorByAttribute" class="form-control">
+											        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+											            {{obj.label}}
+											        </option>
+											    </select>
+											</div>
+											<div class="row padding-3">
+												<select class="form-control" ng-options="obj.value as obj.label for obj in colorByOptions" ng-model="colorByOption"></select>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row padding-top-20">
+								<div class="col-sm-6 text-center">
+									<label>{{cur_doc}}</label>
+								</div>
+								<div class="col-sm-6 text-center">
+									<button type="button" class="btn btn-primary btn-sm" ng-disabled="compute_btn_disabled" ng-click="loadSimmilarityScore()">Compute Document Simmilarity</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-12">
+					<!-- Viz Section -->
+					<div class="panel panel-default margin-bottom-0">
+						<div class="panel-body padding-3">
+							<p class="grid-container">
+								<span ng-repeat="doc in gridData | orderBy:sortByAttribute:sortByOrder" class="document" ng-style="{'background':getDocColor(doc.name)}" ng-class="{selected: doc.hover, clicked: doc.clicked}" ng-mouseenter="mouseEnterDoc(doc)" ng-mouseleave="mouseLeaveDoc(doc)" ng-click="mouseClick(doc)"></span>
+							</p>
+
+							<div class="documentContainer" style="height: 307px;" ng-if="content_loaded">
+								<div style="overflow-x: hidden; overflow-y: auto; max-height: 307px;">
+									<div class="bs-content divide padding-top-45">
+										<p ng-repeat="line in content" ng-bind-html="line"></p>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

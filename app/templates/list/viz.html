@@ -5,41 +5,38 @@ VISLists, VIS 25 - All the Papers and Citations
 {% endblock %}
 
 {% block head_script_content %}
-	<style type="text/css">
-		.top-margin-15{
-			margin-top: 15px;
-		}
-	</style>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 
-	<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/nginfinitescroll/build-src/ng-infinite-scroll.min.js') }}"></script>
-	<!--<script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/ngReact/ngReact.min.js') }}"></script>
-	<script type="text/jsx" src="{{url_for('static', filename='js/list/list-reactor.js')}}"></script>-->
 	<script src="{{ url_for('static', filename='libs/d3.v3.js') }}"></script>
-	<!--<script src="{{ url_for('static', filename='js/list/longscroll.js') }}"></script>-->
 	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
 	<script src="{{ url_for('static', filename='libs/jquery.noty.packaged.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
-	{% endblock %}
+{% endblock %}
 
-	{% block toolbar_header_left_link_content %}
-	<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
-	<li class="divider"><a href="/list/tutorial">Help</a></li>
-	{% endblock %}
+{% block toolbar_home_link %}
+	{% if vis25 %}
+		<a class="navbar-brand" href="javascript:void(0)">VISLists</a>
+	{% else %}
+		<a class="navbar-brand" href="javascript:void(0)">ListVIS</a>
+	{% endif %}
+	
+{% endblock %}
 
-	{% block toolbar_page_content %}
-	<p class="navbar-text">List Modes</p>
-	<div class="btn-group navbar-nav navbar-center">
-		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
-		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
-		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
-		<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
-	</div>
+{% block toolbar_page_content %}
+
+	<ul class="nav navbar-nav navbar-center">
+		<li><p class="navbar-text">List Modes</p></li>
+		<li class="btn-group">
+			<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
+			<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
+			<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
+			<button type="button" class="btn btn-default navbar-btn" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
+		</li>
+	</ul>
 
 	<!-- <div class="btn-group">
 		<button type="button" class="btn btn-info">{{token}}</button>
@@ -53,22 +50,28 @@ VISLists, VIS 25 - All the Papers and Citations
 		</ul>
 	</div> -->
 
-	<!-- Single button -->
-	<ul class="nav navbar-nav navbar-right top-margin-15">
-		<li><strong>Session Code</strong> {{token}}</li>
+	<ul class="nav navbar-nav navbar-right">
+		<li><a href="/list">Home</a></li>
+		<li><a href="/list/tutorial">Tutorial</a></li>
+		<li><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/" target="_blank">VIS 25 - All the Papers and Citations</a></li>
 	</ul>
-	{% endblock %}
 
-	{% block content %}
+	<!-- Single button -->
+	<!-- <ul class="nav navbar-nav navbar-right top-margin-15"> -->
+		<!-- <li><strong>Session Code</strong> {{token}}</li> -->
+	<!-- </ul> -->
+{% endblock %}
+
+{% block content %}
 	<div class="loader" ng-show="isLoading"></div>
 	<div class="grid" style="height: {{gridHeight|angular}}px;">
 		<div class="list-container" style="width: {{width|angular}}px; margin-left: 35px;">
 			<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
 		</div>
 	</div>
-	{% endblock %}
+{% endblock %}
 
-	{% block script_content %}
+{% block script_content %}
 	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
 	<script type="text/javascript">
 
@@ -105,5 +108,5 @@ VISLists, VIS 25 - All the Papers and Citations
 			};
 		});
 
-</script>
+	</script>
 {% endblock %}

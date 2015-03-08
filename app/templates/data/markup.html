@@ -1,0 +1,167 @@
+{% extends "base_layout.html" %}
+
+{% block title %}
+Document Markup
+{% endblock %}
+
+{% block head_script_content %}
+
+<style type="text/css">
+	body{
+		padding-top: 20px !important;
+	}
+
+	.navbar{
+		display: none;
+	}
+</style>
+
+<script src="{{ url_for('static', filename='bower_components/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/angular-sanitize/angular-sanitize.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/document/document.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="container" ng-controller="MarkupController">
+	<div class="loader hidden"></div>
+
+	<div class="row">
+		<div class="col-md-7">
+			<div class="panel panel-default">
+				<!-- Default panel contents -->
+				<div class="panel-heading">
+					<div class="row text-center">
+						<div class="col-md-3"></div>
+						<div class="col-md-2"><h5>Title</h5></div>
+						<!-- <div class="col-md-4"> render_select('title') </div> -->
+					</div>
+				</div>
+				
+				<!-- render_document_panel() -->
+				<div class="panel panel-default margin-bottom-0">
+					<!-- Document content to be rendered here. -->
+					<div class="bs-summary">
+						<div class="row">
+							<div class="col-md-12 padding-top-45">
+								<p ng-repeat="line_summary in summary">{{line_summary}}</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="bs-content divide padding-top-45" id="textContent">
+						<p ng-repeat="line in content" ng-bind-html="line"></p>
+					</div>
+					<!-- List group -->
+					<div class="bs-entities divide">
+						<ul class="list-group">
+							<li class="list-group-item">
+								<ul class="list-unstyled">
+									<li ng-repeat="column in entity_columns">
+										<div class="row" ng-if="entities[column]">
+											<div class="col-md-2"><h5><span class="label {{column}}">{{column}}</span></h5></div>
+											<div class="col-md-10">
+												<p style="margin-top: 10px" ng-bind="entities[column].join(', ')"></p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-5">
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<p>A sample of how the documents present in the input zip file is shown to the left. Configure the number of lines that you want in the summary on the left. Add any additional entities that can be created from the input file below.</p>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="panel panel-default">
+					<div class="panel-heading"><h5>Add document specific entities here</h5></div>
+					<div class="panel-body">
+						<table class="table">
+							<caption></caption>
+							<thead>
+								<tr>
+									<th>Entity Name</th>
+									<th>Entity Value</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><input type="text" class="form-control" name="entityName[]" placeholder="New Entity Name"></td>
+									<!-- <td> render_select("value[]") </td> -->
+									<td>
+										<button type="button" class="btn btn-primary js-add-btn">+</button>
+									</td>
+								</tr>
+
+								<tr class="js-entity-template hidden">
+									<td><input type="text" class="form-control" name="entityName[]" placeholder="New Entity Name"></td>
+									<!-- <td>render_select("value[]")</td> -->
+									<td>
+										<button type="button" class="btn btn-primary js-add-btn">+</button>
+										<button type="button" class="btn btn-warning js-remove-btn">-</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="row text-center">
+				<p><a class="btn btn-lg btn-success" href="" id="processBtn" role="button">Process Documents »</a></p>
+			</div> 
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block script_content %}
+<script type="text/javascript">
+	$(function(){
+		$(document).on("click",".js-add-btn", function(){
+			var $new_row = $('.js-entity-template').clone();
+			$new_row.removeClass("js-entity-template hidden");
+			$('tbody').append($new_row);
+		});
+
+		$(document).on("click", ".js-remove-btn", function(){
+			$(this).parents('tr:first').remove();
+		});
+
+		$('#processBtn').click(function(){
+			var params = $('[name="title"]').serialize();
+			params += "&" + $('tbody > tr:not(".js-entity-template")').find("[name='value[]']").serialize();
+			params += "&" + $('tbody > tr:not(".js-entity-template")').find("[name='entityName[]']").serialize();
+			params += "&" + $('[name="summary-lines"]').serialize();
+
+			$('.loader').show().removeClass("hidden");
+			$.ajax('/data/process-documents',{
+				data: params,
+				type: 'POST',
+				dataType: 'json',
+				success: function(data){
+					$('.loader').hide().addClass("hidden");
+					if(data.success){
+						window.location.href = data.redirect;
+					}else{
+						window.alert("The documents could not be processed. Please try again!");
+					}
+				}
+			});
+
+			return false;
+		});
+	});
+</script>
+{% endblock %}

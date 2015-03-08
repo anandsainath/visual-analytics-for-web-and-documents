@@ -1,96 +1,30 @@
 {% extends "base_layout.html" %}
 
 {% block title %}
-VISLists, VIS 25 - All the Papers and Citations
+ListVIS
 {% endblock %}
 
-{% block head_script_content %}
-<style type="text/css">
-	
-	.jumbotron{
-		background-color: transparent !important;
-		padding-left: 30px !important;
-		padding-right: 30px !important;
-		padding-top: 24px !important;
-		padding-bottom: 24px !important;
-		text-align: center;
-	}
-
-	.footer {
-		padding-top: 40px;
-		padding-bottom: 40px;
-		margin-top: 40px;
-		border-top: 1px solid #eee;
-	}
-
-	.btn-file {
-		position: relative;
-		overflow: hidden;
-	}
-
-	.btn-file input[type=file] {
-		position: absolute;
-		top: 0;
-		right: 0;
-		min-width: 100%;
-		min-height: 100%;
-		font-size: 100px;
-		text-align: right;
-		filter: alpha(opacity=0);
-		opacity: 0;
-		background: red;
-		cursor: inherit;
-		display: block;
-	}
-
-	input[readonly] {
-		background-color: white !important;
-		cursor: text !important;
-	}
-
-	.bs-callout-warning {
-		background-color: #faf8f0;
-		border-color: #faebcc;
-	}
-	
-	.bs-callout {
-		margin: 20px 0;
-		padding: 20px;
-		border-left: 3px solid #faebcc;
-	}
-
-	.bs-callout-warning h4 {
-		color: #8a6d3b;
-	}
-
-	.bs-callout h4 {
-		margin-top: 0;
-		margin-bottom: 5px;
-	}
-
-	.padding-left-0 {
-		padding-left: 0px !important;
-	}
-
-	.right-padding-5 {
-		padding-right: 5px !important;
-	}
-
-</style>
+{% block toolbar_home_link %}
+<a class="navbar-brand" href="/list">ListVIS</a>
 {% endblock %}
 
 {% block toolbar_header_left_link_content %}
-<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
-<li><a href="/list/tutorial">Help</a></li>
+<!-- <li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li> -->
+<!-- <li><a href="/list/tutorial">Tutorial</a></li> -->
+{% endblock %}
+
+{% block toolbar_page_content %}
+	<ul class="nav navbar-nav navbar-right">
+		<li><a href="/list/tutorial">Tutorial</a></li>
+		<li><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/" target="_blank">VIS 25 - All the Papers and Citations</a></li>
+	</ul>
 {% endblock %}
 
 {% block content %}
 <div class="container">
 	<div class="jumbotron">
 		<h1>ListVIS</h1>
-		<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
-
-		<p><strong>VISLists</strong> summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis). </p>
+		<p><strong>ListVIS</strong> is a way of visualizing contents of a CSV file. Every column of the CSV file is considered as a “list” and the visualization represents connections between the individual members of a list. Connections can be both internal and external. <strong>VISLists</strong> summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis). </p>
 		<p><a class="btn btn-lg btn-success" href="/list/vis25" role="button">Go to VISLists »</a></p>
 
 	</div>
@@ -129,9 +63,9 @@ VISLists, VIS 25 - All the Papers and Citations
 			<h3>Resume saved session</h3>
 			<p>Enter the session code to resume a previous session.</p>
 			<div class="input-group">
-				<input type="text" class="form-control" placeholder="Saved Session Code">
+				<input type="text" class="form-control" id="sessionCodeTxt" placeholder="Saved Session Code">
 				<span class="input-group-btn">
-					<button class="btn btn-primary" type="button">Go!</button>
+					<button class="btn btn-primary" id="goBtn" type="button">Go!</button>
 				</span>
 			</div>
 		</div>
@@ -144,31 +78,21 @@ VISLists, VIS 25 - All the Papers and Citations
     </div>
 
 	<footer class="footer">
-		<p>© II Lab - Georgia Institute of Technology</p>
+		<p>© <a href="http://www.cc.gatech.edu/gvu/ii/" target="_blank">II Lab - Georgia Institute of Technology</a></p>
 	</footer>
 </div>
 {% endblock %}
 
 {% block script_content %}
-<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/file-btn.js') }}"></script>
 <script type="text/javascript">
 	$(function(){
-
-		$(document).on('change', '.btn-file :file', function() {
-			var input = $(this),
-			numFiles = input.get(0).files ? input.get(0).files.length : 1,
-			label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-			input.trigger('fileselect', [numFiles, label]);
-		});
-
-		$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
-			var input = $(this).parents('.input-group').find(':text'),
-			log = numFiles > 1 ? numFiles + ' files selected' : label;
-
-			if( input.length ) {
-				input.val(log);
-			} else {
-				if( log ) alert(log);
+		$('#goBtn').click(function(){
+			var sessionCode = $("#sessionCodeTxt").val();
+			if(sessionCode){
+				$("#sessionCodeTxt").val(null);
+				window.location.href = "/list/session/"+sessionCode;
 			}
 		});
 	});

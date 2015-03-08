@@ -7,6 +7,9 @@ body {
     height: 100%;
     overflow: auto;
 }*/
+.top-margin-15{
+	margin-top: 15px;
+}
 
 .colored{
 	color: #ff9600;
@@ -165,33 +168,6 @@ ol, ul {
 .bar{
 	background: white;
 	height: 14px;
-}
-
-.loader {
-    position:   fixed;
-    z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     100%;
-    width:      100%;
-    background: rgba( 255, 255, 255, .8 ) 
-        url('/static/images/loading.gif') 
-        50% 50% 
-        no-repeat;
-}
-
-.small-loader {
-    position:   relative;
-    z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     50px;
-    width:      100%;
-    border-bottom: 2px solid #CCC;
-    background: rgba( 255, 255, 255, .8 ) 
-        url('/static/images/loading-small.gif') 
-        50% 50% 
-        no-repeat;
 }
 
 .ellipsize{

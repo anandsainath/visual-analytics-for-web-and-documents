@@ -12,6 +12,10 @@
   		<li class="divider"></li>
   		{{render_item("sort_asc", "Sort Ascending")}}
   		{{render_item("sort_desc", "Sort Descending")}}
+      <li class="divider">
+      {{render_item("hide","Don't show this column")}}
+      {{render_item("show","Show this column")}}
+      </li>
   	</ul>
   </div>
 {% endmacro %}
@@ -55,9 +59,10 @@
 <div id="pagination-root">
   {{ render_pagination(pagination) }}
 </div>
+
 <div class="table-container">
   <div class="table-responsive">
-    <table class="table">
+    <table class="table table-striped">
       <colgroup>
       {% for header in headers %}
       <col span="1"/>
@@ -74,16 +79,20 @@
       {% for row in data %}
       <tr>
         {% for header in headers %}
-        {% if row[header] is string %}
-          {% if row[header] | length > 40 %}
-            <td class="js-td-tooltip" title="{{ row[header] }}" data-toggle="tooltip">{{ row[header]|truncate(length=40) }}</td>
-          {% else %}
-            <td>{{ row[header] }}</td>
+          {% if row[header] is string %}
+              {% if row[header] | length > 40 %}
+                <td class="js-td-tooltip" title="{{ row[header] }}" data-toggle="tooltip">{{ row[header]|truncate(length=40) }}</td>
+              {% else %}
+                <td>{{ row[header] }}</td>
+              {% endif %}
+          {% elif row[header] is iterable %}
+              <td>
+                {% for item in row[header] %}
+                  <p> {{ item }} </p>
+                {% endfor %}
+              </td>
           {% endif %}
-        {% else %}
-          <td>{{ row[header] }}</td>
-        {% endif %}
-        {% endfor %}    
+        {% endfor %} 
       </tr>
       {% endfor %}
     </tbody>

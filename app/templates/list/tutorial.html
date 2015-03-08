@@ -12,19 +12,19 @@
 </style>
 {% endblock %}
 
-{% block toolbar_header_left_link_content %}
-	<li><a href="/list">Home</a></li>
-	<li class="active"><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/">Back to Vis25</a></li>
+{% block toolbar_home_link %}
+<a class="navbar-brand" href="/list">ListVIS</a>
+{% endblock %}
+
+{% block toolbar_page_content %}
+	<ul class="nav navbar-nav navbar-right">
+		<li class="active"><a href="javascript:void(0);">Tutorial</a></li>
+		<li><a href="http://www.cc.gatech.edu/gvu/ii/citevis/VIS25/" target="_blank">VIS 25 - All the Papers and Citations</a></li>
+	</ul>
 {% endblock %}
 
 {% block content %}
 <div class="container">
-
-	<div class="jumbotron">
-		<h1>VISLists</h1>
-
-		<p>This visualization summarizes all papers and authors from the IEEE VIS Conferences (VAST, InfoVis, SciVis).</p>
-	</div>
 	
 	<h1 id="type" class="page-header">Interactions</h1>
 	<div class="row">
@@ -58,7 +58,8 @@
 
 	
 	<footer class="footer">
-        <p>II Lab - Georgia Institute of Technology</p>
-    </footer>
+		<p>© <a href="http://www.cc.gatech.edu/gvu/ii/" target="_blank">II Lab - Georgia Institute of Technology</a></p>
+	</footer>
+
 </div>
 {% endblock %}

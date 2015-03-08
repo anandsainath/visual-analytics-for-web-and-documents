@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-ng-app="ngJigsawApp">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="author" content="Anand Sainath">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+	<link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+
+	<!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
+	<!-- Custom styles for this template -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='libs/bootstrap/css/starter-template.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='bower_components/normalize.css/normalize.css') }}">
+	{% block head_script_content %}{% endblock %}
+	<title>{% block title %}{% endblock %}</title>
+</head>
+<body id="bodyContainer" ng-controller="JigViewController">
+	
+	<div id="layout-html-content">
+		{% block layout_content %}{% endblock %}
+	</div>
+
+	{% block script_content %}{% endblock %}
+</body>
+</html>

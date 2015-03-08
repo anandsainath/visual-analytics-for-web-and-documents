@@ -1,0 +1,49 @@
+{% extends "base_layout.html" %}
+
+{% block title %}
+Jigsaw Web --
+{% endblock %}
+
+{% block toolbar_home_link %}
+<a class="navbar-brand" href="/data">Jigsaw Web</a>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="jumbotron">
+		<h1>Jigsaw Web</h1>
+		<div class="row margin-top-50">
+			<div class="col-md-2"></div>
+			<div class="col-md-8">
+				<form id="fileUploadForm" method="post" enctype="multipart/form-data">
+					<p>Upload a zip file containing text files which you want to visualize using the web version of Jigsaw</p>
+					<div class="row">
+						<div class="col-md-10 padding-right-5">
+							<div class="input-group">
+								<span class="input-group-btn">
+									<span class="btn btn-primary btn-file">
+										Browse <input type="file" name="file" accept="application/zip, application/octet-stream">
+									</span>
+								</span>
+								<input type="text" class="form-control" readonly>
+							</div>		
+						</div>
+						<div class="col-md-2 padding-left-0">
+							<input type="submit" class="btn btn-success"/>
+						</div>
+					</div>
+
+					<span class="help-block" id="fileUploadFormResponse">
+						Currently Supported File Types: *.zip
+					</span>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block script_content %}
+	<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/file-btn.js') }}"></script>
+{% endblock %}

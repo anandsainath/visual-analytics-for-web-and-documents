@@ -2,16 +2,61 @@
 
 The [React.js](http://facebook.github.io/react/) library can be used as a view component in web applications. ngReact is an Angular module that allows React Components to be used in [AngularJS](https://angularjs.org/) applications.
 
+Motivation for this could be any of the following:
+
+- You need greater performance than Angular can offer (two way data binding, Object.observe, too many scope watchers on the page) and React is typically more performant due to the Virtual DOM and other optimizations it can make
+
+- React offers an easier way to think about the state of your UI; instead of data flowing both ways between controller and view as in two way data binding, React typically eschews this for a more unidirectional/reactive paradigm
+
+- Someone in the React community released a component that you would like to try out
+
+- You're already deep into an Angular application and can't move away, but would like to experiment with React
+
+# Installation
+
+Install via Bower:
+
+```
+bower install ngReact
+```
+
+or via npm:
+
+```
+npm install ngreact
+```
+
+# Usage
+
+Then, just make sure Angular, React, and ngReact are on the page,
+```
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/react/react.js"></script>
+<script src="bower_components/ngReact/ngReact.min.js"></script>
+```
+
+and include the 'react' Angular module as a dependency for your new app
+
+```
+<script>
+    angular.module('app', ['react']);
+</script>
+```
+
+and you're good to go.
+
+# Features
+
 Specifically, ngReact is composed of:
 
 - `react-component`, an Angular directive that delegates off to a React Component
 - `reactDirective`, a service for converting React components into the `react-component` Angular directive
 
-**ngReact** can be used in existing angular applications, to replace areas of views with react components.
+**ngReact** can be used in existing angular applications, to replace entire or partial views with react components.
 
 ## The react-component directive
 
-The reactComponent directive allows you to add React Components to your angular views.
+The reactComponent directive is a generic wrapper for embedding your React components.
 
 With an Angular app and controller declaration like this:
 
@@ -26,7 +71,7 @@ And a React Component like this
 
 ```javascript
 /** @jsx React.DOM */
-app.value('HelloComponent', React.createClass({
+var HelloComponent = React.createClass({
   propTypes: {
     fname : React.PropTypes.string.isRequired,
     lname : React.PropTypes.string.isRequired
@@ -34,7 +79,8 @@ app.value('HelloComponent', React.createClass({
   render: function() {
     return <span>Hello {this.props.fname} {this.props.lname}</span>;
   }
-}));
+})
+app.value('HelloComponent', HelloComponent);
 ```
 
 The component can be used in an Angular view using the react-component directive like so, where:
@@ -52,12 +98,24 @@ The component can be used in an Angular view using the react-component directive
 
 ## The reactDirective service
 
-With the `reactDirective` service you can create named directives backed by React components. The service takes the name of the React component as the argument.
+The reactDirective factory, in contrast to the reactComponent directive, is meant to create specific directives corresponding to React components. In the background, this actually creates and sets up directives specifically bound to the specified React component.
+
+If, for example, you wanted to use the same React component in multiple places, you'd have to specify &lt;react-component name="yourComponent" props="props" /&gt; repeatedly, but if you used reactDirective factory, you could create a yourComponent directive and simply use that everywhere.
+
+The service takes the React component as the argument.
 
 ```javascript
 app.directive('hello', function(reactDirective) {
-  return reactDirective('Hello');
-} );
+  return reactDirective(HelloComponent);
+});
+```
+
+Alternatively you can provide the name of the component
+
+```javascript
+app.directive('hello', function(reactDirective) {
+  return reactDirective('HelloComponent');
+});
 ```
 
 This creates a directive that can be used like this:
@@ -70,7 +128,23 @@ This creates a directive that can be used like this:
 </body>
 ```
 
-## Reusing Angular injectables
+The `reactDirective` service will read the React component `propTypes` and watch attributes with these names. If your react component doesn't have `propTypes` defined you can pass in an array of attribute names to watch.
+
+```javascript
+app.directive('hello', function(reactDirective) {
+  return reactDirective(HelloComponent, ['fname', 'lname']);
+});
+```
+
+If you want to change the configuration of the directive created the `reactDirective` service, e.g. change `restrict: 'E'` to `restrict: 'C'`, you can do so by passing in an object literal with the desired configuration.
+
+```javascript
+app.directive('hello', function(reactDirective) {
+  return reactDirective(HelloComponent, undefined, {restrict: 'C'});
+});
+```
+
+## Reusing Angular Injectables
 
 In an existing Angular application, you'll often have existing services or filters that you wish to access from your React component. These can be retrieved using Angular's dependency injection. The React component will still be render-able as aforementioned, using the react-component directive.
 
@@ -105,6 +179,32 @@ app.factory('HelloComponent', function($filter) {
 </body>
 ```
 
+## Jsx Transformation in the browser
+During testing you may want to run the `JSXTransformer` in the browser. For this to work with angular you need to make sure that the jsx code has been transformed before the angular application is bootstrapped. To do so you can [manually bootstrap](https://docs.angularjs.org/guide/bootstrap#manual-initialization) the angular application. For a working example see the [jsx-transformer example](https://github.com/davidchang/ngReact/tree/master/examples/jsx-transformer).
+
+NOTE: The workaround for this is hacky as the angular bootstap is postponed in with a `setTimeout`, so consider [transforming jsx in a build step](http://facebook.github.io/react/docs/getting-started.html#offline-transform).
+
+
+## Developing
+Before starting development run
+
+```bash
+npm install
+bower install
+```
+
+Build minified version and run tests with
+
+```bash
+grunt
+```
+
+Continually run test during development with
+
+```bash
+grunt karma:background watch
+```
+
 # Community
 
 ## Maintainers
@@ -115,3 +215,5 @@ app.factory('HelloComponent', function($filter) {
 ## Contributors
 
 - Tihomir Kit (@pootzko)
+- Alexander Beletsky (@alexanderbeletsky)
+- @matthieu-ravey

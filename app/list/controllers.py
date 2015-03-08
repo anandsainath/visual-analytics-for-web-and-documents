@@ -8,7 +8,6 @@ from app.list.pagination import Pagination
 from app import app
 from random import randint
 from collections import defaultdict
-from pymongo import MongoClient
 from werkzeug import secure_filename
 from pymongo import ASCENDING, DESCENDING
 import random
@@ -20,7 +19,9 @@ import os
 import md5
 import datetime
 
-ITEMS_PER_PAGE = 12
+from ..utils import Utils as DBUtils
+
+ITEMS_PER_PAGE = 10
 
 # Define the blueprint: 'list', set its url prefix: app.url/list
 mod_list = Blueprint('list', __name__, url_prefix='/list')
@@ -33,20 +34,6 @@ ALLOWED_EXTENSIONS = set(['csv'])
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-###########################
-
-
-###########################
-#DB APIS
-
-def get_collection_obj(collection_name):
-	client = MongoClient()
-	db = client[app.config['MONGODB_SETTINGS']['DB']]
-	return db[collection_name]
-
-def get_session_db():
-	return get_collection_obj(session['token'])
 
 ###########################
 
@@ -69,8 +56,12 @@ def index():
 			md5sum_generator.update(datetime.datetime.now().isoformat())
 			collection_name = md5sum_generator.hexdigest()
 
-			new_collection = get_collection_obj(collection_name)
+			new_collection = DBUtils().get_collection_obj(collection_name)
 			new_collection.insert(csv.DictReader(open(file_path,"rU")))
+
+			##Generate a table with the names of all the columns so that this can be referenced further..
+			##Caution: Needs to be updated when ever a new entity type is created..
+			DBUtils().generate_keys_table(collection_name)
 
 			session['token'] = collection_name
 			session.permanent = True
@@ -86,12 +77,21 @@ def is_vis25():
 	return session['token'] == app.config['VIS25_DB']
 
 def get_columns_from_session_db():
-	session_db = get_session_db()
-	headers = sorted(session_db.find_one().keys())
-	headers.remove('_id')
+	headers = DBUtils().get_keys()
+
+	columns_to_be_removed = ['_id', 'SUMMARY']
+	
+	for key in headers:
+		if key.startswith("__"):
+			columns_to_be_removed.append(key)
+
+	for key in columns_to_be_removed:
+		if key in headers: headers.remove(key)
+
 	return headers
 
 def get_column_list(is_admin_interface = False):
+	#TODO: DO this dynamically..
 	if is_vis25():
 		if is_admin_interface:
 			headers = get_columns_from_session_db()
@@ -110,15 +110,16 @@ def admin():
 @mod_list.route('/rows/', defaults={'page': 1}, methods=['POST'])
 @mod_list.route('/rows/page/<int:page>', methods=['POST'])
 def rows(page):
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	data = session_db.find().skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
+	# print type(data)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
 	return render_template('list/table.html', data=data, headers=get_column_list(is_admin_interface=True), pagination=pagination)
 
 @mod_list.route('/pagination/', defaults={'page': 1}, methods=['POST'])
 @mod_list.route('/pagination/page/<int:page>', methods=['POST'])
 def pagination(page):
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
 	return render_template('list/pagination.html', pagination=pagination)
 
@@ -131,23 +132,28 @@ def sort(page):
 	else:
 		sort_params.append((json['column'], ASCENDING))
 
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	data = session_db.find().sort(sort_params).skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
 	return render_template('list/table.html', pagination=pagination, data=data, headers=get_column_list(is_admin_interface=True))
 
 @mod_list.route('/delete-column/page/<int:page>', methods=['POST'])
 def delete_column(page):
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	return_val = session_db.update({}, { '$unset': { request.json['column'] : 1 } }, multi=True)
+
+	DBUtils().generate_keys_table(session['token'])
+
 	data = session_db.find().skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
 	return render_template('list/table.html', pagination=pagination, data=data, headers=get_column_list(is_admin_interface=True))
 
 @mod_list.route('/rename-column/page/<int:page>', methods=['POST'])
 def rename_column(page):
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	return_val = session_db.update({}, { '$rename' : {request.json['old'] : request.json['new']} }, multi=True)
+
+	DBUtils().generate_keys_table(session['token'])
 	
 	data = session_db.find().skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
@@ -166,7 +172,7 @@ def split_into_rows(page):
 	newKeys = request.json['newKeys']
 	separator = request.json['separator']
 
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	for document in session_db.find():
 		if all(key in document for key in keysToSplit):
 			## Only proceed if all the keys that are to be split are available
@@ -187,6 +193,8 @@ def split_into_rows(page):
 		delete_params[old_key] = 1
 	return_val = session_db.update({}, { '$unset': delete_params }, multi=True)
 
+	DBUtils().generate_keys_table(session['token'])
+
 	data = session_db.find().skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
 	return render_template('list/table.html', pagination=pagination, data=data, headers=get_column_list(is_admin_interface=True))
@@ -196,7 +204,7 @@ def split_into_cols(page):
 	column_to_split = request.json['column']
 	separator = request.json['separator']
 
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 	new_columns = [column_name.strip() for column_name in column_to_split.split(separator)]
 	for document in session_db.find():
 		values = [value.strip() for value in document[column_to_split].split(separator)]
@@ -210,6 +218,8 @@ def split_into_cols(page):
 		session_db.update({"_id":document["_id"]},{ '$set': set_dict })
 
 	return_val = session_db.update({}, { '$unset': {column_to_split:1} }, multi=True)
+
+	DBUtils().generate_keys_table(session['token'])
 
 	data = session_db.find().skip(ITEMS_PER_PAGE * (page - 1)).limit(ITEMS_PER_PAGE)
 	pagination = Pagination(page, ITEMS_PER_PAGE, session_db.count())
@@ -233,12 +243,12 @@ app.jinja_env.globals['url_for_sorting'] = url_for_sorting
 @mod_list.route('/vis25')
 def vis25():
 	session['token'] = app.config["VIS25_DB"]
-	return render_template('list/viz.html', headers=get_column_list(), token=session['token'])
+	return render_template('list/viz.html', headers=get_column_list(), token=session['token'], vis25=True)
 
 @mod_list.route('/visualize')
 def visualize():
 	if 'token' in session:
-		return render_template('list/viz.html', headers=get_column_list(), token=session['token'])
+		return render_template('list/viz.html', headers=get_column_list(), token=session['token'], vis25=False)
 	else:
 		return redirect(url_for('.index'))
 
@@ -256,16 +266,31 @@ def tutorial():
 def get_list_entity_types():
 	return json.dumps(get_column_list())
 
+def get_columns_with_list_content():
+	key_list = DBUtils().get_keys()
+	session_db = DBUtils().get_session_db()
+
+	list_columns = []
+	for column_name in key_list:
+		if column_name in ['_id', '__read_count']:
+			continue
+
+		data_dict = session_db.find_one({column_name:{"$exists": True}})
+		if type(data_dict[column_name]) is list:
+			list_columns.append(column_name)
+	return list_columns
+
 @mod_list.route('/get-list-contents')
 def get_list_contents():
 	headers = get_column_list()
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
+	list_columns = get_columns_with_list_content()
 
 	all_data = []
 	for header in headers:
 		aggregate_array = []
-		#TODO This has to be done dynamically..
-		if header == "Author":
+		
+		if header in list_columns:
 			aggregate_array.append({ '$unwind' : '$'+header })
 		
 		aggregate_array.extend([
@@ -330,7 +355,8 @@ def get_updated_list_contents_all_mode(params, column_list):
 	Entities connected to all of the current selections, though not necessarily in the same document
 	'''
 	all_data = []
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
+	list_columns = get_columns_with_list_content()
 
 	for header in column_list:
 		values_set_once = False
@@ -341,7 +367,7 @@ def get_updated_list_contents_all_mode(params, column_list):
 			for column_value in column_params['values']:
 				aggregate_array = [{'$match':{ column_name : column_value }}]
 
-				if header == "Author":
+				if header in list_columns:
 					aggregate_array.append({ '$unwind' : '$' + header })
 
 				aggregate_array.extend([
@@ -397,12 +423,13 @@ def get_intersecting_documents(dict_a, dict_b):
 
 def get_aggregate_query_result(match_params, column_list):
 	all_data = []
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
+	list_columns = get_columns_with_list_content()
 
 	for header in column_list:
 		aggregate_array = [{ '$match': match_params }]
-		#TODO This has to be done dynamically..
-		if header == "Author":
+		
+		if header in list_columns:
 			aggregate_array.append({ '$unwind' : '$'+header })
 		
 		aggregate_array.extend([
@@ -423,7 +450,7 @@ def get_aggregate_query_result(match_params, column_list):
 @mod_list.route('/get-selections', methods=['POST'])
 def get_selections():
 	selection_data = []
-	session_db = get_session_db()
+	session_db = DBUtils().get_session_db()
 
 	for column_name in request.json['related']:
 		document_list = session_db.aggregate([ {'$match':{ request.json['current'] : {'$eq' : request.json['selection']} }}, {'$group':{'_id':'$'+column_name, 'count':{'$sum':1}}} ])['result']

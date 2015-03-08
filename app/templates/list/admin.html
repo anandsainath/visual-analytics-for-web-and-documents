@@ -24,7 +24,8 @@
 	<div class="panel-heading">2. Visualize</div>
 	<div class="panel-body">
 		<p>Visualize the contents of the file using a ListView</p>
-		<button type="button" class="btn btn-primary btn-sm btn-block">Visualize this!</button>
+		<a class="btn btn-primary btn-sm btn-block" href="/list/visualize" role="button">Visualize this!</a>
+		<!-- <button type="button" class="btn btn-primary btn-sm btn-block">Visualize this!</button> -->
 	</div>
 </div>
 {% endblock %}
@@ -131,11 +132,13 @@
 	</div>
 </div>
 
-<div id="table-container"></div>
+<div id="table-container">
+	
+</div>
 {% endblock %}
 
 {% block script_content %}
-<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/list/admin.js') }}"></script>
 {% endblock %}

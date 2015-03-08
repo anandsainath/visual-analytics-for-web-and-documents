@@ -2,13 +2,13 @@
   <div class="panel-heading">
     <div>
       <div class="row">
-        <div class="col-xs-8 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
+        <div class="col-xs-9 js-tooltip" data-toggle="tooltip" data-placement="bottom" title="Select item type to be shown in the list"  style="padding-right: 5px; padding-left: 20px;">
           <select class="form-control" ng-model="selectedList" ng-change="listChanged()">
             <option bindonce ng-repeat="header in headers">{{header}}</option>
           </select>
         </div>
-        <div class="col-xs-3 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
-          <button type="button" class="btn btn-default" ng-click="clearSelections()">Clear List</button>
+        <div class="col-xs-2 js-tooltip pull-left" data-toggle="tooltip" data-placement="bottom" title="Clear Selections" style="padding-left: 5px;">
+          <button type="button" class="btn btn-default" ng-click="clearSelections()">Clear</button>
         </div>
       </div>
       <div class="row top-margin-10">
