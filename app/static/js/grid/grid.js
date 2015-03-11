@@ -1,4 +1,4 @@
-var app = angular.module('ngJigsawApp',['ngSanitize']);
+var app = angular.module('ngJigsawGridApp',['ngSanitize']);
 
 app.filter("sanitize", ['$sce', function($sce) {
   return function(htmlCode){
@@ -9,7 +9,7 @@ app.filter("sanitize", ['$sce', function($sce) {
 /** Global View Controller **/
 
 app.service(
-	"apiService",
+	"gridAPIService",
 	function($http, $q){
 
 		//Return the public API
@@ -77,8 +77,8 @@ app.service(
 		}
 	});
 
-app.factory('DataFactory',
-	function($rootScope, apiService){
+app.factory('GridDataFactory',
+	function($rootScope, gridAPIService){
 
 		var service = {};
 
@@ -87,7 +87,7 @@ app.factory('DataFactory',
 		var dict_simmilarity_score = {};
 
 		service.init = function(){
-			apiService.fetchGridDataList()
+			gridAPIService.fetchGridDataList()
 				.then(function(list){
 					gridData = list;
 					$rootScope.$broadcast('gridListLoaded');
@@ -95,7 +95,7 @@ app.factory('DataFactory',
 		}
 
 		service.loadDocContent = function(doc_id){
-			apiService.fetchDocContent(doc_id)
+			gridAPIService.fetchDocContent(doc_id)
 				.then(function(doc_content){
 					content = doc_content;
 					$rootScope.$broadcast('contentChanged');
@@ -103,7 +103,7 @@ app.factory('DataFactory',
 		}
 
 		service.loadSimmilarity = function(doc_id){
-			apiService.fetchCosineSimmilarity(doc_id)
+			gridAPIService.fetchCosineSimmilarity(doc_id)
 				.then(function(dict_simmilarity){
 					dict_simmilarity_score = dict_simmilarity;
 					$rootScope.$broadcast('simmilarityScoreLoaded');
@@ -125,14 +125,14 @@ app.factory('DataFactory',
 		return service;
 	});
 
-app.controller('JigViewController', 
-	function($scope, $window, DataFactory){
+app.controller('JigGridViewController', 
+	function($scope, $window, GridDataFactory){
 
 		loadRemoteData();
 		
 		/** Private Methods **/ 
 		function loadRemoteData(){
-			DataFactory.init();
+			GridDataFactory.init();
 		}
 	});
 
@@ -145,7 +145,7 @@ app.directive('myDocGridComponent',
 	});
 
 app.controller("GridController",
-	function($scope, $window, $timeout, DataFactory){
+	function($scope, $window, $timeout, GridDataFactory){
 
 		/** Entities, Content and Summary of the current document being displayed. **/
 
@@ -217,12 +217,12 @@ app.controller("GridController",
 		}
 
 		$scope.loadSimmilarityScore = function(){
-			DataFactory.loadSimmilarity($scope.reader_doc_id);
+			GridDataFactory.loadSimmilarity($scope.reader_doc_id);
 		}
 
 		$scope.$watch('reader_doc_id', function(newValue, oldValue){
 			if(newValue != ''){
-				DataFactory.loadDocContent(newValue);
+				GridDataFactory.loadDocContent(newValue);
 				if(oldValue != ''){
 					gridDict[oldValue].clicked = false;
 				}
@@ -230,13 +230,13 @@ app.controller("GridController",
 		});
 
 		$scope.$on('contentChanged', function(){
-			var docContent = DataFactory.getCurrentDocContent();
+			var docContent = GridDataFactory.getCurrentDocContent();
 			$scope.content = docContent.content;
 			$scope.content_loaded = true;
 		});
 		
 		$scope.$on('gridListLoaded', function(){
-			var _grid_data = DataFactory.getGridData();
+			var _grid_data = GridDataFactory.getGridData();
 			$scope.gridData = _grid_data;
 			$scope.gridData.forEach(function(doc, index){
 				gridDict[doc.name] = doc;
@@ -248,7 +248,7 @@ app.controller("GridController",
 		});
 
 		$scope.$on('simmilarityScoreLoaded', function(){
-			var dict_doc_simmilarity = DataFactory.getSimmilarityScore();
+			var dict_doc_simmilarity = GridDataFactory.getSimmilarityScore();
 			minDict['ds'] = 10000;
 			maxDict['ds'] = -1;
 

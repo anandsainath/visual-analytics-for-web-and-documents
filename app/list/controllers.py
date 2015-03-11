@@ -40,7 +40,7 @@ def allowed_file(filename):
 @mod_list.route("/print-session")
 def print_session():
 	return session['token']
-
+	
 @mod_list.route("/", methods=['GET', 'POST'])
 def index():
 	if request.method == 'POST':
@@ -59,6 +59,11 @@ def index():
 			new_collection = DBUtils().get_collection_obj(collection_name)
 			new_collection.insert(csv.DictReader(open(file_path,"rU")))
 
+			# list_columns = new_collection.find_one().keys()
+			# for column in list_columns:
+			# 	if new_collection.find({"$where": "this."+column+".length > 100"}).count() > 0:
+			# 		print column +" has a length greater than 100"
+			
 			##Generate a table with the names of all the columns so that this can be referenced further..
 			##Caution: Needs to be updated when ever a new entity type is created..
 			DBUtils().generate_keys_table(collection_name)

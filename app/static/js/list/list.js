@@ -1,18 +1,18 @@
-var app = angular.module('ngJigsawApp',['sf.virtualScroll','pasvaz.bindonce']);
+var app = angular.module('ngJigsawListApp',['sf.virtualScroll','pasvaz.bindonce']);
 
 app.config(function($logProvider){
   $logProvider.debugEnabled(false);
 });
 
 
-app.controller('JigViewController', 
+app.controller('JigListViewController', 
 	function($scope, $window, DataFactory){
 
 		var listViewWidth = 350;
 
 		$scope.isLoading = true;
 		$scope.mode  = "Any";
-		$scope.lists = [1,2,3,4];
+		$scope.lists = [1,2,3];
 
 		$scope.width = $window.innerWidth - 40;
 		$scope.height = $window.innerHeight;

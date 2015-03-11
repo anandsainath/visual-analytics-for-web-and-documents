@@ -1,3 +1,9 @@
+.doc-panel{
+	margin: 0 0 0 0;
+	padding: 10px;
+	background: #FAFAFA;
+}
+
 .doc-list > li {
 	border-bottom: 1px solid #CCC;
 }
@@ -73,13 +79,15 @@
 }
 
 .summary-panel{
-	padding: 20px !important;
-	padding-top: 0px !important;
-	padding-bottom: 5px !important;
+	padding: 5px !important;
 }
 
 .summary-panel span {
 	display: inline-block;
+}
+
+.doc-panel-heading{
+	padding: 5px 10px !important;
 }
 
 .entity-editor{
@@ -88,12 +96,9 @@
 }
 
 /*Grid CSS*/
-.label-margin-top{
-	margin-top: 32%;
-}
 
 .controls-panel{
-	background: #eee;
+	background: #f5f5f5;
 	padding: 20px !important;
 	padding-top: 0px !important;
 	padding-bottom: 5px !important;

@@ -42,7 +42,7 @@ body {
 	margin: 0 0 0 0;
 	padding-top: 10px;
 	background: #FAFAFA;
-	overflow: hidden;
+	overflow-y: hidden;
 	overflow-x: scroll;
 }
 
@@ -90,7 +90,7 @@ body {
 	padding-right: 25px;
 }
 
-.panel-heading{
+.list-panel-heading{
 	padding: 7px 2px;
 }
 
@@ -112,23 +112,22 @@ ol, ul {
 	background: #FAFAFA;
 }
 
-.panel-body{
-	width: 286px;
+.list-panel-body{
 	padding: 0px;
 	overflow: hidden;
 	float: left;
 }
 
-.scroller{
-	width: 400px;
+.list-scroller{
+	/*width: 400px;*/
 	overflow: auto;
 }
 
-.restrict {
+.list-restrict {
 	width: 286px;
 }
 
-.row {
+.list-row {
 	margin-right: -15px !important;
 	margin-left: -15px !important;
 }
@@ -205,9 +204,13 @@ rect.thumb{
 	font-size: 80%; 
 }
 
-
-.glyphicon{
+.list-glyphicon{
 	top: auto;
 	font-size: 14px;
 	line-height: 1.5;
+}
+
+.list-navbar-text{
+	margin-top: 5px !important;
+	margin-bottom: 0px !important;
 }

@@ -51,7 +51,8 @@ def test():
 @mod_data.route("/visualize")
 def visualize():
 	if 'token' in session:
-		return render_template('data/viz.html')
+		# return render_template('data/viz.html')
+		return render_template('viz.html')
 	else:
 		return redirect(url_for('.index'))
 

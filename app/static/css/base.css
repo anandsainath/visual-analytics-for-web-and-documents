@@ -215,6 +215,14 @@ input[readonly] {
 	border-top: 1px solid #ddd;
 }
 
+.divider-row{
+	min-height: 10px;
+}
+
+.colored-row{
+	background: #FAFAFA;
+}
+
 /* Overwrite the default to keep the scrollbar always visible */
 
 ::-webkit-scrollbar {

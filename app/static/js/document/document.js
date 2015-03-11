@@ -1,26 +1,25 @@
-var app = angular.module('ngJigsawApp',['sf.virtualScroll','pasvaz.bindonce', 'ngSanitize']);
+var app_doc = angular.module('ngJigsawDocApp',['sf.virtualScroll','pasvaz.bindonce', 'ngSanitize']);
 
-app.config(function($logProvider){
+app_doc.config(function($logProvider){
 	$logProvider.debugEnabled(false);
 });
 
-app.directive('myDocumentComponent', function(){
+app_doc.directive('myDocumentComponent', function(){
 	myDocumentComponent = {};
 	myDocumentComponent.restrict = 'E';
 	myDocumentComponent.templateUrl = '/static/directives/document/doc-component.html';
 	return myDocumentComponent;
 });
 
-app.filter("sanitize", ['$sce', function($sce) {
+app_doc.filter("sanitize", ['$sce', function($sce) {
   return function(htmlCode){
     return $sce.trustAsHtml(htmlCode);
   }
 }]);
 
-app.service(
-	"apiService",
+app_doc.service(
+	"docAPIService",
 	function($http, $q){
-
 		//Return the public API
 		return({
 			fetchDocumentList: fetchDocumentList,
@@ -138,8 +137,8 @@ app.service(
 		}
 	});
 
-app.factory('DataFactory',
-	function($rootScope, apiService){
+app_doc.factory('DocDataFactory',
+	function($rootScope, docAPIService){
 
 		var currentSelection = "#FEF935";
 		var documentList = [];
@@ -153,21 +152,21 @@ app.factory('DataFactory',
 		var service = {};
 
 		service.init = function(){
-			apiService.fetchDocumentList()
+			docAPIService.fetchDocumentList()
 				.then(function(list){
 					documentList = list;
 					documentList[0].count += 1;
 					documentList[0].color = currentSelection;
 					$rootScope.$broadcast('documentListLoaded');
 
-					apiService.fetchDocumentContent(documentList[0].name)
+					docAPIService.fetchDocumentContent(documentList[0].name)
 						.then(function(content){
 							documentContentJSON = content;
 							$rootScope.$broadcast('documentContentLoaded');
 						});
 				});
 
-			apiService.fetchEntityTypes()
+			docAPIService.fetchEntityTypes()
 				.then(function(list){
 					entityTypesList = list;
 					$rootScope.$broadcast('entityTypesLoaded');
@@ -175,7 +174,7 @@ app.factory('DataFactory',
 		}
 
 		service.loadMarkupData = function(){
-			apiService.fetchMarkupDoc()
+			docAPIService.fetchMarkupDoc()
 				.then(function(contentJSON){
 					markupDocContentJSON = contentJSON;
 					$rootScope.$broadcast('markupDocContentLoaded');
@@ -183,7 +182,7 @@ app.factory('DataFactory',
 		}
 
 		service.updateSummary = function(num_lines){
-			apiService.fetchMarkupSummary(num_lines)
+			docAPIService.fetchMarkupSummary(num_lines)
 				.then(function(summaryJSONData){
 					summaryJSON = summaryJSONData;
 					$rootScope.$broadcast('summaryChanged');
@@ -191,7 +190,7 @@ app.factory('DataFactory',
 		}
 
 		service.fetchDocument = function(doc_id){
-			apiService.fetchDocumentContent(doc_id)
+			docAPIService.fetchDocumentContent(doc_id)
 				.then(function(content){
 					documentContentJSON = content;
 					$rootScope.$broadcast('documentContentLoaded');
@@ -199,7 +198,7 @@ app.factory('DataFactory',
 		}
 
 		service.fetchWordCloudList = function(num_words, only_entities){
-			apiService.fetchWordCloudList(num_words, only_entities)
+			docAPIService.fetchWordCloudList(num_words, only_entities)
 				.then(function(_wordCloudList){
 					wordCloudList = _wordCloudList;
 					$rootScope.$broadcast('wordCloudLoaded');
@@ -207,7 +206,7 @@ app.factory('DataFactory',
 		}
 
 		service.fetchEntityTypes = function(){
-			apiService.fetchEntityTypes()
+			docAPIService.fetchEntityTypes()
 				.then(function(list){
 					entityTypesList = list;
 					$rootScope.$broadcast('entityTypesLoaded');
@@ -215,7 +214,7 @@ app.factory('DataFactory',
 		}
 
 		service.addEntity = function(entityType, entityText){
-			apiService.addEntity(entityType, entityText)
+			docAPIService.addEntity(entityType, entityText)
 				.then(function(){
 					$rootScope.$broadcast('refreshAfterEntityAddition');
 				});
@@ -249,9 +248,10 @@ app.factory('DataFactory',
 	});
 
 /** Global View Controller **/
-app.controller('JigViewController', 
-	function($scope, $window, DataFactory){
+app_doc.controller('JigDocViewController', 
+	function($scope, $window, DocDataFactory){
 
+		console.log("I am here!!");
 		if($window.location.pathname === "/data/"){
 			//means that the page is loaded when the documents are being uploaded..
 			loadMarkupData();
@@ -262,16 +262,16 @@ app.controller('JigViewController',
 		/** Private Methods **/ 
 
 		function loadRemoteData(){
-			DataFactory.init();
+			DocDataFactory.init();
 		}
 
 		function loadMarkupData(){
-			DataFactory.loadMarkupData();
+			DocDataFactory.loadMarkupData();
 		}
 	});
 
-app.controller("DocController",
-	function($scope, $window, $filter, DataFactory, $sce){
+app_doc.controller("DocController",
+	function($scope, $window, $filter, DocDataFactory, $sce){
 
 		var currentSelection = "#FEF935";
 		$scope.documentList = [];
@@ -281,7 +281,7 @@ app.controller("DocController",
 		$scope.num_words = 30;
 		$scope.only_entities = "0";
 
-		DataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
+		DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 
 		/** Entities, Content and Summary of the current document being displayed. **/
 
@@ -297,17 +297,17 @@ app.controller("DocController",
 		$scope.selectedText = "";
 
 		$scope.$on('entityTypesLoaded', function(){
-			var entity_list = DataFactory.getEntityTypesList();
+			var entity_list = DocDataFactory.getEntityTypesList();
 			$scope.entityTypes = entity_list;
 			$scope.selectedEntity = entity_list[0];
 		});
 		
 		$scope.$on('documentListLoaded', function(){
-			$scope.documentList = DataFactory.getDocumentList();
+			$scope.documentList = DocDataFactory.getDocumentList();
 		});
 
 		$scope.$on('documentContentLoaded', function(){
-			var documentJSON = DataFactory.getDocumentContent();
+			var documentJSON = DocDataFactory.getDocumentContent();
 			$scope.summary = documentJSON['summary'];
 			$scope.content = documentJSON['content'];
 			$scope.entities = documentJSON['entities'];
@@ -316,18 +316,20 @@ app.controller("DocController",
 		});
 
 		$scope.$on('wordCloudLoaded', function(){
-			$scope.wordCloudList = DataFactory.getWordCloudList();
+			$scope.wordCloudList = DocDataFactory.getWordCloudList();
 		});
 
 		$scope.$watch('num_words', function(old_value, new_value){
+			console.log(old_value, new_value);
+			console.log(typeof(old_value), typeof(new_value));
 			if(old_value != new_value){
-				DataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
+				DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 			}
 		});
 
 		$scope.$watch('only_entities', function(old_value, new_value){
 			if(old_value != new_value){
-				DataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
+				DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 			}
 		});
 
@@ -337,7 +339,7 @@ app.controller("DocController",
 
 		$scope.loadDocument = function(doc_id){
 			var previous_doc_id = $scope.document_id;
-			DataFactory.fetchDocument(doc_id);
+			DocDataFactory.fetchDocument(doc_id);
 			var no_of_updates = 0;
 
 			for (var len = $scope.documentList.length, i=0; i<len && no_of_updates < 2; ++i) {
@@ -361,11 +363,11 @@ app.controller("DocController",
 			//2. Update the document cloud on top. - TODO
 			//4. Refresh the entity table contents..
 			selectedText = selectedText.replace(/\//g,"{_}")
-			DataFactory.addEntity(selectedEntity, selectedText);
+			DocDataFactory.addEntity(selectedEntity, selectedText);
 
 			//3. Update the current document.
-			DataFactory.fetchDocument($scope.document_id);
-			DataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
+			DocDataFactory.fetchDocument($scope.document_id);
+			DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 		}
 
 		$scope.addEntity = function(){
@@ -376,13 +378,13 @@ app.controller("DocController",
 			createOrUpdateEntity($scope.selectedText, $scope.entityName);
 
 			//Update the entity type drop down..
-			DataFactory.fetchEntityTypes();
+			DocDataFactory.fetchEntityTypes();
 			$scope.entityName = "";
 		}
 	});
 
-app.controller("MarkupController",
-	function($scope, $window, $filter, DataFactory, $sce){
+app_doc.controller("MarkupController",
+	function($scope, $window, $filter, DocDataFactory, $sce){
 		
 		$scope.lines = 1;
 		$scope.summary = [];
@@ -391,15 +393,15 @@ app.controller("MarkupController",
 		$scope.entities = {};
 
 		$scope.onLineChange = function(){
-			DataFactory.updateSummary($scope.lines);
+			DocDataFactory.updateSummary($scope.lines);
 		}
 
 		$scope.$on("summaryChanged", function(){
-			$scope.summary = DataFactory.getSummaryContent()['summary'];
+			$scope.summary = DocDataFactory.getSummaryContent()['summary'];
 		});
 
 		$scope.$on("markupDocContentLoaded", function(){
-			var documentJSON = DataFactory.getMarkupDocContent();
+			var documentJSON = DocDataFactory.getMarkupDocContent();
 			$scope.summary = documentJSON['summary'];
 			$scope.content = documentJSON['content'];
 			$scope.options = documentJSON['options'];

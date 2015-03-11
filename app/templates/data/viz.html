@@ -13,18 +13,13 @@
 	<script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
 
 	<script src="{{ url_for('static', filename='js/document/document.js') }}"></script>
-	<script src="{{ url_for('static', filename='bower_components/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js') }}"></script>
-	
-	<link rel="stylesheet" href="{{ url_for('static', filename='bower_components/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css') }}">
+	<script src="{{ url_for('static', filename='libs/bootstrap-slider.js') }}"></script>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-slider.css') }}">
 {% endblock %}
 
 {% block content %}
 	<div class="container">
 		<my-document-component></my-document-component>
 	</div>
-{% endblock %}
-
-{% block script_content %}
-
 {% endblock %}

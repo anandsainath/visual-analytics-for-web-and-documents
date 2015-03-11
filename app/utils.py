@@ -31,7 +31,7 @@ class Utils:
 	def generate_keys_table(self,collection_name):
 		map = Code("function() { for (var key in this) { emit(key, null); } }")
 		reduce = Code("function(key, stuff) { return null; }")
-		print self.get_collection_obj(collection_name).map_reduce(map, reduce,  out=SON([("replace", collection_name+"_keys"), ("db", app.config['MONGODB_SETTINGS']['DB'])]))
+		self.get_collection_obj(collection_name).map_reduce(map, reduce,  out=SON([("replace", collection_name+"_keys"), ("db", app.config['MONGODB_SETTINGS']['DB'])]))
 
 	def generate_doc_summary(self, collection_name, only_entities):
 		mapper_code_template = "function(){ __entity_count_code __word_count_code }"

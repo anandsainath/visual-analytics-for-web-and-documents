@@ -1,7 +1,6 @@
 <div class="row" ng-controller="DocController">
-	<div class="col-sm-10 col-sm-offset-1">
-		<div class="panel panel-default padding-1 border-eee">
-
+	<div class="col-sm-12">
+		<div class="doc-panel">
 			<div class="row">
 				<div class="col-sm-12">
 					<div class="panel panel-default margin-bottom-2">
@@ -12,20 +11,19 @@
 							    	Only Entities
 							  </label>
 							</div>
-							<!-- <div class="col-sm-2 padding-2"> -->
-								<!-- <label> <input type="checkbox"> Only Entities </label> -->
-							<!-- </div> -->
 							<div class="col-sm-5 padding-top-7">
-								<input id="wordCloudSlider" data-slider-id='ex1Slider' type="text" data-slider-min="15" data-slider-max="100" data-slider-step="5" data-slider-value="30" ng-model="num_words" class="form-control"/>
+								<input id="wordCloudSlider" data-slider-id='ex1Slider' type="text" ng-model="num_words" class="form-control"/>
 							</div>
 						</div>
 						<div class="row">
-							<div class="panel-body summary-panel" style="min-height: 50px;">
-								<div style="max-height: 200px;">
-									<div style="overflow-x: hidden; overflow-y: auto; max-height: 200px;">
-										<p>
-											<span ng-repeat="item in wordCloudList"><span style="font-size: {{item[2]}}px;" ng-class="{true:'label wc-label label-space '+item[1], false:'label-space'}[item[1]!='']">{{item[0]}}</span> </span>
-										</p>
+							<div class="col-sm-12">
+								<div class="panel-body summary-panel" style="min-height: 50px;">
+									<div style="max-height: 150px;">
+										<div style="overflow-x: hidden; overflow-y: auto; max-height: 150px;">
+											<p>
+												<span ng-repeat="item in wordCloudList"><span style="font-size: {{item[2]}}px;" ng-class="{true:'label wc-label label-space '+item[1], false:'label-space'}[item[1]!='']">{{item[0]}}</span> </span>
+											</p>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -34,14 +32,11 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-3 padding-right-2">
+				<div class="col-sm-4 padding-right-2">
 					<div class="panel panel-default margin-bottom-0">
-						<div class="panel-heading">
+						<div class="panel-heading doc-panel-heading">
 							<div class="row">
-								<div class="col-xs-6">
-									<label class="padding-top-5">Documents</label>
-								</div>
-								<div class="col-xs-6 padding-top-5 padding-left-25">
+								<div class="col-xs-6 col-xs-offset-5 padding-top-5 padding-left-25">
 									<div class="btn-group">
 										<button type="button" class="btn btn-default btn-xs js-tooltip js-sort-alphabetically" data-toggle="tooltip" data-placement="top" title="Sort list alphabetically" ng-click="orderByPredicate='name';" ng-class="{true:'active', false:''}[orderByPredicate=='name']">
 											<span class="glyphicon glyphicon-sort-by-alphabet"></span>
@@ -72,15 +67,15 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-sm-9 padding-left-0">
+				<div class="col-sm-8 padding-left-0">
 					<div class="panel panel-default margin-bottom-0">
-						<div class="documentContainer" style="height: 307px;">
+						<div class="documentContainer" style="height: 295px;">
 							<div class="entity-editor">
 								<div class="row">
 									<div class="col-sm-6 padding-top-2 padding-left-35">
 										<form class="form-inline">
 											<div class="form-group">
-												<label for="entitySelector">Entity Type</label>
+												<!-- <label for="entitySelector">Entity Type</label> -->
 												<select class="form-control" id="entitySelector" ng-options="obj as obj for obj in entityTypes" ng-model="selectedEntity"></select>
 											</div>
 											<input type="text" class="hidden" ng-model="selectedText" id="selectedText"/>
@@ -90,15 +85,15 @@
 									<div class="col-sm-6 padding-top-2 padding-left-0">
 										<form class="form-inline">
 											<div class="form-group">
-												<label for="entityName">Create Entity</label>
-												<input type="text" class="form-control" ng-model="entityName" id="entityName" placeholder="Entity Type"/>
+												<!-- <label for="entityName">Create Entity</label> -->
+												<input type="text" class="form-control" ng-model="entityName" id="entityName" placeholder="New Entity Type"/>
 											</div>
 											<button type="submit" class="btn btn-default" ng-click="createEntity()">Create</button>
 										</form>
 									</div>
 								</div>
 							</div>
-							<div style="overflow-x: hidden; overflow-y: auto; height: 267px; max-height: 307px;">
+							<div style="overflow-x: hidden; overflow-y: auto; height: 255px; max-height: 295px;">
 
 								<!-- Document content to be rendered here. -->
 								<div class="bs-summary">
@@ -119,8 +114,8 @@
 											<ul class="list-unstyled">
 												<li ng-repeat="column in entity_columns">
 													<div class="row" ng-if="entities[column]">
-														<div class="col-md-2"><h5><span class="label {{column}}">{{column}}</span></h5></div>
-														<div class="col-md-10">
+														<div class="col-md-3"><h5><span class="label {{column}}">{{column}}</span></h5></div>
+														<div class="col-md-9">
 															<p style="margin-top: 10px" ng-bind="entities[column].join(', ')"></p>
 														</div>
 													</div>
@@ -143,11 +138,14 @@
 <script type="text/javascript">
 	$(function(){
 		$("#wordCloudSlider").slider({
-			tooltip: 'always'
+			min: 15,
+			max: 100,
+			step: 5,
+			value: 30
 		})
-		.on("change", function(event){
-			// console.log(event.value.oldValue, event.value.newValue);
-			$('#wordCloudSlider').val(event.value.newValue);
+		.on("slideStop", function(event){
+			console.log(event.value);
+			$('#wordCloudSlider').val(event.value).trigger('input');
 		});
 
 		$('#textContent').on("mouseup", function(){
