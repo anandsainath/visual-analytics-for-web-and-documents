@@ -85,6 +85,10 @@
 		angular.bootstrap(document.getElementById("DocView"),['ngJigsawDocApp']);
 		angular.bootstrap(document.getElementById("GridView"),['ngJigsawGridApp']);
 
+		String.prototype.endsWith = function(suffix) {
+			return this.indexOf(suffix, this.length - suffix.length) !== -1;
+		};
+
 		$(function(){
 			$('#closeBtn').click(function(){ $(this).parent().remove(); });
 			$.noty.defaults = {

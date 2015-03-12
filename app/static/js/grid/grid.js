@@ -158,6 +158,7 @@ app.controller("GridController",
 		$scope.reader_doc_id = undefined;
 		$scope.content = []
 		$scope.content_loaded = false;
+		$scope.module_identifier = Date.now() + Math.floor((Math.random() * 100) + 1) + "_GridView";
 
 		$scope.compute_btn_disabled = true
 
@@ -180,12 +181,28 @@ app.controller("GridController",
 			{id:2, label: "Number of Entities", value:'e', shade: 'light'},
 			{id:3, label: "Polarity", value:'p', shade: 'light'},
 			{id:4, label: "Subjectivity", value:'s', shade: 'light'},
-			{id:5, label: "Document Simmilarity", value: 'ds', shade: 'dark'}
+			{id:5, label: "Document Similarity", value: 'ds', shade: 'dark'}
 		];
 
 		$timeout(function(){
 			$scope.sortByAttribute = "l";
 			$scope.colorByAttribute = "l";
+		});
+
+		/** Subscription for Entity selections **/
+
+		$.jStorage.subscribe("JigsawEntitySelection", function(channel, payload){
+			if(payload.id != $scope.module_identifier){
+				//only accept entity selections other than from itself.
+				console.log($scope.module_identifier, "RECEIVED");
+				if(payload.name == "ID"){
+					var selections = $.jStorage.get(payload.name);
+					// console.log(gridDict[selections[0]])
+					var doc = gridDict[selections[0]]
+					$scope.mouseClick(doc, true);
+					console.log(doc);
+				}
+			}
 		});
 
 		$scope.mouseEnterDoc = function(doc){
@@ -203,7 +220,9 @@ app.controller("GridController",
 			}
 		}
 
-		$scope.mouseClick = function(doc){
+		$scope.mouseClick = function(doc, fromJStorage){
+			fromJStorage = fromJStorage || false
+
 			if(doc.clicked){
 				doc.clicked = false;
 				doc.hover = false;
@@ -219,8 +238,11 @@ app.controller("GridController",
 				$scope.reader_doc_id = doc.name;
 				$scope.compute_btn_disabled = false;
 
-				$.jStorage.set("ID", [doc.name]);
-				$.jStorage.publish('JigsawEntitySelection', {"name":"ID", "selected": true});
+				if(!fromJStorage){
+					console.log("FROM", $scope.module_identifier);
+					$.jStorage.set("ID", [doc.name]);
+					$.jStorage.publish('JigsawEntitySelection', {"name":"ID", "selected": true, "id": $scope.module_identifier});
+				}
 			}
 		}
 

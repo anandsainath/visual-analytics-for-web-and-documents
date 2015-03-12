@@ -296,13 +296,17 @@ app_doc.controller("DocController",
 		$scope.entityName = "";
 		$scope.selectedEntity = "";
 		$scope.selectedText = "";
+		$scope.module_identifier = Date.now() + Math.floor((Math.random() * 100) + 1) + "_DocView";
 
 		$.jStorage.subscribe("JigsawEntitySelection", function(channel, payload){
-			if(payload.name == "ID"){
-				var documentList = $.jStorage.get("ID");
-				$scope.loadDocument(documentList[0]);
-			}else{
-				//handle it accordingly..
+			if(payload.id != $scope.module_identifier){
+				console.log($scope.module_identifier, "RECEIVED");
+				if(payload.name == "ID"){
+					var documentList = $.jStorage.get("ID");
+					$scope.loadDocument(documentList[0], true);
+				}else{
+					//handle it accordingly..
+				}
 			}
 		});
 
@@ -325,7 +329,9 @@ app_doc.controller("DocController",
 			$scope.document_id = documentJSON['id'];
 
 			if($scope.selected_word_tag_item){
-				$scope.$apply();
+				if(!$scope.$$phase) {
+					$scope.$apply();
+				}
 				$scope.onTagItemClick($scope.selected_word_tag_item);
 				console.log($scope.selected_word_tag_item);
 			}
@@ -357,7 +363,9 @@ app_doc.controller("DocController",
 			$('#textContent').unhighlight().highlight(tag_item[0]);
 		}
 
-		$scope.loadDocument = function(doc_id){
+		$scope.loadDocument = function(doc_id, fromJStorage){
+			fromJStorage = fromJStorage || false
+
 			var previous_doc_id = $scope.document_id;
 			DocDataFactory.fetchDocument(doc_id);
 			var no_of_updates = 0;
@@ -373,6 +381,12 @@ app_doc.controller("DocController",
 					$scope.documentList[i].color = "";
 					no_of_updates += 1;
 				}
+			}
+
+			if(!fromJStorage){
+				console.log("FROM", $scope.module_identifier);
+				$.jStorage.set("ID", [doc_id]);
+				$.jStorage.publish('JigsawEntitySelection', {"name":"ID", "selected": true, "id": $scope.module_identifier});
 			}
 		}
 

@@ -64,6 +64,7 @@ app.controller("ListController",
 		$scope.firstOrderPredicate = "";
 		$scope.isListLoading = false;
 		$scope.isListLoadedOnce = false;
+		$scope.module_identifier = Date.now() + Math.floor((Math.random() * 100) + 1) + "_ListView";
 		
 		$scope.selectedListItems = [];
 
@@ -79,10 +80,13 @@ app.controller("ListController",
 		/** Subscription for Entity selections **/
 
 		$.jStorage.subscribe("JigsawEntitySelection", function(channel, payload){
-			if(payload.name == $scope.selectedList){
-				$scope.selectedListItems = [];
-				var selections = $.jStorage.get(payload.name);
-				$scope.selectItem(selections[0]);
+			if(payload.id != $scope.module_identifier && !payload.id.endsWith("_ListView")){
+				console.log($scope.module_identifier, "RECEIVED");
+				if(payload.name == $scope.selectedList){
+					$scope.selectedListItems = [];
+					var selections = $.jStorage.get(payload.name);
+					$scope.selectItem(selections[0], true);
+				}
 			}
 		});
 
@@ -109,7 +113,9 @@ app.controller("ListController",
 			$scope.align = align;
 		}
 
-		$scope.selectItem = function(itemName){
+		$scope.selectItem = function(itemName, fromJStorage){
+			fromJStorage = fromJStorage || false
+
 			$scope.isListLoading = true;
 			if(!notification){
 				notification = noty({});
@@ -122,6 +128,12 @@ app.controller("ListController",
 				$scope.selectedListItems.push(itemName);
 			}
 			DataFactory.setSelectedListItem($scope.selectedList, $scope.selectedListItems);
+
+			if(!fromJStorage){
+				console.log("FROM", $scope.module_identifier);
+				$.jStorage.set($scope.selectedList, $scope.selectedListItems);
+				$.jStorage.publish('JigsawEntitySelection', {"name":$scope.selectedList, "selected": true, "id": $scope.module_identifier});
+			}
 		}
 
 		$scope.getScrollBarBackgroundColor = function(name, strength){
