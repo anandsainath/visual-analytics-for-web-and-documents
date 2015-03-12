@@ -147,6 +147,7 @@ input[readonly] {
 .label{
 	border: 1px solid #DDD;
 	color: #000;
+	font-weight: normal !important;
 }
 
 .LOCATION{

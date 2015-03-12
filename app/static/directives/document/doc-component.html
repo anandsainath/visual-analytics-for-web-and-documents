@@ -21,7 +21,7 @@
 									<div style="max-height: 150px;">
 										<div style="overflow-x: hidden; overflow-y: auto; max-height: 150px;">
 											<p>
-												<span ng-repeat="item in wordCloudList"><span style="font-size: {{item[2]}}px;" ng-class="{true:'label wc-label label-space '+item[1], false:'label-space'}[item[1]!='']">{{item[0]}}</span> </span>
+												<span ng-repeat="item in wordCloudList"><span style="font-size: {{item[2]}}px;" ng-class="{'label wc-label label-space {{item[1]}}': item[1]!='', 'label-space':item[1]=='', 'selected-tag-item':selected_word_tag_item == item}" ng-click="onTagItemClick(item)">{{item[0]}}</span> </span>
 											</p>
 										</div>
 									</div>

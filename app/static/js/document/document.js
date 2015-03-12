@@ -290,6 +290,7 @@ app_doc.controller("DocController",
 		$scope.content = [];
 		$scope.summary = [];
 		$scope.entity_columns = [];
+		$scope.selected_word_tag_item = undefined;
 
 		$scope.entityTypes = [];
 		$scope.entityName = "";
@@ -322,6 +323,12 @@ app_doc.controller("DocController",
 			$scope.entities = documentJSON['entities'];
 			$scope.entity_columns = documentJSON['entity_columns'];
 			$scope.document_id = documentJSON['id'];
+
+			if($scope.selected_word_tag_item){
+				$scope.$apply();
+				$scope.onTagItemClick($scope.selected_word_tag_item);
+				console.log($scope.selected_word_tag_item);
+			}
 		});
 
 		$scope.$on('wordCloudLoaded', function(){
@@ -329,8 +336,6 @@ app_doc.controller("DocController",
 		});
 
 		$scope.$watch('num_words', function(old_value, new_value){
-			console.log(old_value, new_value);
-			console.log(typeof(old_value), typeof(new_value));
 			if(old_value != new_value){
 				DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 			}
@@ -345,6 +350,12 @@ app_doc.controller("DocController",
 		// $scope.$watch('selectedText', function(old_value, new_value){
 		// 	console.log(old_value, new_value);
 		// });
+
+		$scope.onTagItemClick = function(tag_item){
+			$scope.selected_word_tag_item = tag_item;
+			console.log(tag_item[0]);
+			$('#textContent').unhighlight().highlight(tag_item[0]);
+		}
 
 		$scope.loadDocument = function(doc_id){
 			var previous_doc_id = $scope.document_id;

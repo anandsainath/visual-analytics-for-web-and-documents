@@ -126,3 +126,13 @@
 .clicked{
 	border: 2px solid #FEF935 !important;
 }
+
+.selected-tag-item{
+	font-weight: bold !important;
+}
+
+.highlight {
+    font-weight: bolder !important;
+    color: #000 !important;
+    background-color: #FFFF88;
+}
