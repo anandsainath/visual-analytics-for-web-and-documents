@@ -54,7 +54,7 @@
 					<div class="panel panel-default margin-bottom-0">
 						<div class="panel-body padding-3">
 							<p class="grid-container">
-								<span ng-repeat="doc in gridData | orderBy:sortByAttribute:sortByOrder" class="document" ng-style="{'background':getDocColor(doc.name)}" ng-class="{selected: doc.hover, clicked: doc.clicked}" ng-mouseenter="mouseEnterDoc(doc)" ng-mouseleave="mouseLeaveDoc(doc)" ng-click="mouseClick(doc)"></span>
+								<span ng-repeat="document in gridData | orderBy:sortByAttribute:sortByOrder" class="document" ng-style="{'background':getDocColor(document.name)}" ng-class="{selected: document.hover, clicked: document.clicked}" ng-mouseenter="mouseEnterDoc(document)" ng-mouseleave="mouseLeaveDoc(document)" ng-click="mouseClick(document)"></span>
 							</p>
 
 							<div class="documentContainer" style="height: 307px;" ng-if="content_loaded">

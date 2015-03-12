@@ -296,6 +296,15 @@ app_doc.controller("DocController",
 		$scope.selectedEntity = "";
 		$scope.selectedText = "";
 
+		$.jStorage.subscribe("JigsawEntitySelection", function(channel, payload){
+			if(payload.name == "ID"){
+				var documentList = $.jStorage.get("ID");
+				$scope.loadDocument(documentList[0]);
+			}else{
+				//handle it accordingly..
+			}
+		});
+
 		$scope.$on('entityTypesLoaded', function(){
 			var entity_list = DocDataFactory.getEntityTypesList();
 			$scope.entityTypes = entity_list;

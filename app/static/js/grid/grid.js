@@ -151,11 +151,11 @@ app.controller("GridController",
 
 		$scope.gridData = [];
 		
-		$scope.sortByOrder = "false";
+		$scope.sortByOrder = false;
 		$scope.colorByOption = "dark";
 		$scope.cur_doc = 'No document selected';
 
-		$scope.reader_doc_id = '';
+		$scope.reader_doc_id = undefined;
 		$scope.content = []
 		$scope.content_loaded = false;
 
@@ -169,8 +169,8 @@ app.controller("GridController",
 		$scope.redShades = ['#67000d', '#a50f15', '#CB181D', '#EF3B2C', '#FB6A4A', '#FCA114', '#FCBBA1', '#FEE0D2'];
 		
 		$scope.sortByOrderOptions = [
-			{label: "Ascending", value: "false"}, 
-			{label: "Descending", value: "true"}
+			{label: "Ascending", value: false}, 
+			{label: "Descending", value: true}
 		];
 
 		$scope.colorByOptions = [{label: "Greater Value, Darker Color", value: "dark"}, {label: "Greater Value, Lighter Color", value: "light"}];
@@ -196,10 +196,10 @@ app.controller("GridController",
 		$scope.mouseLeaveDoc = function(doc){
 			doc.hover = false;
 
-			if($scope.reader_doc_id == ''){
-				$scope.cur_doc = 'No document selected';
-			}else{
+			if($scope.reader_doc_id){
 				$scope.cur_doc = $scope.reader_doc_id +" : "+ gridDict[$scope.reader_doc_id][$scope.sortByAttribute];
+			}else{
+				$scope.cur_doc = 'No document selected';
 			}
 		}
 
@@ -211,8 +211,16 @@ app.controller("GridController",
 				$scope.compute_btn_disabled = true;
 			}else{
 				doc.clicked = true;
+
+				if($scope.reader_doc_id){
+					gridDict[$scope.reader_doc_id].clicked = false;
+				}
+
 				$scope.reader_doc_id = doc.name;
 				$scope.compute_btn_disabled = false;
+
+				$.jStorage.set("ID", [doc.name]);
+				$.jStorage.publish('JigsawEntitySelection', {"name":"ID", "selected": true});
 			}
 		}
 
@@ -220,14 +228,14 @@ app.controller("GridController",
 			GridDataFactory.loadSimmilarity($scope.reader_doc_id);
 		}
 
-		$scope.$watch('reader_doc_id', function(newValue, oldValue){
-			if(newValue != ''){
-				GridDataFactory.loadDocContent(newValue);
-				if(oldValue != ''){
-					gridDict[oldValue].clicked = false;
-				}
-			}
-		});
+		// $scope.$watch('reader_doc_id', function(newValue, oldValue){
+		// 	if(newValue != ''){
+		// 		GridDataFactory.loadDocContent(newValue);
+		// 		if(oldValue != ''){
+		// 			gridDict[oldValue].clicked = false;
+		// 		}
+		// 	}
+		// });
 
 		$scope.$on('contentChanged', function(){
 			var docContent = GridDataFactory.getCurrentDocContent();

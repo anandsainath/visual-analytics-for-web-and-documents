@@ -76,6 +76,16 @@ app.controller("ListController",
 
 		var notification;
 
+		/** Subscription for Entity selections **/
+
+		$.jStorage.subscribe("JigsawEntitySelection", function(channel, payload){
+			if(payload.name == $scope.selectedList){
+				$scope.selectedListItems = [];
+				var selections = $.jStorage.get(payload.name);
+				$scope.selectItem(selections[0]);
+			}
+		});
+
 		/** Public methods **/
 		$scope.listChanged = function(){
 			if($scope.previousList){
