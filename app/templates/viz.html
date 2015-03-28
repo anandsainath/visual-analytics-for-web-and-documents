@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-slider.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='libs/gridster/css/jquery.gridster.min.css') }}">
 
 	<script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/jquerypp.selection.js') }}"></script>
@@ -26,49 +27,53 @@
 
 	<script src="{{ url_for('static', filename='libs/jquery.noty.packaged.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='libs/gridster/js/jquery.gridster.min.js') }}"></script>
 {% endblock %}
 
 
 {% block layout_content %}
 
-<div class="container">
-	<div class="row colored-row" ng-app="ngJigsawListApp">
-		<div class="col-lg-12" ng-controller="JigListViewController" id="ListContainer">
-			<div class="row">
-				<div class="col-lg-4 col-lg-offset-4">
-					<ul>
-						<li><p class="list-navbar-text navbar-text">List Modes</p></li>
-						<li class="btn-group">
-							<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
-							<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
-							<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
-							<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
-						</li>
-					</ul>
+<div class="container gridster">
+	<ul ng-app="ngJigsawListApp" class="js-grid-parent">
+		<li class="colored-row js-grid-item" data-row="1" data-col="1" data-sizex="8" data-sizey="2">
+			<div ng-controller="JigListViewController" id="ListContainer">
+				<div class="row">
+					<div class="col-lg-8 col-lg-offset-4">
+						<ul style="padding-top: 5px;">
+							<li><p class="list-navbar-text navbar-text">List Modes</p></li>
+							<li class="btn-group">
+								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
+								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
+								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
+								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
+							</li>
+						</ul>
+					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="col-lg-10 col-lg-offset-1">
-					<div class="loader" ng-show="isLoading"></div>
-					<div class="grid" style="height: {{gridHeight|angular}}px;">
-						<!-- width: {{width|angular}}px;  -->
-						<div class="list-container" style="margin-left: 35px;">
-							<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="loader" ng-show="isLoading"></div>
+						<div class="grid" style="height: {{gridHeight|angular}}px;">
+							<!-- width: {{width|angular}}px;  -->
+							<div class="list-container" style="margin-left: 35px; width: 1010px;">
+								<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-	<div class="row divider-row"></div>
-	<div class="row colored-row">
-		<div class="col-lg-7" ng-app="ngJigsawDocApp" id="DocView" ng-controller="JigDocViewController">
-			<my-document-component></my-document-component>
-		</div>
-		<div class="col-lg-5" ng-app="ngJigsawGridApp" id="GridView" ng-controller="JigGridViewController">
-			<my-doc-grid-component val="gridData"></my-doc-grid-component>
-		</div>
-	</div>
+		</li>
+		<li class="colored-row js-grid-item" data-row="3" data-col="1" data-sizex="5" data-sizey="3">
+			<div ng-app="ngJigsawDocApp" id="DocView" ng-controller="JigDocViewController">
+				<my-document-component></my-document-component>
+			</div>
+		</li>
+		<!-- <li class="colored-row js-grid-item" data-row="3" data-col="7" data-sizex="4" data-sizey="3">
+			<div ng-app="ngJigsawGridApp" id="GridView" ng-controller="JigGridViewController">
+				<my-doc-grid-component val="gridData"></my-doc-grid-component>
+			</div>
+		</li> -->
+	</ul>
 </div>
 
 {% endblock %}
@@ -83,13 +88,37 @@
 	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
 	<script type="text/javascript">
 		angular.bootstrap(document.getElementById("DocView"),['ngJigsawDocApp']);
-		angular.bootstrap(document.getElementById("GridView"),['ngJigsawGridApp']);
+		// angular.bootstrap(document.getElementById("GridView"),['ngJigsawGridApp']);
 
 		String.prototype.endsWith = function(suffix) {
 			return this.indexOf(suffix, this.length - suffix.length) !== -1;
 		};
 
 		$(function(){
+
+			resizeListToSize(265);
+			$(".container > ul.js-grid-parent").gridster({
+		        widget_margins: [10, 10],
+		        widget_base_dimensions: [120, 140],
+		        widget_selector: 'li.js-grid-item',
+		        resize: {
+		        	enabled: true,
+		        	stop: function(e, ui, $widget){
+		        		var listContainer = $($widget[0]).find("#ListContainer");
+		        		if(listContainer['length']){
+		        			console.log("Inside if case");
+		        			var scope = angular.element(listContainer[0]).scope();
+		        			// resizeListToSize($($widget[0]).height() - 35);
+		        			resize(scope, $($widget[0]).height() - 35);
+		        		}
+		        		// console.log($($widget[0]).find("#ListContainer"), "<<ListContainer");
+		        		console.log(e, ui, $widget);
+		        		// console.log($($widget[0]).width());
+		        		// console.log($($widget[0]).height());
+		        	}
+		        }
+		    });
+
 			$('#closeBtn').click(function(){ $(this).parent().remove(); });
 			$.noty.defaults = {
 				layout: 'topCenter',

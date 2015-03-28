@@ -16,7 +16,7 @@ app.config["MONGODB_SETTINGS"] = {'DB': "jigsaw"}
 app.config["SECRET_KEY"] = "c39dcb77e31b57bb094e816c4982ac3c"
 
 ##Below configurations need to be changed in the server.
-app.config["VIS25_DB"] = "ffb57a8b21bf783b59578b89aa500172"
+app.config["VIS25_DB"] = "3fddc06d9f3848af6b5cd8ac6bc8d249"
 app.config["SITE_DOMAIN"] = "127.0.0.1:5000"
 
 UPLOAD_FOLDER = os.path.join('.', os.path.abspath(os.path.join(__file__, '..')), 'upload/')

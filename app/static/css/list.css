@@ -64,7 +64,6 @@ body {
 }
 
 .list-container{
-	position: absolute;
 	height: 550px;
 }
 
@@ -125,6 +124,10 @@ ol, ul {
 
 .list-restrict {
 	width: 286px;
+}
+
+.list-restrict-full {
+	width: 308px;
 }
 
 .list-row {
@@ -213,4 +216,12 @@ rect.thumb{
 .list-navbar-text{
 	margin-top: 5px !important;
 	margin-bottom: 0px !important;
+}
+
+.multiselect{
+	background-color: #EAEAEA;
+}
+
+.multiselect input{
+	margin-left: -2px;
 }

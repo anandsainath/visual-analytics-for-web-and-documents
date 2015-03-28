@@ -67,8 +67,11 @@ app.controller("ListController",
 		$scope.module_identifier = Date.now() + Math.floor((Math.random() * 100) + 1) + "_ListView";
 		
 		$scope.selectedListItems = [];
+		$scope.isMultiSelectMode = false;
 
 		$scope.dataWatchFlag = 0; //dummy flag that gets updated everytime the overview scroller should change..
+
+		$scope.lastMultiSelectPosition = undefined;
 
 		//the below call would return an empty array when the controller is 
 		//called before the data is loaded, but would return the list of entities
@@ -113,14 +116,85 @@ app.controller("ListController",
 			$scope.align = align;
 		}
 
-		$scope.selectItem = function(itemName, fromJStorage){
-			fromJStorage = fromJStorage || false
-
+		$scope.selectItem = function(itemName, $event, $index){
 			$scope.isListLoading = true;
 			if(!notification){
 				notification = noty({});
 			}
-			
+
+			if($event){
+				//$event is not undefined..
+				if($event.shiftKey){
+					$scope.selectedListItems = [];
+					if($scope.lastMultiSelectPosition){
+						//lastMultiSelectPosition is not undefined..
+						var startIndex = ($index < $scope.lastMultiSelectPosition)? $index : $scope.lastMultiSelectPosition;
+						var endIndex = ($index > $scope.lastMultiSelectPosition)? $index : $scope.lastMultiSelectPosition;
+
+						for(var index=startIndex; index<=endIndex; index++){
+							$scope.selectedListItems.push($scope.listData[index]['name']);
+						}
+					} else {
+						$scope.selectedListItems.push(itemName);
+						// $scope.lastMultiSelectPosition = $index;
+					}
+				} else if(($event.metaKey && navigator.platform.indexOf('Mac') > -1) || ($event.ctrlKey && navigator.platform.indexOf('Win') > -1)){
+					var index = $scope.selectedListItems.indexOf(itemName);
+					if(index != -1){
+						$scope.selectedListItems.splice(index, 1);
+					} else{
+						$scope.selectedListItems.push(itemName);
+					}
+				} else {
+					$scope.selectedListItems = [];
+					$scope.selectedListItems.push(itemName);
+					// $scope.lastMultiSelectPosition = $index;
+				}
+
+				$.jStorage.set($scope.selectedList, $scope.selectedListItems);
+				$.jStorage.publish('JigsawEntitySelection', {"name":$scope.selectedList, "selected": true, "id": $scope.module_identifier});
+			} else {
+				//$event is undefined..
+				var index = $scope.selectedListItems.indexOf(itemName);
+				if(index != -1){
+					$scope.selectedListItems.splice(index, 1);
+				} else{
+					$scope.selectedListItems = [];
+					$scope.selectedListItems.push(itemName);
+				}
+			}
+
+			$scope.lastMultiSelectPosition = $index;
+			// var index = $scope.selectedListItems.indexOf(itemName);
+			// if(index != -1){
+			// 	$scope.selectedListItems.splice(index, 1);
+			// } else{
+			// 	$scope.selectedListItems = [];
+			// 	$scope.selectedListItems.push(itemName);
+			// }
+			// console.log("SelectedListItems", $scope.selectedListItems);
+			DataFactory.setSelectedListItem($scope.selectedList, $scope.selectedListItems);
+
+			// if(!fromJStorage){
+			// 	console.log("FROM", $scope.module_identifier);
+			// 	$.jStorage.set($scope.selectedList, $scope.selectedListItems);
+			// 	$.jStorage.publish('JigsawEntitySelection', {"name":$scope.selectedList, "selected": true, "id": $scope.module_identifier});
+			// }
+			$scope.isMultiSelectMode = false;
+		}
+
+		$scope.selectMultipleItems = function(itemName){
+			$scope.isListLoading = true;
+			if(!notification){
+				notification = noty({});
+			}
+
+			if(!$scope.isMultiSelectMode){
+				//first time the multi select mode is activated
+				//reset the selected items list..
+				$scope.selectedListItems = [];
+			}
+
 			var index = $scope.selectedListItems.indexOf(itemName);
 			if(index != -1){
 				$scope.selectedListItems.splice(index, 1);
@@ -129,11 +203,13 @@ app.controller("ListController",
 			}
 			DataFactory.setSelectedListItem($scope.selectedList, $scope.selectedListItems);
 
-			if(!fromJStorage){
-				console.log("FROM", $scope.module_identifier);
-				$.jStorage.set($scope.selectedList, $scope.selectedListItems);
-				$.jStorage.publish('JigsawEntitySelection', {"name":$scope.selectedList, "selected": true, "id": $scope.module_identifier});
-			}
+			// if(!fromJStorage){
+			console.log("FROM", $scope.module_identifier);
+			$.jStorage.set($scope.selectedList, $scope.selectedListItems);
+			$.jStorage.publish('JigsawEntitySelection', {"name":$scope.selectedList, "selected": true, "id": $scope.module_identifier});
+			// }
+			$scope.isMultiSelectMode = true;
+
 		}
 
 		$scope.getScrollBarBackgroundColor = function(name, strength){

@@ -308,19 +308,21 @@ def get_list_contents():
 		])
 		
 		content_list = session_db.aggregate(aggregate_array)['result']
+		if content_list:
+			print content_list, [item['count'] for item in content_list]
 
-		if max(item['count'] for item in content_list) == 1:
-			temp_list = content_list
-			content_list = []
-			new_count = 1/len(temp_list)
-			for dict_item in temp_list:
-				dict_item['frequency'] = new_count
-				content_list.append(dict_item)
+			if max([item['count'] for item in content_list]) == 1:
+				temp_list = content_list
+				content_list = []
+				new_count = 1/len(temp_list)
+				for dict_item in temp_list:
+					dict_item['frequency'] = new_count
+					content_list.append(dict_item)
 
-		all_data.append({
-			"key": header,
-			"values": content_list
-		})
+			all_data.append({
+				"key": header,
+				"values": content_list
+			})
 
 	return json.dumps(all_data)
 

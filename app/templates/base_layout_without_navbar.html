@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"> <!-- data-ng-app="ngJigsawApp" -->
+<html lang="en" data-ng-app="ngJigsawListApp"> <!-- data-ng-app="ngJigsawApp" -->
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,7 +17,7 @@
 	{% block head_script_content %}{% endblock %}
 	<title>{% block title %}{% endblock %}</title>
 </head>
-<body> <!--id="bodyContainer" ng-controller="JigViewController" -->
+<body id="bodyContainer" ng-controller="JigListViewController"> <!--id="bodyContainer" ng-controller="JigViewController" -->
 	
 	<div id="layout-html-content">
 		{% block layout_content %}{% endblock %}
