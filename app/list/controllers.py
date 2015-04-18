@@ -79,7 +79,7 @@ def index():
 #ADMIN APIS
 
 def is_vis25():
-	return session['token'] == app.config['VIS25_DB']
+	return DBUtils().get_session_token() == app.config['VIS25_DB']
 
 def get_columns_from_session_db():
 	headers = DBUtils().get_keys()

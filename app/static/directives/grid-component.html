@@ -7,32 +7,42 @@
 					<div class="panel panel-default controls-panel margin-bottom-2">
 						<div class="panel-body padding-bottom-0">
 							<div class="row">
-								<div class="col-sm-6"> <p class="text-center">Sort By</p> </div>
-								<div class="col-sm-6"> <p class="text-center">Color By</p> </div>
-							</div>
-							<div class="row">
 								<div class="col-sm-6">
 									<div class="row padding-3">
-										<select ng-model="sortByAttribute" class="form-control">
-									        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
-									            {{obj.label}}
-									        </option>
-									    </select>
+										<div class="col-sm-4">
+											<p class="text-center" style="margin: 7px 0px 0px 0px;">Sort By</p>
+										</div>
+										<div class="col-sm-8">
+											<select ng-model="sortByAttribute" class="form-control">
+										        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+										            {{obj.label}}
+										        </option>
+										    </select>
+										</div>
 									</div>
 									<div class="row padding-3">
-										<select class="form-control" ng-options="obj.value as obj.label for obj in sortByOrderOptions" ng-model="sortByOrder"></select>
+										<div class="col-sm-12">
+											<select class="form-control" ng-options="obj.value as obj.label for obj in sortByOrderOptions" ng-model="sortByOrder"></select>
+										</div>
 									</div>
 								</div>
 								<div class="col-sm-6">
 									<div class="row padding-3">
-										<select ng-model="colorByAttribute" class="form-control">
-									        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
-									            {{obj.label}}
-									        </option>
-									    </select>
+										<div class="col-sm-4">
+											<p class="text-center" style="margin: 7px 0px 0px 0px;">Color By</p>
+										</div>
+										<div class="col-sm-8">
+											<select ng-model="colorByAttribute" class="form-control">
+										        <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+										            {{obj.label}}
+										        </option>
+										    </select>
+										</div>
 									</div>
 									<div class="row padding-3">
-										<select class="form-control" ng-options="obj.value as obj.label for obj in colorByOptions" ng-model="colorByOption"></select>
+										<div class="col-sm-12">
+											<select class="form-control" ng-options="obj.value as obj.label for obj in colorByOptions" ng-model="colorByOption"></select>
+										</div>
 									</div>
 								</div>
 							</div>

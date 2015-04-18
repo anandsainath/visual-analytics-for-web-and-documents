@@ -1,4 +1,5 @@
-var app = angular.module('ngJigsawGridApp',['ngSanitize']);
+// var app = angular.module('ngJigsawGridApp',['ngSanitize']);
+var app = angular.module('ngJigsaw');
 
 app.filter("sanitize", ['$sce', function($sce) {
   return function(htmlCode){
@@ -125,23 +126,42 @@ app.factory('GridDataFactory',
 		return service;
 	});
 
-app.controller('JigGridViewController', 
-	function($scope, $window, GridDataFactory){
-
-		loadRemoteData();
-		
-		/** Private Methods **/ 
-		function loadRemoteData(){
-			GridDataFactory.init();
-		}
-	});
-
 app.directive('myDocGridComponent', 
 	function(){
-		myDocGridComponent = {};
-		myDocGridComponent.restrict = 'E';
-		myDocGridComponent.templateUrl = '/static/directives/grid-component.html';
-		return myDocGridComponent;
+		
+		function Controller($scope, $window, GridDataFactory){
+			GridDataFactory.init();
+		}
+
+		function link($scope, element, attributes, controller){
+			console.log("Link function inside the directive called..");
+		}
+
+		return ({
+			restrict: 'A',
+			templateUrl: '/static/directives/grid-component.html',
+			controller: Controller,
+			link: link
+		});
+	});
+
+app.directive('gridView', 
+	function(){
+		
+		function Controller($scope, $window, GridDataFactory){
+			GridDataFactory.init();
+		}
+
+		function link($scope, element, attributes, controller){
+			console.log("Link function inside the directive called..");
+		}
+
+		return ({
+			restrict: 'A',
+			templateUrl: '/static/directives/grid-view.html',
+			controller: Controller,
+			link: link
+		});
 	});
 
 app.controller("GridController",

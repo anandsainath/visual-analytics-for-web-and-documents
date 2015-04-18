@@ -16,14 +16,20 @@ class Utils:
 		db = self.get_db()
 		return db[collection_name]
 
+	def get_session_token(self):
+		##For VDA Project..
+		if 'token' not in session:
+			session['token'] = 'dac6cee6b243c932d00f976ba0d9882f'
+		return session['token']
+
 	def get_session_db(self):
-		return self.get_collection_obj(session['token'])
+		return self.get_collection_obj(self.get_session_token())
 
 	def get_session_key_db(self):
-		return self.get_collection_obj(session['token']+"_keys")
+		return self.get_collection_obj(self.get_session_token()+"_keys")
 
 	def get_session_word_freq_db(self):
-		return self.get_collection_obj(session['token']+"_doc_word_frequency")
+		return self.get_collection_obj(self.get_session_token()+"_doc_word_frequency")
 
 	def get_keys(self):
 		return [document['_id'] for document in self.get_session_key_db().find({},{'_id': 1})]

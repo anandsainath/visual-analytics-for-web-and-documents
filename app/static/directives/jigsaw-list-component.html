@@ -1,0 +1,26 @@
+<div id="ListContainer" style="margin-top: 25px; padding-bottom: 25px;">
+	<div class="row">
+		<div class="col-lg-12 col-md-12 col-sm-12 text-center">
+			<ul style="padding-top: 5px;">
+				<!-- <li><p class="list-navbar-text navbar-text">List Modes</p></li> -->
+				<li class="btn-group">
+					<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
+					<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
+					<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
+					<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="loader" ng-show="isLoading"></div>
+			<div class="grid" style="height: {{gridHeight}}px;">
+				<div class="list-container" style="width: {{lists.length * 350}}px;">
+					<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

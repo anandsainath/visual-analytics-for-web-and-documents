@@ -35,9 +35,7 @@ def allowed_file(filename):
 def format_line(line):
 	open_tag_template = "<span class='label {{entity_type}}'>"
 	list_entities = get_entities()
-
-	print list_entities
-
+	# print list_entities
 	for entity_type in list_entities:
 		line = line.replace("<"+entity_type+">", open_tag_template.replace("{{entity_type}}", entity_type)).replace("</"+entity_type+">","</span>")
 
@@ -64,6 +62,20 @@ def grid():
 # Public APIs
 
 ###### GRID VIEW ######
+
+@mod_data.route('/compute-clusters')
+def compute_clusters():
+	from DocumentCluster import DocumentCluster
+	content_vector = []
+	id_vector = []
+	session_db = DBUtils().get_session_db()
+
+	for doc in session_db.find({}, {'ID': 1, '__content': 1}):
+		content_vector.append(" ".join(doc['__content']))
+		id_vector.append(doc['ID'])
+
+	DocumentCluster({'content': content_vector, 'id': id_vector})
+	return "Anand"
 
 @mod_data.route('/compute-simmilarity/<seed_doc_id>')
 def compute_grid_simmilarity(seed_doc_id):

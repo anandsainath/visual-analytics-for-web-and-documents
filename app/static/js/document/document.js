@@ -1,14 +1,57 @@
-var app_doc = angular.module('ngJigsawDocApp',['sf.virtualScroll','pasvaz.bindonce', 'ngSanitize']);
+// var app_doc = angular.module('ngJigsawDocApp',['sf.virtualScroll','pasvaz.bindonce', 'ngSanitize']);
+var app_doc = angular.module('ngJigsaw');
 
 app_doc.config(function($logProvider){
 	$logProvider.debugEnabled(false);
 });
 
-app_doc.directive('myDocumentComponent', function(){
-	myDocumentComponent = {};
-	myDocumentComponent.restrict = 'E';
-	myDocumentComponent.templateUrl = '/static/directives/document/doc-component.html';
-	return myDocumentComponent;
+app_doc.directive('documentView', function(){
+	function DocViewController($scope, $window, DocDataFactory){
+		if($window.location.pathname === "/data/"){
+			//means that the page is loaded when the documents are being uploaded..
+			loadMarkupData();
+		}else{
+			loadRemoteData();
+		}
+
+		/** Private Methods **/ 
+
+		function loadRemoteData(){
+			DocDataFactory.init();
+		}
+
+		function loadMarkupData(){
+			DocDataFactory.loadMarkupData();
+		}
+	}
+
+	function link($scope, $elements, attributes, controller){
+		$elements.find("#wordCloudSlider").slider({
+			min: 15,
+			max: 100,
+			step: 5,
+			value: 30
+		})
+		.on("slideStop", function(event){
+			$elements.find('#wordCloudSlider').val(event.value).trigger('input');
+		});
+
+		$elements.find('#textContent').on("mouseup", function(){
+			var selection = $('#textContent').selection();
+			if(selection.end != selection.start){
+				var text = $('#textContent').text().substring(selection.start, selection.end).trim();
+				$('#selectedText').val(text).trigger('input');
+				console.log(text);
+			}
+		});
+	}
+
+	return ({
+		restrict: 'A',
+		templateUrl: '/static/directives/doc-view.html',
+		controller: DocViewController,
+		link: link
+	});
 });
 
 app_doc.filter("sanitize", ['$sce', function($sce) {
@@ -247,29 +290,6 @@ app_doc.factory('DocDataFactory',
 		return service;
 	});
 
-/** Global View Controller **/
-app_doc.controller('JigDocViewController', 
-	function($scope, $window, DocDataFactory){
-
-		console.log("I am here!!");
-		if($window.location.pathname === "/data/"){
-			//means that the page is loaded when the documents are being uploaded..
-			loadMarkupData();
-		}else{
-			loadRemoteData();
-		}
-
-		/** Private Methods **/ 
-
-		function loadRemoteData(){
-			DocDataFactory.init();
-		}
-
-		function loadMarkupData(){
-			DocDataFactory.loadMarkupData();
-		}
-	});
-
 app_doc.controller("DocController",
 	function($scope, $window, $filter, DocDataFactory, $sce){
 
@@ -342,6 +362,7 @@ app_doc.controller("DocController",
 		});
 
 		$scope.$watch('num_words', function(old_value, new_value){
+			console.log("num_words changed!!");
 			if(old_value != new_value){
 				DocDataFactory.fetchWordCloudList($scope.num_words, $scope.only_entities);
 			}

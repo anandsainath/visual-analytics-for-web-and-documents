@@ -7,117 +7,31 @@
 {% block head_script_content %}
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/list.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/add-visualization.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/visualization-widget.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-slider.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='libs/gridster/css/jquery.gridster.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='bower_components/angular-gridster/dist/angular-gridster.min.css') }}"></script>
 
 	<script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/underscore/underscore-min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/jquerypp.selection.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular-sanitize/angular-sanitize.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='libs/d3.v3.js') }}"></script>
-	
-	<script src="{{ url_for('static', filename='libs/jStorage/jstorage.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/document/document.js') }}"></script>
-	<script src="{{ url_for('static', filename='js/grid/grid.js') }}"></script>
-	<script src="{{ url_for('static', filename='libs/bootstrap-slider.js') }}"></script>
-	<script src="{{ url_for('static', filename='libs/jquery.highlight.js') }}"></script>
-
 	<script src="{{ url_for('static', filename='libs/jquery.noty.packaged.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='libs/gridster/js/jquery.gridster.min.js') }}"></script>
-{% endblock %}
+	<script src="{{ url_for('static', filename='libs/uuid.js') }}"></script>
 
-
-{% block layout_content %}
-
-<div class="container gridster">
-	<ul ng-app="ngJigsawListApp" class="js-grid-parent">
-		<li class="colored-row js-grid-item" data-row="1" data-col="1" data-sizex="8" data-sizey="2">
-			<div ng-controller="JigListViewController" id="ListContainer">
-				<div class="row">
-					<div class="col-lg-8 col-lg-offset-4">
-						<ul style="padding-top: 5px;">
-							<li><p class="list-navbar-text navbar-text">List Modes</p></li>
-							<li class="btn-group">
-								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('Any')" ng-class="{true:'active', false:''}[mode=='Any']">Any</button>
-								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All')" ng-class="{true:'active', false:''}[mode=='All']">All</button>
-								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('And')" ng-class="{true:'active', false:''}[mode=='And']">Same</button>
-								<button type="button" class="btn btn-default btn-sm" ng-click="updateMode('All-Any')" ng-class="{true:'active', false:''}[mode=='All-Any']">All-Any</button>
-							</li>
-						</ul>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-lg-12">
-						<div class="loader" ng-show="isLoading"></div>
-						<div class="grid" style="height: {{gridHeight|angular}}px;">
-							<!-- width: {{width|angular}}px;  -->
-							<div class="list-container" style="margin-left: 35px; width: 1010px;">
-								<my-list-component bindonce ng-repeat="list_index in lists track by $index"></my-list-component>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</li>
-		<li class="colored-row js-grid-item" data-row="3" data-col="1" data-sizex="5" data-sizey="3">
-			<div ng-app="ngJigsawDocApp" id="DocView" ng-controller="JigDocViewController">
-				<my-document-component></my-document-component>
-			</div>
-		</li>
-		<!-- <li class="colored-row js-grid-item" data-row="3" data-col="7" data-sizex="4" data-sizey="3">
-			<div ng-app="ngJigsawGridApp" id="GridView" ng-controller="JigGridViewController">
-				<my-doc-grid-component val="gridData"></my-doc-grid-component>
-			</div>
-		</li> -->
-	</ul>
-</div>
-
-{% endblock %}
-
-{% block script_content %}
-	<style type="text/css">
-		body{
-			padding-top: 10px !important;
-		}
-	</style>
-
-	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
+	<script src="{{ url_for('static', filename='bower_components/javascript-detect-element-resize/jquery.resize.js') }}"></script>
+	<script src="{{ url_for('static', filename='bower_components/angular-gridster/dist/angular-gridster.min.js') }}"></script>
+	
 	<script type="text/javascript">
-		angular.bootstrap(document.getElementById("DocView"),['ngJigsawDocApp']);
-		// angular.bootstrap(document.getElementById("GridView"),['ngJigsawGridApp']);
-
 		String.prototype.endsWith = function(suffix) {
 			return this.indexOf(suffix, this.length - suffix.length) !== -1;
 		};
 
 		$(function(){
-
-			resizeListToSize(265);
-			$(".container > ul.js-grid-parent").gridster({
-		        widget_margins: [10, 10],
-		        widget_base_dimensions: [120, 140],
-		        widget_selector: 'li.js-grid-item',
-		        resize: {
-		        	enabled: true,
-		        	stop: function(e, ui, $widget){
-		        		var listContainer = $($widget[0]).find("#ListContainer");
-		        		if(listContainer['length']){
-		        			console.log("Inside if case");
-		        			var scope = angular.element(listContainer[0]).scope();
-		        			// resizeListToSize($($widget[0]).height() - 35);
-		        			resize(scope, $($widget[0]).height() - 35);
-		        		}
-		        		// console.log($($widget[0]).find("#ListContainer"), "<<ListContainer");
-		        		console.log(e, ui, $widget);
-		        		// console.log($($widget[0]).width());
-		        		// console.log($($widget[0]).height());
-		        	}
-		        }
-		    });
 
 			$('#closeBtn').click(function(){ $(this).parent().remove(); });
 			$.noty.defaults = {
@@ -150,4 +64,83 @@
 		});
 
 	</script>
+
+	<script src="{{ url_for('static', filename='js/viz.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/directives/addVisualization.js') }}"></script>
+	<script src="{{ url_for('static', filename='libs/jStorage/jstorage.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/list/list.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/document/document.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/grid/grid.js') }}"></script>
+	<script src="{{ url_for('static', filename='libs/bootstrap-slider.js') }}"></script>
+	<script src="{{ url_for('static', filename='libs/jquery.highlight.js') }}"></script>
+	<script src="{{ url_for('static', filename='libs/bootstrap/js/bootstrap.min.js') }}"></script>
+	
+{% endblock %}
+
+
+{% block layout_content %}
+
+<div ng-app="ngJigsaw" ng-controller="RootCtrl">
+	
+	<nav role="navigation" class="navbar">
+		<div class="navbar-default navbar-static-top affix" data-spy="affix">
+			<div class="container">
+				<!-- Add visualization control -->
+                <div add-visualization gridster-configs="visualizations"></div>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<div gridster="gridsterOpts">
+	        <ul> 
+	        	<li gridster-item="visualization" ng-repeat="visualization in visualizations track by visualization.id">
+	                <div class="well visualization-widget" visualization-widget
+	                    gridster-configs="visualizations"
+	                    gridster-config-index="$index">
+	                </div>
+	            </li>
+	        </ul>
+	    </div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block script_content %}
+	<style type="text/css">
+		body{
+			padding-top: 0px !important;
+		}
+
+		.navbar-default {
+		  background-color: #FFFFFF;
+		  border: 0;
+		  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+		}
+
+		.navbar-default.affix {
+		  top: 0;
+		  width: 100%;
+		  z-index: 1040;
+		  transform: none;
+		  -webkit-transform: none;
+		}
+
+		body {
+		    font-family: 'Helvetica Neue', Arial, sans-serif;
+		    background: #F1F1F1;
+		    /*color: #fff;*/
+		}
+		
+		.well {
+		  background-color: #FFFFFF;
+		  box-shadow: 0 1px 4px rgba(154, 154, 154, 0.3);
+		  border: 1px solid #D6D6D6;
+		  margin: 0px;
+		  position: relative;
+		}
+	</style>
+
+	<script type="text/javascript" src="{{url_for('static', filename='js/list/main.js')}}"></script>
 {% endblock %}

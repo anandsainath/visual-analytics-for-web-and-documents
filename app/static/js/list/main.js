@@ -34,7 +34,7 @@ function resize(scope, height){
 }
 
 //first call of tellAngular when the dom is loaded
-document.addEventListener("DOMContentLoaded", resizeLists, false);
+// document.addEventListener("DOMContentLoaded", resizeLists, false);
 
 //calling tellAngular on resize event
-window.onresize = resizeLists;
+// window.onresize = resizeLists;
