@@ -17,7 +17,8 @@ app.service(
 		return({
 			fetchGridDataList: fetchGridDataList,
 			fetchDocContent: fetchDocContent,
-			fetchCosineSimmilarity: fetchCosineSimmilarity
+			fetchCosineSimmilarity: fetchCosineSimmilarity,
+			fetchClusterAssignments: fetchClusterAssignments
 		});
 
 		/** Public Methods **/
@@ -57,6 +58,17 @@ app.service(
 			}, handleError));
 		}
 
+		function fetchClusterAssignments(){
+			var request = $http({
+				method: "get",
+				url: "/data/compute-clusters"
+			});
+
+			return(request.then(function(response){
+				return response.data;
+			}, handleError))
+		}
+
 		/** Private methods **/
 
 		function handleError(response){
@@ -83,15 +95,22 @@ app.factory('GridDataFactory',
 
 		var service = {};
 
-		var gridData = [];
+		var gridData = undefined;
 		var content = {};
 		var dict_simmilarity_score = {};
+		var cluster_assignments = undefined;
 
 		service.init = function(){
 			gridAPIService.fetchGridDataList()
 				.then(function(list){
 					gridData = list;
 					$rootScope.$broadcast('gridListLoaded');
+				});
+
+			gridAPIService.fetchClusterAssignments()
+				.then(function(doc_cluster_assignments){
+					cluster_assignments = doc_cluster_assignments;
+					$rootScope.$broadcast('clustersLoaded');
 				});
 		}
 
@@ -121,6 +140,10 @@ app.factory('GridDataFactory',
 
 		service.getSimmilarityScore = function(){
 			return dict_simmilarity_score;
+		}
+
+		service.getClusterAssignments = function(){
+			return cluster_assignments;
 		}
 
 		return service;
@@ -158,7 +181,7 @@ app.directive('gridView',
 
 		return ({
 			restrict: 'A',
-			templateUrl: '/static/directives/grid-view.html',
+			templateUrl: '/static/directives/grid-view-new.html',
 			controller: Controller,
 			link: link
 		});
@@ -170,7 +193,12 @@ app.controller("GridController",
 		/** Entities, Content and Summary of the current document being displayed. **/
 
 		$scope.gridData = [];
-		
+		$scope.clusterData = [];
+		$scope.clusterLabels = [];
+		var gridDict = {};
+		var minDict = {'l': 10000, 'e': 10000, 'ds': 10000};
+		var maxDict = {'l': -1, 'e': -1, 'ds': -1};
+
 		$scope.sortByOrder = false;
 		$scope.colorByOption = "dark";
 		$scope.cur_doc = 'No document selected';
@@ -179,15 +207,18 @@ app.controller("GridController",
 		$scope.content = []
 		$scope.content_loaded = false;
 		$scope.module_identifier = Date.now() + Math.floor((Math.random() * 100) + 1) + "_GridView";
+		$scope.clusters_loaded = false;
+		$scope.display_mode = 'grid'; //can be either 'grid' or 'cluster'
+
+		$scope.display_mode_grid = true;
+		$scope.display_mode_cluster = false;
 
 		$scope.compute_btn_disabled = true
 
-		var minDict = {'l': 10000, 'e': 10000, 'ds': 10000};
-		var maxDict = {'l': -1, 'e': -1, 'ds': -1};
-		var gridDict = {};
-
+		
 		$scope.blueShades = ['#08306B', '#08519C', '#2171B5', '#4292c6', '#6BAED6', '#9ECAE1', '#C6DBEF', '#DEEBF7'];
 		$scope.redShades = ['#67000d', '#a50f15', '#CB181D', '#EF3B2C', '#FB6A4A', '#FCA114', '#FCBBA1', '#FEE0D2'];
+		$scope.clusterShades = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
 		
 		$scope.sortByOrderOptions = [
 			{label: "Ascending", value: false}, 
@@ -197,17 +228,32 @@ app.controller("GridController",
 		$scope.colorByOptions = [{label: "Greater Value, Darker Color", value: "dark"}, {label: "Greater Value, Lighter Color", value: "light"}];
 
 		$scope.selectOptions = [
-			{id:1, label:"Document Length", value:'l', shade: 'light'},
+			{id:1, label: "Document Length", value:'l', shade: 'light'},
 			{id:2, label: "Number of Entities", value:'e', shade: 'light'},
-			{id:3, label: "Polarity", value:'p', shade: 'light'},
+			{id:3, label: "Sentiment", value:'p', shade: 'light'},
 			{id:4, label: "Subjectivity", value:'s', shade: 'light'},
-			{id:5, label: "Document Similarity", value: 'ds', shade: 'dark'}
+			{id:5, label: "Document Similarity", value: 'ds', shade: 'dark'},
+			{id:6, label: "Cluster Assignment", value: 'c', shade: 'dark'}
 		];
 
 		$timeout(function(){
 			$scope.sortByAttribute = "l";
 			$scope.colorByAttribute = "l";
 		});
+
+		loadGridData();
+		addClusterAssignments(); // loads the cluster assignments if the view is loaded up the second time..
+
+
+		$scope.displayMode = function(mode){
+			if(mode == 'grid'){
+				$scope.display_mode_grid = true;
+				$scope.display_mode_cluster = false;
+			}else{
+				$scope.display_mode_grid = false;
+				$scope.display_mode_cluster = true;
+			}
+		}
 
 		/** Subscription for Entity selections **/
 
@@ -285,16 +331,22 @@ app.controller("GridController",
 			$scope.content_loaded = true;
 		});
 		
-		$scope.$on('gridListLoaded', function(){
+		function loadGridData(){
 			var _grid_data = GridDataFactory.getGridData();
-			$scope.gridData = _grid_data;
-			$scope.gridData.forEach(function(doc, index){
-				gridDict[doc.name] = doc;
-				if(minDict['l'] > doc.l){minDict['l'] = doc.l;}
-				if(maxDict['l'] < doc.l){maxDict['l'] = doc.l;}
-				if(minDict['e'] > doc.e){minDict['e'] = doc.e;}
-				if(maxDict['e'] < doc.e){maxDict['e'] = doc.e;}
-			});
+			if(_grid_data){
+				$scope.gridData = _grid_data;
+				$scope.gridData.forEach(function(doc, index){
+					gridDict[doc.name] = doc;
+					if(minDict['l'] > doc.l){minDict['l'] = doc.l;}
+					if(maxDict['l'] < doc.l){maxDict['l'] = doc.l;}
+					if(minDict['e'] > doc.e){minDict['e'] = doc.e;}
+					if(maxDict['e'] < doc.e){maxDict['e'] = doc.e;}
+				});
+			}
+		}
+
+		$scope.$on('gridListLoaded', function(){
+			loadGridData();
 		});
 
 		$scope.$on('simmilarityScoreLoaded', function(){
@@ -310,6 +362,35 @@ app.controller("GridController",
 				if(maxDict['ds'] < ds){maxDict['ds'] = ds;}
 			}
 			$scope.selectOptions[4]['shade'] = 'light';
+		});
+
+		function addClusterAssignments(){
+			var cluster_assignments = GridDataFactory.getClusterAssignments();
+
+			if(cluster_assignments){
+				$scope.clusters_loaded = true;
+				for(var index in cluster_assignments){
+					cluster_object = cluster_assignments[index];
+					var cluster_num = cluster_object['cluster'];
+					var cluster_docs = [];
+
+					for(var doc_index in cluster_object['ids']){
+						var key = cluster_object['ids'][doc_index];
+						gridDict[key]['c'] = cluster_num;
+
+						cluster_docs.push(gridDict[key]);
+					}
+					$scope.clusterData.push({
+						'docs': cluster_docs,
+						'words': cluster_object['words']
+					});
+				}
+				$scope.selectOptions[5]['shade'] = 'light';
+			}
+		}
+
+		$scope.$on('clustersLoaded', function(){
+			addClusterAssignments();
 		});
 
 		$scope.getDocColor = function(doc_id){
@@ -349,6 +430,10 @@ app.controller("GridController",
 					minColorValue = ($scope.colorByOption == "dark")? minDict['ds'] : maxDict['ds'];
 					color = $scope.blueShades[parseInt(($scope.blueShades.length-1)*(maxColorValue-value)*1.0/(maxColorValue-minColorValue))];
 					break;
+				case 'c':
+					value = gridDict[doc_id]['c'];
+					color = $scope.clusterShades[parseInt(value)];
+					break
 			}
 			return color;
 		}

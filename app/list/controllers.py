@@ -2,6 +2,7 @@
 from __future__ import division
 #Flask dependencies
 from flask import Blueprint, request, render_template, redirect, url_for, session, g
+from flask.ext.cache import Cache
 import csv
 
 from app.list.pagination import Pagination
@@ -25,6 +26,7 @@ ITEMS_PER_PAGE = 10
 
 # Define the blueprint: 'list', set its url prefix: app.url/list
 mod_list = Blueprint('list', __name__, url_prefix='/list')
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 ###########################
 #FILE UPLOAD CONFIGURATION#

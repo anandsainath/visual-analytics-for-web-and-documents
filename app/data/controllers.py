@@ -4,6 +4,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, sessio
 from werkzeug import secure_filename
 from app import app
 from textblob import TextBlob
+from flask.ext.cache import Cache
 
 import glob
 import ner
@@ -20,6 +21,7 @@ from ..utils import Utils as DBUtils
 
 # Define the blueprint: 'data', set its url prefix: app.url/data
 mod_data = Blueprint('data', __name__, url_prefix='/data')
+cache = Cache(app,config={'CACHE_TYPE': 'simple'})
 
 ###########################
 #FILE UPLOAD CONFIGURATION#
@@ -64,6 +66,7 @@ def grid():
 ###### GRID VIEW ######
 
 @mod_data.route('/compute-clusters')
+@cache.memoize()
 def compute_clusters():
 	from DocumentCluster import DocumentCluster
 	content_vector = []
@@ -74,10 +77,10 @@ def compute_clusters():
 		content_vector.append(" ".join(doc['__content']))
 		id_vector.append(doc['ID'])
 
-	DocumentCluster({'content': content_vector, 'id': id_vector})
-	return "Anand"
+	return json.dumps(DocumentCluster({'content': content_vector, 'id': id_vector}).get_cluster_assignments())
 
 @mod_data.route('/compute-simmilarity/<seed_doc_id>')
+@cache.memoize()
 def compute_grid_simmilarity(seed_doc_id):
 	from sklearn.feature_extraction.text import TfidfVectorizer
 	from sklearn.metrics.pairwise import cosine_similarity
@@ -104,6 +107,7 @@ def compute_grid_simmilarity(seed_doc_id):
 	return json.dumps(dict(zip(id_vector, cosine[0].tolist())))
 
 @mod_data.route('/get-grid-data')
+@cache.memoize()
 def get_grid_data():
 	session_db = DBUtils().get_session_db()
 	results = []
@@ -193,6 +197,7 @@ def get_entity_types():
 
 ## Returns list of tuples containing (read_count, doc_id, "__list_selection_color__")
 @mod_data.route("/get-document-list")
+@cache.memoize()
 def get_document_list():
 	session_db = DBUtils().get_session_db()
 	return json.dumps([{"count":document['__read_count'], "name":document['ID'], "color":""} for document in session_db.find({}, {'ID' : 1, '__read_count': 1})])

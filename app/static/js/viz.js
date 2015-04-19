@@ -1,5 +1,14 @@
 angular.module('ngJigsaw', ['gridster','sf.virtualScroll','pasvaz.bindonce','ngSanitize'])
 	.controller("RootCtrl", function($scope){
+
+		/**
+	     * Simple toggle method for tracking which chart is visible.
+	     * @method toggleCreateFilters
+	     */
+	    $scope.toggleChartOptions = function() {
+	        $scope.chartOptions = !$scope.chartOptions;
+	    };
+
 		/**
 	     * Basic gridster layout hander that will disable mouse events on gridster items via CSS so mouse handlers
 	     * in the items will not trigger and conflict with the layout action.

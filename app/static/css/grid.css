@@ -1,0 +1,19 @@
+.chart-options .popover-content {
+  background-color: #FFFFFF;
+  padding: 15px 15px 0;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.chart-options .popover {
+  left: auto;
+  right: 5px;
+  top: 45px;
+  margin-top: 0;
+  background: none;
+  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}

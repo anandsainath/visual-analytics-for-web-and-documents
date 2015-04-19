@@ -14,9 +14,12 @@ import math
 class DocumentCluster:
 
 	def __init__(self, documents):
+		self.documents = documents
+
+	def get_cluster_assignments(self):
 		totalvocab_stemmed = []
 		totalvocab_tokenized = []
-		for doc_content in documents['content']:
+		for doc_content in self.documents['content']:
 			allwords_stemmed = self.tokenize_and_stem(doc_content) #for each item in 'documents['content']', tokenize/stem
 			totalvocab_stemmed.extend(allwords_stemmed) #extend the 'totalvocab_stemmed' list
 
@@ -32,14 +35,14 @@ class DocumentCluster:
 										min_df=0.2, stop_words='english',
 										use_idf=True, tokenizer=self.tokenize_and_stem, ngram_range=(1,3))
 
-		tfidf_matrix = tfidf_vectorizer.fit_transform(documents['content']) #fit the vectorizer to documents['content']
+		tfidf_matrix = tfidf_vectorizer.fit_transform(self.documents['content']) #fit the vectorizer to documents['content']
 		terms = tfidf_vectorizer.get_feature_names()
 
 		from sklearn.metrics.pairwise import cosine_similarity
 		dist = 1 - cosine_similarity(tfidf_matrix)
 
 		from sklearn.cluster import KMeans
-		num_clusters = int(math.floor(math.sqrt(len(documents['content'])/2) + 0.5))
+		num_clusters = int(math.floor(math.sqrt(len(self.documents['id'])/2) + 0.5))
 		km = KMeans(n_clusters=num_clusters)
 		km.fit(tfidf_matrix)
 		clusters = km.labels_.tolist()
@@ -51,9 +54,9 @@ class DocumentCluster:
 
 		for cluster_label in clusters:
 			if cluster_label in cluster_assignments:
-				cluster_assignments[cluster_label]['ids'].append(documents['id'][index])
+				cluster_assignments[cluster_label]['ids'].append(self.documents['id'][index])
 			else:
-				cluster_assignments[cluster_label] = {'ids': [documents['id'][index]], 'words': []}
+				cluster_assignments[cluster_label] = {'ids': [self.documents['id'][index]], 'words': []}
 			index += 1
 
 		#sort cluster centers by proximity to centroid
@@ -63,7 +66,15 @@ class DocumentCluster:
 		    for ind in order_centroids[i, :6]: #replace 6 with n words per cluster
 		    	cluster_assignments[i]['words'].append(vocab_frame.ix[terms[ind].split(' ')].values.tolist()[0][0].encode('utf-8', 'ignore'))
 
-		return cluster_assignments
+
+		list_cluster_assignments = []
+		for key, value in cluster_assignments.iteritems():
+			list_cluster_assignments.append({
+				'cluster': key,
+				'ids': value['ids'],
+				'words': value['words']
+			})
+		return list_cluster_assignments
 
 	def tokenize_and_stem(self, text):
 		from nltk.stem.snowball import SnowballStemmer

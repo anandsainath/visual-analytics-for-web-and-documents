@@ -1,0 +1,76 @@
+<div style="width: 100%; height: 100%;" class="padding-5" ng-controller="GridController">
+    <div style="width: 100%; height: 11%; overflow-x: hidden; overflow-y: auto; margin-top: 10px;">
+        <div class="chart-options pull-right">
+            <a class="btn btn-lg text-muted collapsed"
+            data-toggle="collapse" data-target=".bar-chart-options"
+            data-animation=false
+            ng-click="toggleChartOptions()">
+            <span class="glyphicon glyphicon-cog"></span>
+            <span class="caret"></span>
+            </a>
+            <div class="bar-chart-options popover bottom">
+                <div class="popover-content">
+                    <div class="form-group">
+                        <label>Sort By</label>
+                        <select ng-model="sortByAttribute" class="form-control">
+                            <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+                                {{obj.label}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" ng-options="obj.value as obj.label for obj in sortByOrderOptions" ng-model="sortByOrder"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Color By</label>
+                        <select ng-model="colorByAttribute" class="form-control">
+                            <option ng-repeat="obj in selectOptions" ng-disabled="obj.shade=='dark'" value="{{obj.value}}">
+                                {{obj.label}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" ng-options="obj.value as obj.label for obj in colorByOptions" ng-model="colorByOption"></select>
+                    </div>
+                </div>
+            </div>
+        </div> 
+
+        <div class="btn-group pull-right padding-top-7" data-toggle="buttons">
+            <label class="btn btn-default btn-sm active" ng-click='displayMode("grid")'>
+                <input type="radio" ng-model="display_mode" value="grid" id="option1" autocomplete="off"> Grid View
+            </label>
+            <label class="btn btn-default btn-sm" ng-click='displayMode("cluster")'>
+                <input type="radio" ng-model="display_mode" value="cluster" id="option2" autocomplete="off"> Cluster View
+            </label>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-sm pull-right" ng-disabled="compute_btn_disabled" ng-click="loadSimmilarityScore()" disabled="disabled" style="margin-top: 7px; margin-right: 10px;">Compute Document Similarity</button>
+
+        <div class="pull-right">
+            <label style="margin-top: 12px; margin-right: 15px;">{{cur_doc}}</label>
+        </div>
+    </div>
+    <div style="width: 100%; height: 86%; margin-top: 3px;" ng-if="display_mode_grid">
+        <div class="panel panel-default" style="height: 100%; background: #eee">
+            
+            <div class="panel-body padding-3" style="height: 100%">
+                <p class="grid-container" style="overflow-x: hidden; overflow-y: auto; height: 95%">
+                    <span ng-repeat="document in gridData | orderBy:sortByAttribute:sortByOrder" class="document" ng-style="{'background':getDocColor(document.name)}" ng-class="{selected: document.hover, clicked: document.clicked}" ng-mouseenter="mouseEnterDoc(document)" ng-mouseleave="mouseLeaveDoc(document)" ng-click="mouseClick(document)"></span>
+                </p>                
+            </div>
+        
+        </div>
+    </div>
+
+    <div style="width: 100%; height: 86%; margin-top: 3px;" ng-if="display_mode_cluster">
+        <div class="panel panel-default" style="height: 100%; background: #eee">
+            <div class="panel-body padding-3" style="overflow-x: hidden; overflow-y: auto; height: 97%">
+                <p ng-repeat="cluster in clusterData">
+                    <span ng-bind="cluster['words'].join(', ')"></span> <br/>
+                    <span ng-repeat="document in cluster['docs'] | orderBy:sortByAttribute:sortByOrder" class="document" ng-style="{'background':getDocColor(document.name)}" ng-class="{selected: document.hover, clicked: document.clicked}" ng-mouseenter="mouseEnterDoc(document)" ng-mouseleave="mouseLeaveDoc(document)" ng-click="mouseClick(document)"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
