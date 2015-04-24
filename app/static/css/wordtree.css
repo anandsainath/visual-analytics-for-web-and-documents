@@ -1,0 +1,34 @@
+.word-tree-container {
+  font-family: Georgia, serif;
+}
+
+.word-tree-container path {
+  fill: none;
+  stroke: #666;
+  stroke-width: .5px;
+}
+
+.word-tree-container text {
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.word-tree-container text:hover{
+	fill: #FD9A9B;
+}
+
+.word-tree-container tspan, .word-tree-container textPath {
+	white-space: inherit;
+}
+
+.word-tree-container .help-text{
+	color: #999;
+	font-style: italic;
+	padding: 5px 10px;
+}

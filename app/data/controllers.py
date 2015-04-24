@@ -79,6 +79,26 @@ def compute_clusters():
 
 	return json.dumps(DocumentCluster({'content': content_vector, 'id': id_vector}).get_cluster_assignments())
 
+
+@mod_data.route('/get-word-tree-content/<tree_root>')
+@cache.memoize()
+def get_word_tree_content(tree_root):
+	return json.dumps([doc['obj']['__content'] for doc in DBUtils().get_db().command('text',session['token']+'_content',search=tree_root)['results']])
+
+@mod_data.route('/create-content-tables')
+def create_content_tables():
+	import nltk
+	session_db = DBUtils().get_session_db()
+	
+	content_collection_name = session['token'] + "_content"
+	content_table = DBUtils().get_collection_obj(content_collection_name)
+
+	for doc in session_db.find({}, {'__content': 1}):
+		print [{"__content": x} for x in nltk.sent_tokenize(" ".join(doc['__content']))]
+		content_table.insert([{"__content": x} for x in nltk.sent_tokenize(" ".join(doc['__content']))])
+	return "Done"	
+
+
 @mod_data.route('/compute-simmilarity/<seed_doc_id>')
 @cache.memoize()
 def compute_grid_simmilarity(seed_doc_id):

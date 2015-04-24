@@ -75,7 +75,7 @@ angular.module('ngJigsaw', ['gridster','sf.virtualScroll','pasvaz.bindonce','ngS
 		};
 
 		 $scope.visualizations = [
-		 	{
+		 	/*{
 		        id: uuid(),
 		        sizeX: 2,
 		        sizeY: 3,
@@ -94,6 +94,13 @@ angular.module('ngJigsaw', ['gridster','sf.virtualScroll','pasvaz.bindonce','ngS
 		        minSizeX: 4,
 		        minSizeY: 3,
 		        type: 'document-view'
+		    }, */{
+		    	id: uuid(),
+		    	sizeX: 6,
+		    	sizeY: 3,
+		    	minSizeX: 6,
+		    	minSizeY: 3,
+		    	type: 'wordtree-view'
 		    }
 		];
 	})
