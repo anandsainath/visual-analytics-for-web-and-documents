@@ -198,6 +198,10 @@ def update_entity(entity_type, entity_text):
 
 
 def get_entities():
+	if 'token' not in session:
+		# as is the case with loading up the markup document..
+		return ['PERSON','ORGANIZATION','LOCATION','MONEY','TIME','PERCENTAGE','DATE']
+
 	entity_columns = DBUtils().get_keys()
 	columns_to_be_removed = ['_id', 'SUMMARY', 'ID']
 	
@@ -300,11 +304,17 @@ def get_markup_document():
 
 	summary_array = pageRankSummarizer.summarize(file_line_content, 1)
 	option_values = []
-	option_values.append(os.path.basename(sample_file_name))
+	# option_values.append(os.path.basename(sample_file_name))
 	for index in range(len(file_content)):
 		option_values.append("Line "+ str(index+1))
 
-	return json.dumps({"entities": dict_entities, "content": file_content, "summary": summary_array, "options": option_values});
+	return json.dumps({
+		"entities": dict_entities, 
+		"content": file_content, 
+		"summary": summary_array, 
+		"options": option_values,
+		"entity_columns": ['PERSON','ORGANIZATION','LOCATION','MONEY','TIME','PERCENTAGE','DATE']
+	});
 
 @mod_data.route('/get-markup-document-summary/lines/<num_lines>')
 def get_markup_document_summary(num_lines):
@@ -323,12 +333,31 @@ def get_markup_document_summary(num_lines):
 	summary_array = pageRankSummarizer.summarize(file_line_content, int(num_lines))
 	return json.dumps({"summary": summary_array});
 
+
+@mod_data.route('/show-markup-document')
+def show_markup_document():
+	return render_template('data/markup.html')
+
+@mod_data.route('/fetch-current-document-count/')
+def get_current_document_count():
+	if 'corpus' in session:
+		session_db = DBUtils().get_collection_obj(session['corpus'])
+		return str(session_db.count())
+	return "0"
+
+@mod_data.route('/fetch-total-document-count/')
+def get_total_document_count():
+	collection_name = session['corpus']
+	session_key = collection_name + "_total_count"
+	if session_key in session:
+		return str(session[session_key])
+	return "0"
+
 @mod_data.route("/", methods=['GET', 'POST'])
 def index():
 	if request.method == 'POST':
 		file = request.files['file']
 		if file and allowed_file(file.filename):
-
 			filename = secure_filename(file.filename)
 			file_name_without_extension = filename.rsplit('.', 1)[0]
 
@@ -351,27 +380,35 @@ def index():
 			
 			session['corpus'] = collection_name
 			session['folder_name'] = file_name_without_extension
+
+			session[collection_name+'_total_count'] = len([name for name in os.listdir(destination_path) if os.path.isfile(os.path.join(destination_path, name))])
+			print session[collection_name+'_total_count']
 			session.permanent = True
 
 			os.remove(file_path)
-
-			return render_template('data/markup.html')
+			return url_for('.show_markup_document')
 			
 	return render_template('data/index.html')
 
 @mod_data.route('/process-documents', methods=['POST'])
 def process_document():
-	if 'corpus' in session:
+	import nltk
+	from pymongo import TEXT
 
+	if 'corpus' in session:
 		tagger = ner.SocketNER(host="localhost", port=8080)
-		
 		collection_name = session['corpus']
 		folder_name = session['folder_name']
 		destination_path = os.path.join(app.config['UPLOAD_FOLDER'], collection_name, folder_name)
 		data_array = []
+		content_array = []
 		pageRankSummarizer = PageRankSummarizer()
 		tfidf_parser = TFIDF()
 
+		content_collection_name = collection_name + "_content"
+		content_table = DBUtils().get_collection_obj(content_collection_name)
+		new_collection = DBUtils().get_collection_obj(collection_name)
+		
 		for input_file_name in glob.glob(destination_path+"/*.txt"):
 			dict_entities = {}
 			file_content = []
@@ -392,6 +429,7 @@ def process_document():
 			
 			list_entity_frequency = []
 			str_content = " ".join(file_content)
+			content_table.insert([{"__content": x} for x in nltk.sent_tokenize(" ".join(file_line_content))])
 
 			value_template = "<{{type}}>{{value}}</{{type}}>"
 			for entity_type,list_value in dict_entities.iteritems():
@@ -418,15 +456,13 @@ def process_document():
 			# 	else:
 			# 		dict_entities['TITLE'] = file_line_content[selected_title_option-1]
 
-			# dict_entities['SUMMARY'] = pageRankSummarizer.summarize(file_line_content, int(request.form['summary-lines']))
-			dict_entities['SUMMARY'] = pageRankSummarizer.summarize(file_line_content, 2)
+			dict_entities['SUMMARY'] = pageRankSummarizer.summarize(file_line_content, int(request.form['summary-lines']))
+			# dict_entities['SUMMARY'] = pageRankSummarizer.summarize(file_line_content, 2)
 			dict_entities['ID'] = os.path.basename(input_file_name)
 			dict_entities['__read_count'] = 0
-			data_array.append(dict_entities)
+			new_collection.insert(dict_entities)
 			
-
-		new_collection = DBUtils().get_collection_obj(collection_name)
-		new_collection.insert(data_array)
+		content_table.create_index([('__content', TEXT)], default_language='english')
 
 		##Generate a table with the names of all the columns so that this can be referenced further..
 		##Caution: Needs to be updated when ever a new entity type is created..

@@ -16,38 +16,61 @@ Document Markup
 	}
 </style>
 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
 <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/angular/angular.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/angular-bindonce/bindonce.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/angular-virtual-scroll/angular-virtual-scroll.min.js') }}"></script>
 <script src="{{ url_for('static', filename='bower_components/angular-sanitize/angular-sanitize.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/document/document.js') }}"></script>
+<script src="{{ url_for('static', filename='js/document/markup.js') }}"></script>
+<!-- <script src="{{ url_for('static', filename='js/document/document.js') }}"></script> -->
+
+<script src="{{ url_for('static', filename='js/importer/importer.controller.js') }}"></script>
+<script src="{{ url_for('static', filename='js/importer/importer.directive.js') }}"></script>	
 
 {% endblock %}
 
 {% block content %}
-<div class="container" ng-controller="MarkupController">
+<!-- 
+This document isn't rendered by angular, but via flask. Hence any angular variables that need to be printed have to be preceeded by the |angular flag.
+-->
+<div class="container" data-ng-app="ngJigsawDocApp" id="docContainer" ng-controller="MarkupController">
 	<div class="loader hidden"></div>
 
 	<div class="row">
 		<div class="col-md-7">
 			<div class="panel panel-default">
 				<!-- Default panel contents -->
-				<div class="panel-heading">
+				<!-- <div class="panel-heading">
 					<div class="row text-center">
 						<div class="col-md-3"></div>
 						<div class="col-md-2"><h5>Title</h5></div>
-						<!-- <div class="col-md-4"> render_select('title') </div> -->
+						<div class="col-md-4">
+							<select name="title" class="form-control">
+								<option ng-repeat="option in options" value="{{option}}">{{option|angular}}</option>
+							</select>
+						</div>
 					</div>
-				</div>
+				</div> -->
 				
 				<!-- render_document_panel() -->
 				<div class="panel panel-default margin-bottom-0">
 					<!-- Document content to be rendered here. -->
-					<div class="bs-summary">
+					<div class="pull-right form-inline" style="padding-right: 15px; padding-top: 10px;">
+						<span style="padding-right: 10px">Summary lines</span>
+						<select class="form-control" ng-model="lines" ng-change="onLineChange()" name="summary-lines">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+						</select>
+					</div>
+					<div class="bs-summary" style="margin-top: 35px;">
 						<div class="row">
-							<div class="col-md-12 padding-top-45">
-								<p ng-repeat="line_summary in summary">{{line_summary}}</p>
+							<div class="col-md-12" style="padding-top: 35px;">
+								<p ng-repeat="line_summary in summary">{{line_summary|angular}}</p>
 							</div>
 						</div>
 					</div>
@@ -62,7 +85,7 @@ Document Markup
 								<ul class="list-unstyled">
 									<li ng-repeat="column in entity_columns">
 										<div class="row" ng-if="entities[column]">
-											<div class="col-md-2"><h5><span class="label {{column}}">{{column}}</span></h5></div>
+											<div class="col-md-2"><h5><span class="label {{column|angular}}">{{column|angular}}</span></h5></div>
 											<div class="col-md-10">
 												<p style="margin-top: 10px" ng-bind="entities[column].join(', ')"></p>
 											</div>
@@ -99,7 +122,12 @@ Document Markup
 							<tbody>
 								<tr>
 									<td><input type="text" class="form-control" name="entityName[]" placeholder="New Entity Name"></td>
-									<!-- <td> render_select("value[]") </td> -->
+									<td>
+										<select name="value[]" class="form-control">
+											<option ng-repeat="option in options" value="{{option}}">{{option|angular}}</option>
+										</select>
+									</td>
+									
 									<td>
 										<button type="button" class="btn btn-primary js-add-btn">+</button>
 									</td>
@@ -107,7 +135,12 @@ Document Markup
 
 								<tr class="js-entity-template hidden">
 									<td><input type="text" class="form-control" name="entityName[]" placeholder="New Entity Name"></td>
-									<!-- <td>render_select("value[]")</td> -->
+									<td>
+										<select name="value[]" class="form-control">
+											<option ng-repeat="option in options" value="{{option}}">{{option|angular}}</option>
+										</select>
+									</td>
+									
 									<td>
 										<button type="button" class="btn btn-primary js-add-btn">+</button>
 										<button type="button" class="btn btn-warning js-remove-btn">-</button>
@@ -119,10 +152,11 @@ Document Markup
 				</div>
 			</div>
 			<div class="row text-center">
-				<p><a class="btn btn-lg btn-success" href="" id="processBtn" role="button">Process Documents »</a></p>
+				<button type="button" id="processBtn" data-loading-text="Processing Files..." class="btn btn-success" autocomplete="off" data-toggle="modal" data-target="#myModal">Process Documents »</button>
 			</div> 
 		</div>
 	</div>
+	<div import-dialog></div>
 </div>
 {% endblock %}
 
@@ -139,29 +173,49 @@ Document Markup
 			$(this).parents('tr:first').remove();
 		});
 
-		$('#processBtn').click(function(){
-			var params = $('[name="title"]').serialize();
-			params += "&" + $('tbody > tr:not(".js-entity-template")').find("[name='value[]']").serialize();
+		$(document).on('shown.bs.modal', '#myModal', function(){
+			$(document).off('focusin.bs.modal');
+			angular.element($("#myModal")).scope().triggerProgressUpdates();
+		});
+
+		// $("#myModal").on('shown.bs.modal',function(){
+		// 	$(document).off('focusin.bs.modal');
+
+		// 	console.log("I am here..");
+
+		// 	var scope = angular.element(document.getElementById('#myModal')).scope();
+		// 	console.log(scope);
+		// 	scope.$apply(function(){
+		// 		var controller = angular.element(document.getElementById('#myModal'));
+		// 		controller.testFunction();
+		// 	});
+		// });
+
+		// $('#processBtn').click(function(){
+			/*var $btn = $(this).button('loading');
+			// params = $('[name="title"]').serialize();
+			var params = $('tbody > tr:not(".js-entity-template")').find("[name='value[]']").serialize();
 			params += "&" + $('tbody > tr:not(".js-entity-template")').find("[name='entityName[]']").serialize();
 			params += "&" + $('[name="summary-lines"]').serialize();
 
-			$('.loader').show().removeClass("hidden");
+			// $('.loader').show().removeClass("hidden");
 			$.ajax('/data/process-documents',{
 				data: params,
 				type: 'POST',
 				dataType: 'json',
 				success: function(data){
-					$('.loader').hide().addClass("hidden");
+					$btn.button('reset');
+					// $('.loader').hide().addClass("hidden");
 					if(data.success){
 						window.location.href = data.redirect;
 					}else{
 						window.alert("The documents could not be processed. Please try again!");
 					}
 				}
-			});
-
-			return false;
-		});
+			});*/
+			// console.log("button clicked");
+			// return false;
+		// });
 	});
 </script>
 {% endblock %}

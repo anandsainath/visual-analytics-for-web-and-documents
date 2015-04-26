@@ -9,7 +9,7 @@ app.factory('WordTreeFactory',
 		service.fetchResults = function(rootWord){
 			WordTreeAPIService.fetchAllContent(rootWord).then(function(_data){
 				data = _data;
-				$rootScope.$broadcast('WordTreeLoaded')
+				$rootScope.$broadcast('WordTreeLoaded');
 			});
 		}
 

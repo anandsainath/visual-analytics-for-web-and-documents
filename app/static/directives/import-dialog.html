@@ -1,0 +1,19 @@
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-controller="ImportController">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			
+			<div class="modal-body">
+				<div class="progress">
+				<div class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="{{percentage}}" aria-valuemin="0" aria-valuemax="100" style="width: {{percentage}}%">
+						<span class="sr-only">{{percentage}}% Complete</span>
+					</div>
+				</div>
+
+				<p>Imported <strong>{{documents}}</strong> of <strong>{{totalDocuments}}</strong> documents..</p>
+
+				<small>Every document that is imported is summarized, its Named-Entities are determined and its sentiment is determined and the process might take 2 seconds (per document).</small>
+			</div>
+		</div>
+	</div>
+</div>

@@ -16,4 +16,23 @@ $(function(){
 			if( log ) alert(log);
 		}
 	});
+
+	$('#myButton').on('click', function () {
+		var $btn = $(this).button('loading');
+		
+		var form_data = new FormData($('#fileUploadForm')[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/data/',
+            data: form_data,
+            contentType: false,
+            processData: false
+        }).done(function(data, textStatus, jqXHR){
+            window.location.href = data;
+            $btn.button('reset');
+        }).fail(function(data){
+        	console.log("Something went wrong..");
+        });
+		
+	});
 });

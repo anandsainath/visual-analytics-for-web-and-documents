@@ -437,29 +437,3 @@ app_doc.controller("DocController",
 			$scope.entityName = "";
 		}
 	});
-
-app_doc.controller("MarkupController",
-	function($scope, $window, $filter, DocDataFactory, $sce){
-		
-		$scope.lines = 1;
-		$scope.summary = [];
-		$scope.content = [];
-		$scope.options = [];
-		$scope.entities = {};
-
-		$scope.onLineChange = function(){
-			DocDataFactory.updateSummary($scope.lines);
-		}
-
-		$scope.$on("summaryChanged", function(){
-			$scope.summary = DocDataFactory.getSummaryContent()['summary'];
-		});
-
-		$scope.$on("markupDocContentLoaded", function(){
-			var documentJSON = DocDataFactory.getMarkupDocContent();
-			$scope.summary = documentJSON['summary'];
-			$scope.content = documentJSON['content'];
-			$scope.options = documentJSON['options'];
-			$scope.entities = documentJSON['entities'];
-		});
-	});

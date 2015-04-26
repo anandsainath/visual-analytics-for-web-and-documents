@@ -17,6 +17,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 manager.add_command("runserver", Server( 
     use_debugger = True,
     use_reloader = True,
+    threaded=True,
     host = '0.0.0.0')
 )
 

@@ -29,7 +29,8 @@ Jigsaw Web --
 							</div>		
 						</div>
 						<div class="col-md-2 padding-left-0">
-							<input type="submit" class="btn btn-success"/>
+							<!-- <input type="submit" class="btn btn-success"/> -->
+							<button type="button" id="myButton" data-loading-text="Uploading File..." class="btn btn-success" autocomplete="off">Submit</button>
 						</div>
 					</div>
 
@@ -46,4 +47,5 @@ Jigsaw Web --
 {% block script_content %}
 	<script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/file-btn.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 {% endblock %}

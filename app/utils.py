@@ -17,9 +17,6 @@ class Utils:
 		return db[collection_name]
 
 	def get_session_token(self):
-		##For VDA Project..
-		if 'token' not in session:
-			session['token'] = 'dac6cee6b243c932d00f976ba0d9882f'
 		return session['token']
 
 	def get_session_db(self):
