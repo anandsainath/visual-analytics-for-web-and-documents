@@ -152,7 +152,7 @@ This document isn't rendered by angular, but via flask. Hence any angular variab
 				</div>
 			</div>
 			<div class="row text-center">
-				<button type="button" id="processBtn" data-loading-text="Processing Files..." class="btn btn-success" autocomplete="off" data-toggle="modal" data-target="#myModal">Process Documents »</button>
+				<button type="button" id="processBtn" data-loading-text="Processing Files..." class="btn btn-success" autocomplete="off" data-toggle="modal" data-target="#myModal" data-backdrop="static">Process Documents »</button>
 			</div> 
 		</div>
 	</div>
@@ -177,45 +177,6 @@ This document isn't rendered by angular, but via flask. Hence any angular variab
 			$(document).off('focusin.bs.modal');
 			angular.element($("#myModal")).scope().triggerProgressUpdates();
 		});
-
-		// $("#myModal").on('shown.bs.modal',function(){
-		// 	$(document).off('focusin.bs.modal');
-
-		// 	console.log("I am here..");
-
-		// 	var scope = angular.element(document.getElementById('#myModal')).scope();
-		// 	console.log(scope);
-		// 	scope.$apply(function(){
-		// 		var controller = angular.element(document.getElementById('#myModal'));
-		// 		controller.testFunction();
-		// 	});
-		// });
-
-		// $('#processBtn').click(function(){
-			/*var $btn = $(this).button('loading');
-			// params = $('[name="title"]').serialize();
-			var params = $('tbody > tr:not(".js-entity-template")').find("[name='value[]']").serialize();
-			params += "&" + $('tbody > tr:not(".js-entity-template")').find("[name='entityName[]']").serialize();
-			params += "&" + $('[name="summary-lines"]').serialize();
-
-			// $('.loader').show().removeClass("hidden");
-			$.ajax('/data/process-documents',{
-				data: params,
-				type: 'POST',
-				dataType: 'json',
-				success: function(data){
-					$btn.button('reset');
-					// $('.loader').hide().addClass("hidden");
-					if(data.success){
-						window.location.href = data.redirect;
-					}else{
-						window.alert("The documents could not be processed. Please try again!");
-					}
-				}
-			});*/
-			// console.log("button clicked");
-			// return false;
-		// });
 	});
 </script>
 {% endblock %}

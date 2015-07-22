@@ -12,17 +12,11 @@ app.controller("ImportController",
 
 		$scope.$on('TotalDocumentCount', function(){
 			$scope.totalDocuments = ImportFactory.getTotalDocumentCount();
-			// getCurrentDocumentCount();
 		});
 
 		$scope.$on('CurrentCount', function(){
 			$scope.documents = ImportFactory.getCurrentDocumentCount();
 			$scope.percentage = ($scope.documents/$scope.totalDocuments) * 100;
-		});
-
-		function getCurrentDocumentCount(){
-			console.log("getCurrentDocumentCount called");
-			ImportFactory.fetchCurrentDocumentCount();
 
 			if($scope.documents < $scope.totalDocuments){
 				$timeout(getCurrentDocumentCount, 7500);
@@ -33,6 +27,11 @@ app.controller("ImportController",
 					window.alert("The documents could not be processed. Please try again!");
 				}
 			}
+		});
+
+		function getCurrentDocumentCount(){
+			console.log("getCurrentDocumentCount called");
+			ImportFactory.fetchCurrentDocumentCount();
 		}
 
 		$scope.triggerProgressUpdates = function(){
